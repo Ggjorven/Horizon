@@ -1,0 +1,35 @@
+## Ignore Visual Studio temporary files, build results, and
+.vs/
+
+# VS Code files for those working on multiple tools
+.vscode
+/.vscode
+/.vscode/*
+/.vscode/**
+**/.vscode/
+*.code-workspace
+**/*.code-workspace
+
+/Tasks/
+
+# Local History for Visual Studio Code
+.history/
+
+# Visual Studio ignores
+**.sln
+
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+
+# Types
+**.pdb
+**.exp
+
+# Binaries
+/bin/
+/bin-int/
+
+# Other
+make
+Makefile
