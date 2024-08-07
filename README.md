@@ -143,6 +143,5 @@ Contributions are welcome! Please fork the repository and create a pull request 
 ## Third-Party Libraries
   - `Pulse` [https://github.com/Ggjorven/Pulse](https://github.com/Ggjorven/Pulse)
   - `spdlog` [https://github.com/gabime/spdlog/](https://github.com/gabime/spdlog/)
-  - `glad` [https://github.com/Dav1dde/glad/tree/glad2](https://github.com/Dav1dde/glad/tree/glad2)
   - `glm` [https://github.com/icaven/glm.git](https://github.com/icaven/glm.git)
   - `vma` [https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git)
