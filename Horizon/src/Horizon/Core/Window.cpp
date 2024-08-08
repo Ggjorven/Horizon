@@ -39,7 +39,7 @@ namespace Hz
 		m_Window = glfwCreateWindow((int)windowSpecs.Width, (int)windowSpecs.Height, windowSpecs.Title.c_str(), nullptr, nullptr);
 		HZ_ASSERT(m_Window, "Failed to create window...");
 
-		GraphicsContext::Init(m_Window);
+		GraphicsContext::Init(m_Window, windowSpecs.Width, windowSpecs.Height, rendererSpecs.VSync, (uint8_t)rendererSpecs.Buffers);
 
         GLFWwindow* window = static_cast<GLFWwindow*>(m_Window);
 		glfwSetWindowUserPointer(window, (void*)&m_Specification); //So we can access/get to the data in lambda functions

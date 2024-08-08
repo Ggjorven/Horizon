@@ -41,6 +41,11 @@ namespace Hz
         s_Instance->Present();
     }
 
+    uint32_t Renderer::GetCurrentFrame()
+    {
+        return s_Instance->GetCurrentFrame();
+    }
+
     const RendererSpecification &Renderer::GetSpecification()
     {
         return s_Instance->GetSpecification();

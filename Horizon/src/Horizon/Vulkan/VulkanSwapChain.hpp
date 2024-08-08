@@ -21,7 +21,7 @@ namespace Hz
 		VulkanSwapChain(VkSurfaceKHR surface); // Takes ownership of the surface
 		~VulkanSwapChain();
 
-		void Init(uint32_t width, uint32_t height, const bool vsync);
+		void Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight);
 
 		inline const VkFormat GetColourFormat() const { return m_ColourFormat; }
 
@@ -31,10 +31,9 @@ namespace Hz
 		inline std::vector<Ref<Image>>& GetSwapChainImages() { return m_Images; }
 		inline Ref<Image> GetDepthImage() { return m_DepthStencil; }
 
-		// Note(Jorben): This function is used by VulkanRenderCommandBuffers to wait for the image to be available
-		inline const VkSemaphore GetCurrentImageAvailableSemaphore() const { return m_ImageAvailableSemaphores[m_CurrentFrame]; }
-		inline const VkSemaphore GetImageAvailableSemaphore(uint32_t index) const { return m_ImageAvailableSemaphores[index]; }
 		inline const VkCommandPool GetVkCommandPool() const { return m_CommandPool; }
+		inline const VkSemaphore GetImageAvailableSemaphore(uint32_t index) const { return m_ImageAvailableSemaphores[index]; }
+		inline const VkSemaphore GetCurrentImageAvailableSemaphore() const { return GetImageAvailableSemaphore(m_CurrentFrame); }
 
         static Ref<VulkanSwapChain> Create(VkSurfaceKHR surface); // Takes ownership of the surface
 

@@ -21,6 +21,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <span>
 #include <set>
 #include <map>
 #include <unordered_map>

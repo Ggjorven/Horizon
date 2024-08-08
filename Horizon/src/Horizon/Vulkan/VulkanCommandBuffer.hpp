@@ -26,7 +26,7 @@ namespace Hz
 	private:
 		std::vector<VkCommandBuffer> m_CommandBuffers = { };
 
-		// Syncronization objects
+		// Synchronization objects
 		std::vector<VkSemaphore> m_RenderFinishedSemaphores = { };
 		std::vector<VkFence> m_InFlightFences = { };
 	};

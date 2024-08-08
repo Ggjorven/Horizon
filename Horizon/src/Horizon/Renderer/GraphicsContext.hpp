@@ -14,7 +14,7 @@ namespace Hz
     public:
         using ContextType = VulkanContext;
     public:
-        static void Init(void* window);
+        static void Init(void* window, uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight);
         static void Destroy();
 
         static ContextType* Raw() { return s_Instance;}

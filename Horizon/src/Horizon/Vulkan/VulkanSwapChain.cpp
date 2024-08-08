@@ -63,7 +63,7 @@ namespace Hz
         vkDestroySurfaceKHR(context.GetVkInstance(), m_Surface, nullptr);
 	}
 
-	void VulkanSwapChain::Init(uint32_t width, uint32_t height, const bool vsync)
+	void VulkanSwapChain::Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
 	{
         ENFORCE_API(Vulkan);
 
@@ -232,6 +232,7 @@ namespace Hz
 			specs.Layout = ImageLayout::Undefined;
 
             m_Images[i] = Ref<Image>::Create(new VulkanImage(specs, tempImages[i], imageView));
+            m_Images[i]->Transition(ImageLayout::Undefined, ImageLayout::PresentSrcKHR);
 		}
 
 		if (!m_DepthStencil)
@@ -254,7 +255,7 @@ namespace Hz
         ///////////////////////////////////////////////////////////
 		if (m_ImageAvailableSemaphores.empty())
 		{
-			m_ImageAvailableSemaphores.resize((size_t)Renderer::GetSpecification().Buffers);
+			m_ImageAvailableSemaphores.resize((size_t)framesInFlight);
 
 			VkSemaphoreCreateInfo semaphoreInfo = {};
 			semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -263,7 +264,7 @@ namespace Hz
 			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-			for (size_t i = 0; i < (size_t)Renderer::GetSpecification().Buffers; i++)
+			for (size_t i = 0; i < (size_t)framesInFlight; i++)
 			{
                 VK_CHECK_RESULT(vkCreateSemaphore(context.GetDevice()->GetVkDevice(), &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]));
 			}
@@ -287,7 +288,7 @@ namespace Hz
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			auto& window = Window::Get();
-			Init(window.GetWidth(), window.GetHeight(), Renderer::GetSpecification().VSync);
+			Init(window.GetWidth(), window.GetHeight(), Renderer::GetSpecification().VSync, (uint8_t)Renderer::GetSpecification().Buffers);
 		}
 		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
 		{

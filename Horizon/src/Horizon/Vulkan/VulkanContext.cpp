@@ -2,7 +2,9 @@
 #include "VulkanContext.hpp"
 
 #include "Horizon/Core/Logging.hpp"
+#include "Horizon/Core/Window.hpp"
 
+#include "Horizon/Renderer/Renderer.hpp"
 #include "Horizon/Renderer/GraphicsContext.hpp"
 
 #include "Horizon/Vulkan/VulkanUtils.hpp"
@@ -104,10 +106,10 @@ namespace Hz
 		vkDestroyInstance(m_VulkanInstance, nullptr);
     }
 
-    void VulkanContext::Init()
+    void VulkanContext::Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
     {
         InitInstance();
-        InitDevices();
+        InitDevices(width, height, vsync, framesInFlight);
     }
 
     void VulkanContext::InitInstance()
@@ -207,7 +209,7 @@ namespace Hz
         }
     }
 
-    void VulkanContext::InitDevices()
+    void VulkanContext::InitDevices(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
     {
         ENFORCE_API(Vulkan);
 
@@ -223,6 +225,7 @@ namespace Hz
 		//Allocator::Init();
 
         m_SwapChain = VulkanSwapChain::Create(surface);
+        m_SwapChain->Init(width, height, vsync, framesInFlight);
     }
 
 }

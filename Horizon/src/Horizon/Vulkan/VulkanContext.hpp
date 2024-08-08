@@ -25,7 +25,7 @@ namespace Hz
 		VulkanContext(void* window);
         ~VulkanContext();
 
-        void Init();
+        void Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight);
 
 		inline const VkInstance GetVkInstance() const { return m_VulkanInstance; }
 		inline const VkDebugUtilsMessengerEXT GetVkDebugger() const { return m_DebugMessenger; }
@@ -39,7 +39,7 @@ namespace Hz
 	///////////////////////////////////////////////////////////
     private:
         void InitInstance();
-        void InitDevices();
+        void InitDevices(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight);
 
 	///////////////////////////////////////////////////////////
 	// Private variables

@@ -9,6 +9,8 @@
 #include "Horizon/Vulkan/VulkanUtils.hpp"
 #include "Horizon/Vulkan/VulkanContext.hpp"
 
+#include <numeric>
+
 namespace Hz
 {
 
@@ -27,7 +29,7 @@ namespace Hz
 
         VulkanContext& context = *GraphicsContext::Raw();
 
-        context.GetSwapChain()->Init(width, height, vsync);
+        context.GetSwapChain()->Init(width, height, vsync, (uint8_t)Renderer::GetSpecification().Buffers);
         m_Specification.VSync = vsync;
     }
 
@@ -39,24 +41,21 @@ namespace Hz
             return;
 
         VulkanContext& context = *GraphicsContext::Raw();
+        auto swapChain = context.GetSwapChain();
 
         {
-            /*
-            Renderer::GetRenderData().Reset();
-            m_ResourceFreeQueue.Execute();
-
-            auto& fences = VulkanTaskManager::GetFences();
+            auto& fences = m_Manager.GetFences();
             if (!fences.empty())
             {
-                vkWaitForFences(m_Device->GetVulkanDevice(), (uint32_t)fences.size(), fences.data(), VK_TRUE, MAX_UINT64);
-                vkResetFences(m_Device->GetVulkanDevice(), (uint32_t)fences.size(), fences.data());
+                vkWaitForFences(context.GetDevice()->GetVkDevice(), (uint32_t)fences.size(), fences.data(), VK_TRUE, 18446744073709551615ull);
+                vkResetFences(context.GetDevice()->GetVkDevice(), (uint32_t)fences.size(), fences.data());
             }
-            VulkanTaskManager::AddSemaphore(m_SwapChain->GetCurrentImageAvailableSemaphore());
-            */
+
+            m_Manager.Add(context.GetSwapChain()->GetCurrentImageAvailableSemaphore());
         }
         { // Acquire SwapChain Image
-            uint32_t acquiredImage = context.GetSwapChain()->AcquireNextImage();
-            context.GetSwapChain()->m_AcquiredImage = acquiredImage;
+            uint32_t acquiredImage = swapChain->AcquireNextImage();
+            swapChain->m_AcquiredImage = acquiredImage;
         }
     }
 
@@ -70,48 +69,70 @@ namespace Hz
 
     void VulkanRenderer::Present()
     {
+        ENFORCE_API(Vulkan);
+
         if (Window::Get().IsMinimized())
             return;
 
-        /**
-        auto& semaphores = VulkanTaskManager::GetSemaphores();
+        VulkanContext& context = *GraphicsContext::Raw();
+
+        auto& semaphores = m_Manager.GetSemaphores();
+        auto swapChain = context.GetSwapChain();
 
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
 		presentInfo.pWaitSemaphores = semaphores.data();
 		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = &m_SwapChain;
-		presentInfo.pImageIndices = &m_AquiredImage;
+		presentInfo.pSwapchains = &swapChain->m_SwapChain;
+		presentInfo.pImageIndices = &swapChain->m_AcquiredImage;
 		presentInfo.pResults = nullptr; // Optional
 
 		VkResult result = VK_SUCCESS;
 		{
-			APP_PROFILE_SCOPE("QueuePresent");
-
 			// Note(Jorben): Without these 2 lines there is a memory leak when validation layers are enabled.
-			if constexpr (s_Validation)
+			if constexpr (VulkanContext::s_Validation)
 			{
-				APP_PROFILE_SCOPE("QueueWaitIdle");
-				vkQueueWaitIdle(m_Device->GetGraphicsQueue());
+				vkQueueWaitIdle(context.GetDevice()->GetGraphicsQueue());
 			}
 
-			result = vkQueuePresentKHR(m_Device->GetPresentQueue(), &presentInfo);
+			result = vkQueuePresentKHR(context.GetDevice()->GetPresentQueue(), &presentInfo);
 		}
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 		{
-			auto& window = Application::Get().GetWindow();
-			OnResize(window.GetWidth(), window.GetHeight(), window.IsVSync());
+			auto& window = Window::Get();
+			Recreate(window.GetWidth(), window.GetHeight(), m_Specification.VSync);
 		}
 		else if (result != VK_SUCCESS)
 		{
-			APP_LOG_ERROR("Failed to present swap chain image!");
+			HZ_LOG_ERROR("Failed to present swap chain image!");
 		}
 
-		constexpr const uint32_t framesInFlight = (uint32_t)RendererSpecification::BufferCount;
-		m_CurrentFrame = (m_CurrentFrame + 1) % framesInFlight;
-        */
+        m_Manager.Reset();
+		swapChain->m_CurrentFrame = (swapChain->m_CurrentFrame + 1) % (uint32_t)m_Specification.Buffers;
     }
 
+    uint32_t VulkanRenderer::GetCurrentFrame() const
+    {
+        ENFORCE_API(Vulkan, -1);
+
+        const VulkanContext& context = *GraphicsContext::Raw();
+
+        return context.GetSwapChain()->GetCurrentFrame();
+    }
+
+    void VulkanRenderer::VerifyExectionPolicy(ExecutionPolicy &policy) // Only used in Debug
+    {
+        if (!(policy & ExecutionPolicy::InOrder) || !(policy & ExecutionPolicy::Parallel))
+        {
+            HZ_LOG_WARN("Failed to specify base ExecutionPolicy state. Resorting to ExecutionPolicy::InOrder");
+            policy |= ExecutionPolicy::InOrder;
+        }
+        if (!(policy & ExecutionPolicy::WaitForPrevious) || !(policy & ExecutionPolicy::NoWait))
+        {
+            HZ_LOG_WARN("Failed to specify extra ExecutionPolicy state. Resorting to ExecutionPolicy::WaitForPrevious");
+            policy |= ExecutionPolicy::WaitForPrevious;
+        }
+    }
 }

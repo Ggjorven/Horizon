@@ -1,6 +1,9 @@
 #include <Horizon/Core/Application.hpp>
+#include <Horizon/Core/Logging.hpp>
 #include <Horizon/Core/Window.hpp>
 #include <Horizon/Renderer/Renderer.hpp>
+
+#include <Pulse/Time/Timer.hpp>
 
 using namespace Hz;
 
@@ -28,11 +31,32 @@ int main(int argc, char* argv[])
     RendererSpecification rendererSpecs = { BufferCount::Triple, false };
     Ref<Window> window = Window::Create(windowSpecs, rendererSpecs);
 
+    Pulse::Time::Timer deltaTimer = {};
+    Pulse::Time::Timer intervalTimer = {};
+    double interval = 0.300; // Seconds
+    uint32_t FPS = 0;
+
     while (!s_ShouldClose)
     {
-        window->PollEvents();
+        deltaTimer.Reset();
 
+        window->PollEvents();
+        Renderer::BeginFrame();
+
+
+
+        Renderer::EndFrame();
         window->SwapBuffers();
+
+        // Update FPS
+        FPS++;
+        if (intervalTimer.ElapsedSeconds() >= interval)
+        {
+            HZ_LOG_TRACE("Deltatime: {0:.4f}ms | FPS: {1} ({2} / {3:.5f})", deltaTimer.ElapsedMillis(), static_cast<uint32_t>(FPS / intervalTimer.ElapsedSeconds()), FPS, intervalTimer.ElapsedSeconds());
+
+            intervalTimer.Reset();
+            FPS = 0;
+        }
     }
 
     return 0;
