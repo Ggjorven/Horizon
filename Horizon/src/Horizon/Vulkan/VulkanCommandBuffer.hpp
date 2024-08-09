@@ -11,6 +11,8 @@
 namespace Hz
 {
 
+    class VulkanRenderer;
+
 	class VulkanCommandBuffer
 	{
 	public:
@@ -29,6 +31,8 @@ namespace Hz
 		// Synchronization objects
 		std::vector<VkSemaphore> m_RenderFinishedSemaphores = { };
 		std::vector<VkFence> m_InFlightFences = { };
+
+        friend class VulkanRenderer;
 	};
 
 

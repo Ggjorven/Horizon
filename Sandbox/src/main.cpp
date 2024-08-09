@@ -2,6 +2,7 @@
 #include <Horizon/Core/Logging.hpp>
 #include <Horizon/Core/Window.hpp>
 #include <Horizon/Renderer/Renderer.hpp>
+#include <Horizon/Renderer/GraphicsContext.hpp>
 
 #include <Pulse/Time/Timer.hpp>
 
@@ -31,6 +32,13 @@ int main(int argc, char* argv[])
     RendererSpecification rendererSpecs = { BufferCount::Triple, false };
     Ref<Window> window = Window::Create(windowSpecs, rendererSpecs);
 
+    Ref<Renderpass> renderpass = Renderpass::Create({
+        .ColourAttachment = GraphicsContext::GetSwapChainImages(),
+        .ColourClearColour = { 1.0f, 0.0f, 0.0, 1.0f },
+        .PreviousColourImageLayout = ImageLayout::PresentSrcKHR,
+        .FinalColourImageLayout = ImageLayout::PresentSrcKHR
+    });
+
     Pulse::Time::Timer deltaTimer = {};
     Pulse::Time::Timer intervalTimer = {};
     double interval = 0.300; // Seconds
@@ -43,7 +51,9 @@ int main(int argc, char* argv[])
         window->PollEvents();
         Renderer::BeginFrame();
 
-
+        Renderer::Begin(renderpass);
+        Renderer::End(renderpass);
+        Renderer::Submit(renderpass);
 
         Renderer::EndFrame();
         window->SwapBuffers();
@@ -59,5 +69,6 @@ int main(int argc, char* argv[])
         }
     }
 
+    renderpass.Reset();
     return 0;
 }

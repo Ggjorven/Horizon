@@ -211,8 +211,6 @@ namespace Hz
 
     void VulkanContext::InitDevices(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
     {
-        ENFORCE_API(Vulkan);
-
         VkSurfaceKHR surface = VK_NULL_HANDLE;
 		VK_CHECK_RESULT(glfwCreateWindowSurface(m_VulkanInstance, static_cast<GLFWwindow*>(m_Window), nullptr, &surface));
 

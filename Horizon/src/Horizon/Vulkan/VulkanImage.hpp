@@ -10,6 +10,8 @@
 namespace Hz
 {
 
+    class VulkanSwapChain;
+
     class VulkanImage
 	{
 	public:

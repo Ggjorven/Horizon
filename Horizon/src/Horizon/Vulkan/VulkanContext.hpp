@@ -3,6 +3,7 @@
 #include "Horizon/Core/Memory.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
+#include "Horizon/Renderer/Image.hpp"
 
 #include "Horizon/Vulkan/VulkanDevice.hpp"
 #include "Horizon/Vulkan/VulkanPhysicalDevice.hpp"
@@ -33,6 +34,9 @@ namespace Hz
 		inline Ref<VulkanDevice> GetDevice() const { return m_Device; }
 		inline Ref<VulkanPhysicalDevice> GetPhysicalDevice() const { return m_PhysicalDevice; }
 		inline Ref<VulkanSwapChain> GetSwapChain() const { return m_SwapChain; }
+
+        inline std::vector<Ref<Image>>& GetSwapChainImages() { return m_SwapChain->GetSwapChainImages(); }
+		inline Ref<Image> GetDepthImage() { return m_SwapChain->GetDepthImage(); }
 
     ///////////////////////////////////////////////////////////
 	// Private functions

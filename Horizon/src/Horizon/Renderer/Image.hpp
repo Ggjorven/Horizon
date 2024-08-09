@@ -2,11 +2,14 @@
 
 #include "Horizon/Core/Memory.hpp"
 
+#include "Horizon/Renderer/RendererSpecification.hpp"
+
 #include <Pulse/Enum/Enum.hpp>
 
 #include <cstdint>
 #include <variant>
 #include <filesystem>
+#include <type_traits>
 
 namespace Hz
 {
@@ -14,6 +17,7 @@ namespace Hz
     using namespace Pulse::Enum::Bitwise;
 
     class VulkanImage;
+    class VulkanRenderer;
 
     ///////////////////////////////////////////////////////////
 	// Specifications
@@ -105,6 +109,7 @@ namespace Hz
     {
     public:
         using ImageType = VulkanImage;
+        static_assert(std::is_same_v<ImageType, VulkanImage>, "Unsupported image type selected.");
     public:
         Image(const ImageSpecification& specs);
         Image(ImageType* src); // Takes ownership of passed in object
@@ -114,11 +119,17 @@ namespace Hz
         void Resize(uint32_t width, uint32_t height);
         void Transition(ImageLayout initial, ImageLayout final);
 
+        const ImageSpecification& GetSpecification() const;
+
         // Returns underlying type pointer
         inline ImageType* Src() { return m_Instance; }
 
+        static Ref<Image> Create(const ImageSpecification& specs);
+
     private:
         ImageType* m_Instance;
+
+        friend class VulkanRenderer;
     };
 
 }

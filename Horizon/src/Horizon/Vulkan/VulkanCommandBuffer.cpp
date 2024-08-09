@@ -14,9 +14,7 @@ namespace Hz
 
 	VulkanCommandBuffer::VulkanCommandBuffer()
 	{
-        ENFORCE_API(Vulkan);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
 		auto device = context.GetDevice()->GetVkDevice();
 		const uint32_t framesInFlight = (uint32_t)Renderer::GetSpecification().Buffers;
@@ -49,9 +47,7 @@ namespace Hz
 
 	VulkanCommandBuffer::~VulkanCommandBuffer()
     {
-        ENFORCE_API(Vulkan);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
         context.GetDevice()->Wait();
 
@@ -66,9 +62,7 @@ namespace Hz
 
 	VulkanCommand::VulkanCommand(bool start)
 	{
-        ENFORCE_API(Vulkan);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
 		VkCommandBufferAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -84,9 +78,7 @@ namespace Hz
 
 	VulkanCommand::~VulkanCommand()
 	{
-        ENFORCE_API(Vulkan);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
 		vkFreeCommandBuffers(context.GetDevice()->GetVkDevice(), context.GetSwapChain()->GetVkCommandPool(), 1, &m_CommandBuffer);
 	}
@@ -107,9 +99,7 @@ namespace Hz
 
 	void VulkanCommand::Submit()
 	{
-        ENFORCE_API(Vulkan);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

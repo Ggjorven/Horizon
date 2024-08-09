@@ -14,7 +14,7 @@ namespace Hz
 	VulkanDevice::VulkanDevice(const VkSurfaceKHR surface, Ref<VulkanPhysicalDevice> physicalDevice)
 		: m_PhysicalDevice(physicalDevice)
 	{
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = *GraphicsContext::Src();
 
 		QueueFamilyIndices indices = QueueFamilyIndices::Find(surface, m_PhysicalDevice->GetVkPhysicalDevice());
 

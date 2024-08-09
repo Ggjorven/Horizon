@@ -28,9 +28,7 @@ namespace Hz
 
 	VulkanImage::~VulkanImage()
 	{
-        ENFORCE_API(Vulkan);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
         auto device = context.GetDevice();
         device->Wait();

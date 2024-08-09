@@ -42,7 +42,7 @@ namespace Hz
         delete m_Instance;
 	}
 
-	void Image::SetData(void* data, size_t size)
+    void Image::SetData(void* data, size_t size)
 	{
         m_Instance->SetData(data, size);
 	}
@@ -56,5 +56,15 @@ namespace Hz
 	{
         m_Instance->Transition(initial, final);
 	}
+
+    const ImageSpecification& Image::GetSpecification() const
+    {
+        return m_Instance->GetSpecification();
+    }
+
+    Ref<Image> Image::Create(const ImageSpecification &specs)
+    {
+        return Ref<Image>::Create(specs);
+    }
 
 }

@@ -22,4 +22,14 @@ namespace Hz
         s_Instance = nullptr;
     }
 
+    std::vector<Ref<Image>> &GraphicsContext::GetSwapChainImages()
+    {
+        return s_Instance->GetSwapChainImages();
+    }
+
+    Ref<Image> GraphicsContext::GetDepthImage()
+    {
+        return s_Instance->GetDepthImage();
+    }
+
 }

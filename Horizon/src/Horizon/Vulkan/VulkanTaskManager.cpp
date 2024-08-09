@@ -36,6 +36,29 @@ namespace Hz
         m_Semaphores[frame].second.push_back(semaphore);
     }
 
+    void VulkanTaskManager::Remove(VkSemaphore semaphore)
+    {
+        std::scoped_lock<std::mutex> lock(m_ThreadSafety);
+
+        uint32_t frame = Renderer::GetCurrentFrame();
+
+        // Check the InOrder list
+        auto it = std::find(m_Semaphores[frame].first.begin(), m_Semaphores[frame].first.end(), semaphore);
+        if (it != m_Semaphores[frame].first.end())
+        {
+            m_Semaphores[frame].first.erase(it);
+            return;
+        }
+
+        // Check the Frame End list
+        auto it2 = std::find(m_Semaphores[frame].second.begin(), m_Semaphores[frame].second.end(), semaphore);
+        if (it2 != m_Semaphores[frame].second.end())
+        {
+            m_Semaphores[frame].second.erase(it2);
+            return;
+        }
+    }
+
     VkSemaphore VulkanTaskManager::GetNext()
     {
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);

@@ -18,9 +18,7 @@ namespace Hz
 	VulkanSwapChain::VulkanSwapChain(VkSurfaceKHR surface)
 		: m_Surface(surface)
 	{
-        ENFORCE_API(Vulkan);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
         FindImageFormatAndColorSpace();
 
@@ -42,9 +40,7 @@ namespace Hz
 
 	VulkanSwapChain::~VulkanSwapChain()
 	{
-        ENFORCE_API(Vulkan);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
 		auto device = context.GetDevice();
 		device->Wait();
@@ -65,9 +61,7 @@ namespace Hz
 
 	void VulkanSwapChain::Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
 	{
-        ENFORCE_API(Vulkan);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
 		///////////////////////////////////////////////////////////
 		// SwapChain
@@ -187,7 +181,7 @@ namespace Hz
         m_Images.clear(); // Destroys imageviews
 
 		if (oldSwapchain)
-			vkDestroySwapchainKHR(context.GetDevice()->GetVkDevice(), oldSwapchain, nullptr); // Destroys Images?
+			vkDestroySwapchainKHR(context.GetDevice()->GetVkDevice(), oldSwapchain, nullptr); // Destroys images?
 
 		// Get the swap chain images
 		uint32_t imageCount = 0;
@@ -195,9 +189,9 @@ namespace Hz
 
 		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(context.GetDevice()->GetVkDevice(), m_SwapChain, &imageCount, NULL));
 		tempImages.resize(imageCount);
-		if (m_Images.empty()) m_Images.resize((size_t)imageCount);
 		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(context.GetDevice()->GetVkDevice(), m_SwapChain, &imageCount, tempImages.data()));
 
+		if (m_Images.empty()) m_Images.resize((size_t)imageCount); // Make sure we can access the appropriate indices
 		for (uint32_t i = 0; i < imageCount; i++)
 		{
 			VkImageViewCreateInfo colorAttachmentView = {};
@@ -231,7 +225,21 @@ namespace Hz
 			specs.Height = height;
 			specs.Layout = ImageLayout::Undefined;
 
-            m_Images[i] = Ref<Image>::Create(new VulkanImage(specs, tempImages[i], imageView));
+            if (m_Images[i])
+            {
+                VulkanImage* src = HzCast(VulkanImage, m_Images[i]->Src());
+
+                // Destroy old image view
+                vkDestroyImageView(context.GetDevice()->GetVkDevice(), src->m_ImageView, nullptr);
+
+                // Set new data
+                src->m_Specification = specs;
+                src->m_Image = tempImages[i];
+                src->m_ImageView;
+            }
+            else
+                m_Images[i] = Ref<Image>::Create(new VulkanImage(specs, tempImages[i], imageView));
+
             m_Images[i]->Transition(ImageLayout::Undefined, ImageLayout::PresentSrcKHR);
 		}
 
@@ -278,9 +286,7 @@ namespace Hz
 
     uint32_t VulkanSwapChain::AcquireNextImage()
 	{
-        ENFORCE_API(Vulkan, -1);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
 		uint32_t imageIndex = 0;
 
@@ -299,10 +305,8 @@ namespace Hz
 	}
 
 	void VulkanSwapChain::FindImageFormatAndColorSpace()
-	{
-        ENFORCE_API(Vulkan);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+    {
+        const VulkanContext& context = GetHzContext(Vulkan);
 
         const VkPhysicalDevice physicalDevice = context.GetPhysicalDevice()->GetVkPhysicalDevice();
 		const VkSurfaceKHR surface = m_Surface;

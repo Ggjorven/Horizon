@@ -41,12 +41,42 @@ namespace Hz
         s_Instance->Present();
     }
 
+    void Renderer::Begin(Ref<CommandBuffer> cmdBuf)
+    {
+        s_Instance->Begin(cmdBuf);
+    }
+
+    void Renderer::Begin(Ref<Renderpass> renderpass)
+    {
+        s_Instance->Begin(renderpass);
+    }
+
+    void Renderer::End(Ref<CommandBuffer> cmdBuf)
+    {
+        s_Instance->End(cmdBuf);
+    }
+
+    void Renderer::End(Ref<Renderpass> renderpass)
+    {
+        s_Instance->End(renderpass);
+    }
+
+    void Renderer::Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
+    {
+        s_Instance->Submit(cmdBuf, policy, queue, waitOn);
+    }
+
+    void Renderer::Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
+    {
+        s_Instance->Submit(renderpass, policy, queue, waitOn);
+    }
+
     uint32_t Renderer::GetCurrentFrame()
     {
         return s_Instance->GetCurrentFrame();
     }
 
-    const RendererSpecification &Renderer::GetSpecification()
+    const RendererSpecification& Renderer::GetSpecification()
     {
         return s_Instance->GetSpecification();
     }

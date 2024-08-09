@@ -13,9 +13,19 @@ namespace Hz
     {
     }
 
+    CommandBuffer::CommandBuffer(CommandBufferType *src)
+        : m_Instance(src)
+    {
+    }
+
     CommandBuffer::~CommandBuffer()
     {
         delete m_Instance;
+    }
+
+    Ref<CommandBuffer> CommandBuffer::Create()
+    {
+        return Ref<CommandBuffer>::Create();
     }
 
 }

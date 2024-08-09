@@ -17,9 +17,7 @@ namespace Hz::VkUtils
 
 	VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 	{
-        ENFORCE_API(Vulkan, VK_FORMAT_UNDEFINED);
-
-        const VulkanContext& context = *GraphicsContext::Raw();
+        const VulkanContext& context = GetHzContext(Vulkan);
 
 		for (VkFormat format : candidates)
 		{

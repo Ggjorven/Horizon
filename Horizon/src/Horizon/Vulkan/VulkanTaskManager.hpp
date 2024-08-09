@@ -28,6 +28,8 @@ namespace Hz
         void Add(VulkanCommandBuffer* cmdBuf, ExecutionPolicy policy);
         void Add(VkSemaphore semaphore); // Adds it to the frame wait queue (m_Semaphores[frame][1])
 
+        void Remove(VkSemaphore semaphore); // It removes the semaphore if it exists (it checks both semaphore vectors)
+
         VkSemaphore GetNext();
 
         std::vector<VkFence>& GetFences();

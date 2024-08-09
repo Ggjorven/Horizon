@@ -23,14 +23,15 @@ namespace Hz
         void EndFrame();
         void Present();
 
-        //void Begin();
-        //void Begin();
-        //void End();
-        //void End();
-        //void Submit();
-        //void Submit();
+        void Begin(Ref<CommandBuffer> cmdBuf);
+        void Begin(Ref<Renderpass> renderpass);
+        void End(Ref<CommandBuffer> cmdBuf);
+        void End(Ref<Renderpass> renderpass);
+        void Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn);
+        void Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn);
 
         uint32_t GetCurrentFrame() const;
+
         inline VulkanTaskManager& GetTaskManager() { return m_Manager; }
         inline const RendererSpecification& GetSpecification() const { return m_Specification; }
 
