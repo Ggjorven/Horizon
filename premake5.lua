@@ -23,14 +23,14 @@ Dependencies =
 			LibDir = "%{VULKAN_SDK}/lib/"
 		}
 	},
-	ShaderC =
-	{
-		LibName = "shaderc_shared"
-	},
-	VMA =
+    VMA =
 	{
 		LibName = "VMA",
 		IncludeDir = "%{wks.location}/vendor/vma/include"
+	},
+	ShaderC =
+	{
+		LibName = "shaderc_shared"
 	},
 
 	-- All other Third-Party libraries
@@ -46,6 +46,10 @@ Dependencies =
 	glm =
 	{
 		IncludeDir = "%{wks.location}/vendor/glm"
+	},
+    stb =
+	{
+		IncludeDir = "%{wks.location}/vendor/stb"
 	},
 	Pulse =
 	{
@@ -78,8 +82,8 @@ workspace "Horizon"
 
 group "Dependencies"
 	include "vendor/glfw"
+    include "vendor/vma"
 	include "vendor/Pulse/Pulse"
-	include "vendor/vma"
 group ""
 
 group "Horizon"

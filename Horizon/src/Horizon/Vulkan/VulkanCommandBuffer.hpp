@@ -48,7 +48,7 @@ namespace Hz
 		void Submit();
 		void EndAndSubmit();
 
-		inline const VkCommandBuffer GetVulkanCommandBuffer() const { return m_CommandBuffer; }
+		inline const VkCommandBuffer GetVkCommandBuffer() const { return m_CommandBuffer; }
 
 	private:
 		VkCommandBuffer m_CommandBuffer = VK_NULL_HANDLE;

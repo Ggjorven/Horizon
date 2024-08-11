@@ -4,12 +4,15 @@
 [submodule "vendor/glfw"]
 	path = vendor/glfw
 	url = https://github.com/Ggjorven/glfw.git
-[submodule "vendor/vma"]
-	path = vendor/vma
-	url = https://github.com/Ggjorven/VMA.git
 [submodule "vendor/glm"]
 	path = vendor/glm
 	url = https://github.com/g-truc/glm.git
 [submodule "vendor/premake-vscode"]
 	path = vendor/premake-vscode
 	url = https://github.com/peter1745/premake-vscode.git
+[submodule "vendor/stb"]
+	path = vendor/stb
+	url = https://github.com/nothings/stb.git
+[submodule "vendor/vma"]
+	path = vendor/vma
+	url = https://github.com/Ggjorven/VMA.git

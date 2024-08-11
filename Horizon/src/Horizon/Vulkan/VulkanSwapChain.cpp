@@ -18,7 +18,7 @@ namespace Hz
 	VulkanSwapChain::VulkanSwapChain(VkSurfaceKHR surface)
 		: m_Surface(surface)
 	{
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         FindImageFormatAndColorSpace();
 
@@ -40,7 +40,7 @@ namespace Hz
 
 	VulkanSwapChain::~VulkanSwapChain()
 	{
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
 		auto device = context.GetDevice();
 		device->Wait();
@@ -61,7 +61,7 @@ namespace Hz
 
 	void VulkanSwapChain::Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
 	{
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
 		///////////////////////////////////////////////////////////
 		// SwapChain
@@ -220,10 +220,11 @@ namespace Hz
 			ImageSpecification specs = {};
 			specs.Usage = ImageUsage::None;
 			specs.Format = (ImageFormat)m_ColourFormat;
-			specs.Flags = ImageUsageFlags::Colour | ImageUsageFlags::NoMipMaps;
+			specs.Flags = ImageUsageFlags::Colour;
 			specs.Width = width;
 			specs.Height = height;
 			specs.Layout = ImageLayout::Undefined;
+            specs.MipMaps = false;
 
             if (m_Images[i])
             {
@@ -248,10 +249,11 @@ namespace Hz
 			ImageSpecification specs = {};
 			specs.Usage = ImageUsage::Size;
 			specs.Format = (ImageFormat)VkUtils::FindDepthFormat();
-			specs.Flags = ImageUsageFlags::Depth | ImageUsageFlags::Sampled | ImageUsageFlags::NoMipMaps;
+			specs.Flags = ImageUsageFlags::DepthStencil | ImageUsageFlags::Sampled;
 			specs.Width = width;
 			specs.Height = height;
-			specs.Layout = ImageLayout::Depth;
+			specs.Layout = ImageLayout::DepthStencil;
+            specs.MipMaps = false;
 
 			m_DepthStencil = Ref<Image>::Create(specs);
 		}
@@ -286,7 +288,7 @@ namespace Hz
 
     uint32_t VulkanSwapChain::AcquireNextImage()
 	{
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
 		uint32_t imageIndex = 0;
 
@@ -306,7 +308,7 @@ namespace Hz
 
 	void VulkanSwapChain::FindImageFormatAndColorSpace()
     {
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         const VkPhysicalDevice physicalDevice = context.GetPhysicalDevice()->GetVkPhysicalDevice();
 		const VkSurfaceKHR surface = m_Surface;

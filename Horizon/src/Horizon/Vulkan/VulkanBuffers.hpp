@@ -1,0 +1,119 @@
+#pragma once
+
+#include "Horizon/Core/Memory.hpp"
+
+#include "Horizon/Renderer/RendererSpecification.hpp"
+#include "Horizon/Renderer/Buffers.hpp"
+
+//#include "Horizon/Renderer/Descriptors.hpp"
+
+#include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
+
+namespace Hz
+{
+
+    VkFormat DataTypeToVkFormat(DataType type);
+
+	class VulkanVertexBuffer
+	{
+	public:
+		VulkanVertexBuffer(const BufferSpecification& specs, void* data, size_t size);
+		~VulkanVertexBuffer();
+
+		void Bind(Ref<CommandBuffer> commandBuffer) const;
+		static void Bind(Ref<CommandBuffer> commandBuffer, std::vector<Ref<VertexBuffer>>&& buffers);
+
+	private:
+		VkBuffer m_Buffer = VK_NULL_HANDLE;
+		VmaAllocation m_Allocation = VK_NULL_HANDLE;
+
+		size_t m_BufferSize;
+	};
+
+	class VulkanIndexBuffer
+	{
+	public:
+		VulkanIndexBuffer(const BufferSpecification& specs, uint32_t* indices, uint32_t count);
+		~VulkanIndexBuffer();
+
+		void Bind(Ref<CommandBuffer> commandBuffer) const;
+
+		inline uint32_t GetCount() const { return m_Count; }
+
+	private:
+		VkBuffer m_Buffer = VK_NULL_HANDLE;
+		VmaAllocation m_Allocation = VK_NULL_HANDLE;
+
+		uint32_t m_Count;
+	};
+
+	class VulkanUniformBuffer
+	{
+	public:
+		VulkanUniformBuffer(const BufferSpecification& specs, size_t dataSize);
+		~VulkanUniformBuffer();
+
+		void Upload(Ref<DescriptorSet> set, Descriptor element);
+
+		void SetData(void* data, size_t size, size_t offset);
+
+        inline size_t GetSize() const { return m_Size; }
+
+	private:
+		std::vector<VkBuffer> m_Buffers = { };
+		std::vector<VmaAllocation> m_Allocations = { };
+
+		size_t m_Size;
+	};
+
+    /* // TODO: Implement
+	class VulkanDynamicUniformBuffer
+	{
+	public:
+		VulkanDynamicUniformBuffer(uint32_t elements, size_t sizeOfOneElement);
+		virtual ~VulkanDynamicUniformBuffer();
+
+		void SetData(void* data, size_t size) override;
+
+		void SetDataIndexed(uint32_t index, void* data, size_t size) override;
+		void UploadIndexedData() override;
+
+		inline uint32_t GetAmountOfElements() const override { return m_ElementCount; }
+		inline size_t GetAlignment() const override { return m_AlignmentOfOneElement; }
+
+		void Upload(Ref<DescriptorSet> set, Descriptor element) override;
+		void Upload(Ref<DescriptorSet> set, Descriptor element, size_t offset) override;
+
+	private:
+		std::vector<VkBuffer> m_Buffers = { };
+		std::vector<VmaAllocation> m_Allocations = { };
+
+		uint32_t m_ElementCount = 0;
+		size_t m_SizeOfOneElement = 0;
+		size_t m_AlignmentOfOneElement = 0;
+
+		std::vector<std::pair<void*, size_t>> m_IndexedData = { };
+	};
+    */
+
+	class VulkanStorageBuffer
+    {
+	public:
+		VulkanStorageBuffer(const BufferSpecification& specs, size_t dataSize);
+		~VulkanStorageBuffer();
+
+		void SetData(void* data, size_t size, size_t offset);
+
+		void Upload(Ref<DescriptorSet> set, Descriptor element);
+
+		inline size_t GetSize() const { return m_Size; }
+
+	private:
+		std::vector<VkBuffer> m_Buffers = { };
+		std::vector<VmaAllocation> m_Allocations = { };
+
+		size_t m_Size;
+	};
+
+}

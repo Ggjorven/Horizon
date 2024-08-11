@@ -32,7 +32,7 @@ namespace Hz
 
     void VulkanRenderpass::Resize(uint32_t width, uint32_t height)
     {
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         for (auto& framebuffer : m_Framebuffers)
             vkDestroyFramebuffer(context.GetDevice()->GetVkDevice(), framebuffer, nullptr);
@@ -60,7 +60,7 @@ namespace Hz
 
     void VulkanRenderpass::CreateRenderpass()
     {
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         ///////////////////////////////////////////////////////////
         // Renderpass
@@ -154,7 +154,7 @@ namespace Hz
 
     void VulkanRenderpass::CreateFramebuffers(uint32_t width, uint32_t height)
     {
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         ///////////////////////////////////////////////////////////
         // Framebuffers
@@ -198,7 +198,7 @@ namespace Hz
 
     void VulkanRenderpass::Destroy()
     {
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         for (auto& framebuffer : m_Framebuffers)
             vkDestroyFramebuffer(context.GetDevice()->GetVkDevice(), framebuffer, nullptr);

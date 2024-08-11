@@ -57,7 +57,8 @@ namespace Hz
 		const RenderpassSpecification& GetSpecification();
 		Ref<CommandBuffer> GetCommandBuffer();
 
-        RenderpassType* Src() { return m_Instance; }
+        // Returns underlying type pointer
+       inline RenderpassType* Src() { return m_Instance; }
 
         static Ref<Renderpass> Create(const RenderpassSpecification& specs, Ref<CommandBuffer> commandBuffer = nullptr);
 

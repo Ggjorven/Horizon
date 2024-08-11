@@ -3,10 +3,15 @@
 
 #include "Horizon/Core/Logging.hpp"
 
+#include "Horizon/Renderer/Descriptors.hpp"
+
 #include "Horizon/Vulkan/VulkanImage.hpp"
 #include "Horizon/Vulkan/VulkanContext.hpp"
 
 #include <Pulse/Enum/Enum.hpp>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 namespace Hz
 {
@@ -27,8 +32,8 @@ namespace Hz
 	///////////////////////////////////////////////////////////
 	// Core class
 	///////////////////////////////////////////////////////////
-	Image::Image(const ImageSpecification& specs)
-        : m_Instance(new Image::ImageType(specs))
+	Image::Image(const ImageSpecification& specs, const SamplerSpecification& samplerSpecs)
+        : m_Instance(new Image::ImageType(specs, samplerSpecs))
 	{
     }
 
@@ -52,8 +57,13 @@ namespace Hz
         m_Instance->Resize(width, height);
 	}
 
-	void Image::Transition(ImageLayout initial, ImageLayout final)
-	{
+    void Image::Upload(Ref<DescriptorSet> set, Descriptor element)
+    {
+        m_Instance->Upload(set, element);
+    }
+
+    void Image::Transition(ImageLayout initial, ImageLayout final)
+    {
         m_Instance->Transition(initial, final);
 	}
 
@@ -62,9 +72,9 @@ namespace Hz
         return m_Instance->GetSpecification();
     }
 
-    Ref<Image> Image::Create(const ImageSpecification &specs)
+    Ref<Image> Image::Create(const ImageSpecification &specs, const SamplerSpecification& samplerSpecs)
     {
-        return Ref<Image>::Create(specs);
+        return Ref<Image>::Create(specs, samplerSpecs);
     }
 
 }

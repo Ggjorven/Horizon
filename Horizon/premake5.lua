@@ -35,6 +35,7 @@ project "Horizon"
 		"%{Dependencies.spdlog.IncludeDir}",
 		"%{Dependencies.glfw.IncludeDir}",
 		"%{Dependencies.glm.IncludeDir}",
+		"%{Dependencies.stb.IncludeDir}",
 		"%{Dependencies.Pulse.IncludeDir}",
 
 		"%{Dependencies.VMA.IncludeDir}"
@@ -61,6 +62,7 @@ project "Horizon"
 		links
 		{
 			"%{Dependencies.Vulkan.Windows.LibDir}/%{Dependencies.Vulkan.Windows.LibName}",
+			"%{Dependencies.Vulkan.Windows.LibDir}/%{Dependencies.ShaderC.LibName}",
 
 			"opengl32"
 		}
@@ -78,6 +80,7 @@ project "Horizon"
 		links
 		{
 			"%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.Vulkan.Linux.LibName}",
+            "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.LibName}",
 
 			"Xrandr", "Xi", "GLU", "GL", "X11", "dl", "pthread", "stdc++fs"
 		}

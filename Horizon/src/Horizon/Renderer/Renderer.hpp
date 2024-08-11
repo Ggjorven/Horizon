@@ -5,6 +5,7 @@
 #include "Horizon/Renderer/RendererSpecification.hpp"
 #include "Horizon/Renderer/CommandBuffer.hpp"
 #include "Horizon/Renderer/Renderpass.hpp"
+#include "Horizon/Renderer/Buffers.hpp"
 
 #include <Pulse/Enum/Enum.hpp>
 
@@ -15,8 +16,9 @@ namespace Hz
 
     using namespace Pulse::Enum::Bitwise;
 
-    class GraphicsContext;
     class VulkanRenderer;
+
+    class GraphicsContext;
 
     enum class ExecutionPolicy : uint8_t
     {
@@ -50,6 +52,9 @@ namespace Hz
         static void End(Ref<Renderpass> renderpass);
         static void Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy = ExecutionPolicy::InOrder | ExecutionPolicy::WaitForPrevious, Queue queue = Queue::Graphics, const std::vector<Ref<CommandBuffer>>& waitOn = {});
         static void Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy = ExecutionPolicy::InOrder | ExecutionPolicy::WaitForPrevious, Queue queue = Queue::Graphics, const std::vector<Ref<CommandBuffer>>& waitOn = {});
+
+        static void Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount = 3, uint32_t instanceCount = 1);
+        static void DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount = 1);
 
         static uint32_t GetCurrentFrame();
         static const RendererSpecification& GetSpecification();

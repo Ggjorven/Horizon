@@ -13,7 +13,7 @@ namespace Hz
 
 	VulkanPhysicalDevice::VulkanPhysicalDevice(const VkSurfaceKHR surface)
 	{
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 		const VkInstance instance = context.GetVkInstance();
 
 		uint32_t deviceCount = 0;

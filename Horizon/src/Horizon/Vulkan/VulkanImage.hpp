@@ -15,7 +15,7 @@ namespace Hz
     class VulkanImage
 	{
 	public:
-		VulkanImage(const ImageSpecification& specs);
+		VulkanImage(const ImageSpecification& specs, const SamplerSpecification& samplerSpecs);
         VulkanImage(const ImageSpecification& specs, const VkImage image, const VkImageView imageView); // For swapchain
 		~VulkanImage();
 
@@ -23,6 +23,7 @@ namespace Hz
 
 		void Resize(uint32_t width, uint32_t height);
 
+        void Upload(Ref<DescriptorSet> set, Descriptor element);
 		void Transition(ImageLayout initial, ImageLayout final);
 
 		inline const ImageSpecification& GetSpecification() const { return m_Specification; }
@@ -41,8 +42,11 @@ namespace Hz
 
 		void GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
+        void Destroy();
+
 	private:
-		ImageSpecification m_Specification = {};
+		ImageSpecification m_Specification;
+        SamplerSpecification m_SamplerSpecification;
 
 		VkImage m_Image = VK_NULL_HANDLE;
 		VmaAllocation m_Allocation = VK_NULL_HANDLE;

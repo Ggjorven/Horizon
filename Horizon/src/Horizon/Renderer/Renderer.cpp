@@ -3,6 +3,8 @@
 
 #include "Horizon/Core/Logging.hpp"
 
+#include "Horizon/Renderer/Buffers.hpp"
+
 #include "Horizon/Vulkan/VulkanRenderer.hpp"
 
 namespace Hz
@@ -69,6 +71,16 @@ namespace Hz
     void Renderer::Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
         s_Instance->Submit(renderpass, policy, queue, waitOn);
+    }
+
+    void Renderer::Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount)
+    {
+        s_Instance->Draw(cmdBuf, vertexCount, instanceCount);
+    }
+
+    void Renderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
+    {
+        s_Instance->DrawIndexed(cmdBuf, indexBuffer, instanceCount);
     }
 
     uint32_t Renderer::GetCurrentFrame()

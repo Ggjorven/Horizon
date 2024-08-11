@@ -4,12 +4,16 @@
 #include "Horizon/Core/Logging.hpp"
 #include "Horizon/Core/Window.hpp"
 
+#include "Horizon/Renderer/Renderer.hpp"
 #include "Horizon/Renderer/GraphicsContext.hpp"
+#include "Horizon/Renderer/Buffers.hpp"
+#include "Horizon/Renderer/CommandBuffer.hpp"
 
 #include "Horizon/Vulkan/VulkanUtils.hpp"
 #include "Horizon/Vulkan/VulkanContext.hpp"
 #include "Horizon/Vulkan/VulkanCommandBuffer.hpp"
 #include "Horizon/Vulkan/VulkanRenderpass.hpp"
+#include "Horizon/Vulkan/VulkanBuffers.hpp"
 
 #include <numeric>
 
@@ -27,7 +31,7 @@ namespace Hz
 
     void VulkanRenderer::Recreate(uint32_t width, uint32_t height, const bool vsync)
     {
-        VulkanContext& context = GetHzContext(Vulkan);
+        VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         context.GetSwapChain()->Init(width, height, vsync, (uint8_t)Renderer::GetSpecification().Buffers);
         m_Specification.VSync = vsync;
@@ -38,7 +42,7 @@ namespace Hz
         if (Window::Get().IsMinimized())
             return;
 
-        VulkanContext& context = GetHzContext(Vulkan);
+        VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
         auto swapChain = context.GetSwapChain();
 
         {
@@ -70,7 +74,7 @@ namespace Hz
         if (Window::Get().IsMinimized())
             return;
 
-        VulkanContext& context = GetHzContext(Vulkan);
+        VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         auto& semaphores = m_Manager.GetSemaphores();
         auto swapChain = context.GetSwapChain();
@@ -111,7 +115,7 @@ namespace Hz
 
     void VulkanRenderer::Begin(Ref<CommandBuffer> cmdBuf)
     {
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         VulkanCommandBuffer* src = HzCast(VulkanCommandBuffer, cmdBuf->Src());
 
@@ -129,7 +133,7 @@ namespace Hz
 
     void VulkanRenderer::Begin(Ref<Renderpass> renderpass)
     {
-        const VulkanContext& context = GetHzContext(Vulkan);;
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());;
 
         Ref<CommandBuffer> cmdBuf = renderpass->GetCommandBuffer();
         VulkanRenderpass* src = HzCast(VulkanRenderpass, renderpass->Src());
@@ -196,7 +200,7 @@ namespace Hz
 
     void VulkanRenderer::Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         #if defined(HZ_CONFIG_DEBUG)
             VerifyExectionPolicy(policy);
@@ -275,9 +279,21 @@ namespace Hz
         Submit(renderpass->GetCommandBuffer(), policy, queue, waitOn);
     }
 
+    void VulkanRenderer::Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount)
+    {
+        auto vkCmdBuf = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+		vkCmdDraw(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), vertexCount, instanceCount, 0, 0);
+    }
+
+    void VulkanRenderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
+    {
+        auto vkCmdBuf = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+		vkCmdDrawIndexed(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), indexBuffer->GetCount(), instanceCount, 0, 0, 0);
+    }
+
     uint32_t VulkanRenderer::GetCurrentFrame() const
     {
-        const VulkanContext& context = GetHzContext(Vulkan);
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         return context.GetSwapChain()->GetCurrentFrame();
     }

@@ -87,7 +87,7 @@ namespace Hz
 				PULSE_DEBUG_BREAK(); \
 			}
 	#elif defined(HZ_RELEASE)
-		#define HZ_ASSERT(value, ...) if (!value) \
+		#define HZ_ASSERT(value, ...) if (!(value)) \
 			{ \
 				CT_LOG_FATAL(__VA_ARGS__); \
 			}

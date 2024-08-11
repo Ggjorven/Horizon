@@ -30,6 +30,9 @@ namespace Hz
         void Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn);
         void Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn);
 
+        void Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount);
+        void DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount);
+
         uint32_t GetCurrentFrame() const;
 
         inline VulkanTaskManager& GetTaskManager() { return m_Manager; }

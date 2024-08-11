@@ -1,6 +1,6 @@
 # Horizon
 
-**Horizon** is a rendering library written in C++20 using and Vulkan API. This project is in its very early stages.
+**Horizon** is a rendering library written in C++20 using the Vulkan API. The project was written to have near zero impact on Vulkan initialization and use. The project is very simple, but written to be easily expandable.
 
 ## Features
 
@@ -141,7 +141,9 @@ This project is licensed under the Apache 2.0 License. See [LICENSE](LICENSE.txt
 Contributions are welcome! Please fork the repository and create a pull request with your changes.
 
 ## Third-Party Libraries
-  - `Pulse` [https://github.com/Ggjorven/Pulse](https://github.com/Ggjorven/Pulse)
-  - `spdlog` [https://github.com/gabime/spdlog/](https://github.com/gabime/spdlog/)
+  - `Pulse` [https://github.com/Ggjorven/Pulse](https://github.com/Ggjorven/Pulse.git)
+  - `spdlog` [https://github.com/gabime/spdlog/](https://github.com/gabime/spdlog.git)
+  - `stb` [https://github.com/nothings/stb.git](https://github.com/nothings/stb.git)
   - `glm` [https://github.com/icaven/glm.git](https://github.com/icaven/glm.git)
   - `vma` [https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git)
+  - `premake-vscode` [https://github.com/peter1745/premake-vscode/tree/main](https://github.com/peter1745/premake-vscode.git)

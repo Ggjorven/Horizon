@@ -28,9 +28,10 @@ project "Sandbox"
 		"%{Dependencies.spdlog.IncludeDir}",
 		"%{Dependencies.glfw.IncludeDir}",
 		"%{Dependencies.glm.IncludeDir}",
+		"%{Dependencies.stb.IncludeDir}",
 		"%{Dependencies.Pulse.IncludeDir}",
 
-		"%{Dependencies.VMA.IncludeDir}",
+		"%{Dependencies.VMA.IncludeDir}"
 	}
 
 	links
@@ -73,7 +74,9 @@ project "Sandbox"
 			"%{Dependencies.Pulse.LibName}",
 
 			"%{Dependencies.VMA.LibName}",
+
 			"%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.Vulkan.Linux.LibName}",
+            "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.LibName}",
 		}
 
 	filter "configurations:Debug"

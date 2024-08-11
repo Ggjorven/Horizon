@@ -21,7 +21,8 @@ namespace Hz
         CommandBuffer(CommandBufferType* src);
         ~CommandBuffer();
 
-        CommandBufferType* Src() { return m_Instance; }
+        // Returns underlying type pointer
+        inline CommandBufferType* Src() { return m_Instance; }
 
         static Ref<CommandBuffer> Create();
 

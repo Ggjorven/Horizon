@@ -92,7 +92,7 @@ namespace Hz
 
         m_SwapChain.Reset();
 
-		//Allocator::Destroy();
+		VkUtils::Allocator::Destroy();
 
         m_PhysicalDevice.Reset();
 		m_Device.Reset();
@@ -220,7 +220,7 @@ namespace Hz
 		m_PhysicalDevice = VulkanPhysicalDevice::Select(surface);
 		m_Device = VulkanDevice::Create(surface, m_PhysicalDevice);
 
-		//Allocator::Init();
+		VkUtils::Allocator::Init();
 
         m_SwapChain = VulkanSwapChain::Create(surface);
         m_SwapChain->Init(width, height, vsync, framesInFlight);
