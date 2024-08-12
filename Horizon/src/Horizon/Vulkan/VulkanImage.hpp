@@ -5,7 +5,7 @@
 #include "Horizon/Renderer/Image.hpp"
 
 #include <vulkan/vulkan.h>
-#include <vk_mem_alloc.h>
+#include <vma/vk_mem_alloc.h>
 
 namespace Hz
 {

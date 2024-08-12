@@ -8,7 +8,9 @@
 #include "Horizon/Vulkan/VulkanContext.hpp"
 #include "Horizon/Vulkan/VulkanCommandBuffer.hpp"
 
-#include <vk_mem_alloc.h>
+// Note: This file builds VMA
+#define VMA_IMPLEMENTATION
+#include <vma/vk_mem_alloc.h>
 
 namespace Hz::VkUtils
 {

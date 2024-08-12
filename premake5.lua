@@ -1,4 +1,4 @@
--- require("vendor/premake-vscode/vscode")
+require("vendor/premake-vscode/vscode")
 
 ------------------------------------------------------------------------------
 -- Dependencies
@@ -22,11 +22,6 @@ Dependencies =
 			IncludeDir = "%{VULKAN_SDK}/include/",
 			LibDir = "%{VULKAN_SDK}/lib/"
 		}
-	},
-    VMA =
-	{
-		LibName = "VMA",
-		IncludeDir = "%{wks.location}/vendor/vma/include"
 	},
 	ShaderC =
 	{
@@ -82,7 +77,6 @@ workspace "Horizon"
 
 group "Dependencies"
 	include "vendor/glfw"
-    include "vendor/vma"
 	include "vendor/Pulse/Pulse"
 group ""
 

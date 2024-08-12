@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <vulkan/vulkan.h>
-#include <vk_mem_alloc.h>
+#include <vma/vk_mem_alloc.h>
 
 #define VK_CHECK_RESULT_HELPER_2(expr, exprStr, randomizedNr) \
 VkResult result##randomizedNr = expr; \

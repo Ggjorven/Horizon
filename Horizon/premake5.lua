@@ -37,16 +37,12 @@ project "Horizon"
 		"%{Dependencies.glm.IncludeDir}",
 		"%{Dependencies.stb.IncludeDir}",
 		"%{Dependencies.Pulse.IncludeDir}",
-
-		"%{Dependencies.VMA.IncludeDir}"
 	}
 
 	links
 	{
 		"%{Dependencies.glfw.LibName}",
 		"%{Dependencies.Pulse.LibName}",
-
-		"%{Dependencies.VMA.LibName}"
 	}
 
 	filter "system:windows"

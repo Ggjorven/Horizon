@@ -13,6 +13,3 @@
 [submodule "vendor/stb"]
 	path = vendor/stb
 	url = https://github.com/nothings/stb.git
-[submodule "vendor/vma"]
-	path = vendor/vma
-	url = https://github.com/Ggjorven/VMA.git
