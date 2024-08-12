@@ -42,19 +42,19 @@ namespace Hz
 	{
         const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
-		auto device = context.GetDevice();
-		device->Wait();
+        context.GetDevice()->Wait();
+        vkQueueWaitIdle(context.GetDevice()->GetGraphicsQueue());
 
 		if (m_SwapChain)
-			vkDestroySwapchainKHR(device->GetVkDevice(), m_SwapChain, nullptr);
+			vkDestroySwapchainKHR(context.GetDevice()->GetVkDevice(), m_SwapChain, nullptr);
 
 		m_Images.clear();
 		m_DepthStencil.Reset();
 
-		vkDestroyCommandPool(device->GetVkDevice(), m_CommandPool, nullptr);
+		vkDestroyCommandPool(context.GetDevice()->GetVkDevice(), m_CommandPool, nullptr);
 
 		for (size_t i = 0; i < m_ImageAvailableSemaphores.size(); i++)
-			vkDestroySemaphore(device->GetVkDevice(), m_ImageAvailableSemaphores[i], nullptr);
+			vkDestroySemaphore(context.GetDevice()->GetVkDevice(), m_ImageAvailableSemaphores[i], nullptr);
 
         vkDestroySurfaceKHR(context.GetVkInstance(), m_Surface, nullptr);
 	}

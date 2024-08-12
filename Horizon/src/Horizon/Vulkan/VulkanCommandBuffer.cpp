@@ -1,4 +1,5 @@
 #include "hzpch.h"
+#include "hzpch.h"
 #include "VulkanCommandBuffer.hpp"
 
 #include "Horizon/Core/Logging.hpp"
@@ -8,6 +9,7 @@
 
 #include "Horizon/Vulkan/VulkanUtils.hpp"
 #include "Horizon/Vulkan/VulkanContext.hpp"
+#include "Horizon/Vulkan/VulkanRenderer.hpp"
 
 namespace Hz
 {
@@ -47,15 +49,25 @@ namespace Hz
 
 	VulkanCommandBuffer::~VulkanCommandBuffer()
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+        Renderer::Free([commandBuffers = m_CommandBuffers, renderFinishedSemaphores = m_RenderFinishedSemaphores, inFlightFences = m_InFlightFences]()
+        {
+            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+            VulkanRenderer* renderer = HzCast(VulkanRenderer, Renderer::Src());
 
-        context.GetDevice()->Wait();
+            vkFreeCommandBuffers(context.GetDevice()->GetVkDevice(), context.GetSwapChain()->GetVkCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
 
-		for (size_t i = 0; i < m_RenderFinishedSemaphores.size(); i++)
-		{
-			vkDestroySemaphore(context.GetDevice()->GetVkDevice(), m_RenderFinishedSemaphores[i], nullptr);
-			vkDestroyFence(context.GetDevice()->GetVkDevice(), m_InFlightFences[i], nullptr);
-		}
+            for (size_t i = 0; i < renderFinishedSemaphores.size(); i++)
+            {
+                if (renderer)
+                {
+                    renderer->GetTaskManager().RemoveFromAll(renderFinishedSemaphores[i]);
+                    renderer->GetTaskManager().RemoveFromAll(inFlightFences[i]);
+                }
+
+                vkDestroySemaphore(context.GetDevice()->GetVkDevice(), renderFinishedSemaphores[i], nullptr);
+                vkDestroyFence(context.GetDevice()->GetVkDevice(), inFlightFences[i], nullptr);
+            }
+        });
 	}
 
 

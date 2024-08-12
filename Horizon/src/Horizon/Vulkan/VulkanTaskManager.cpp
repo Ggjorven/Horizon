@@ -6,11 +6,15 @@
 namespace Hz
 {
 
-    void VulkanTaskManager::Reset()
+    void VulkanTaskManager::ResetFences()
     {
         uint32_t frame = Renderer::GetCurrentFrame();
-
         m_Fences[frame].clear();
+    }
+
+    void VulkanTaskManager::ResetSemaphores()
+    {
+        uint32_t frame = Renderer::GetCurrentFrame();
         m_Semaphores[frame].first.clear();
         m_Semaphores[frame].second.clear();
     }
@@ -33,14 +37,17 @@ namespace Hz
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
         uint32_t frame = Renderer::GetCurrentFrame();
-        m_Semaphores[frame].second.push_back(semaphore);
+        m_Semaphores[frame].first.push_back(semaphore);
     }
 
     void VulkanTaskManager::Remove(VkSemaphore semaphore)
     {
-        std::scoped_lock<std::mutex> lock(m_ThreadSafety);
+        Remove(semaphore, Renderer::GetCurrentFrame());
+    }
 
-        uint32_t frame = Renderer::GetCurrentFrame();
+    void VulkanTaskManager::Remove(VkSemaphore semaphore, uint32_t frame)
+    {
+        std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
         // Check the InOrder list
         auto it = std::find(m_Semaphores[frame].first.begin(), m_Semaphores[frame].first.end(), semaphore);
@@ -57,6 +64,39 @@ namespace Hz
             m_Semaphores[frame].second.erase(it2);
             return;
         }
+    }
+
+    void VulkanTaskManager::RemoveFromAll(VkSemaphore semaphore)
+    {
+        std::scoped_lock<std::mutex> lock(m_ThreadSafety);
+
+        for (size_t frame = 0; frame < (size_t)Renderer::GetSpecification().Buffers; frame++)
+            Remove(semaphore, frame);
+    }
+
+    void VulkanTaskManager::Remove(VkFence fence)
+    {
+        Remove(fence, Renderer::GetCurrentFrame());
+    }
+
+    void VulkanTaskManager::Remove(VkFence fence, uint32_t frame)
+    {
+        std::scoped_lock<std::mutex> lock(m_ThreadSafety);
+
+        auto it = std::find(m_Fences[frame].begin(), m_Fences[frame].end(), fence);
+        if (it != m_Fences[frame].end())
+        {
+            m_Fences[frame].erase(it);
+            return;
+        }
+    }
+
+    void VulkanTaskManager::RemoveFromAll(VkFence fence)
+    {
+        std::scoped_lock<std::mutex> lock(m_ThreadSafety);
+
+        for (size_t frame = 0; frame < (size_t)Renderer::GetSpecification().Buffers; frame++)
+            Remove(fence, frame);
     }
 
     VkSemaphore VulkanTaskManager::GetNext()

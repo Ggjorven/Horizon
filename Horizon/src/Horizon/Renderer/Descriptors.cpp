@@ -3,6 +3,8 @@
 
 #include "Horizon/Core/Logging.hpp"
 
+#include "Horizon/Renderer/Renderer.hpp"
+#include "Horizon/Renderer/GraphicsContext.hpp"
 #include "Horizon/Renderer/Pipeline.hpp"
 
 #include "Horizon/Vulkan/VulkanDescriptors.hpp"
@@ -70,6 +72,11 @@ namespace Hz
     {
     }
 
+    Uploadable::Uploadable(Type value, Descriptor element)
+        : Value(value), Element(element)
+    {
+    }
+
     ///////////////////////////////////////////////////////////
     // Core class
     ///////////////////////////////////////////////////////////
@@ -86,6 +93,11 @@ namespace Hz
     void DescriptorSet::Bind(Ref<Pipeline> pipeline, Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets)
     {
         m_Instance->Bind(pipeline, commandBuffer, bindPoint, dynamicOffsets);
+    }
+
+    void DescriptorSet::Upload(const std::initializer_list<Uploadable>& elements)
+    {
+        m_Instance->Upload(elements);
     }
 
     DescriptorSets::DescriptorSets(const std::initializer_list<DescriptorSetGroup>& specs)

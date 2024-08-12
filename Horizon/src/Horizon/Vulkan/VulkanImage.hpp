@@ -11,6 +11,7 @@ namespace Hz
 {
 
     class VulkanSwapChain;
+    class VulkanDescriptorSet;
 
     class VulkanImage
 	{
@@ -23,7 +24,6 @@ namespace Hz
 
 		void Resize(uint32_t width, uint32_t height);
 
-        void Upload(Ref<DescriptorSet> set, Descriptor element);
 		void Transition(ImageLayout initial, ImageLayout final);
 
 		inline const ImageSpecification& GetSpecification() const { return m_Specification; }
@@ -56,6 +56,7 @@ namespace Hz
 		uint32_t m_Miplevels = 1;
 
         friend class VulkanSwapChain;
+        friend class VulkanDescriptorSet;
 	};
 
 }

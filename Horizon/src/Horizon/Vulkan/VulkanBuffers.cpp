@@ -57,8 +57,11 @@ namespace Hz
 
     VulkanVertexBuffer::~VulkanVertexBuffer()
     {
-        if (m_Buffer != VK_NULL_HANDLE)
-            VkUtils::Allocator::DestroyBuffer(m_Buffer, m_Allocation);
+        Renderer::Free([buffer = m_Buffer, allocation = m_Allocation]()
+        {
+            if (buffer != VK_NULL_HANDLE)
+                VkUtils::Allocator::DestroyBuffer(buffer, allocation);
+        });
     }
 
     void VulkanVertexBuffer::Bind(Ref<CommandBuffer> commandBuffer) const
@@ -108,8 +111,11 @@ namespace Hz
 
     VulkanIndexBuffer::~VulkanIndexBuffer()
     {
-        if (m_Buffer != VK_NULL_HANDLE)
-            VkUtils::Allocator::DestroyBuffer(m_Buffer, m_Allocation);
+        Renderer::Free([buffer = m_Buffer, allocation = m_Allocation]()
+        {
+            if (buffer != VK_NULL_HANDLE)
+                VkUtils::Allocator::DestroyBuffer(buffer, allocation);
+        });
     }
 
     void VulkanIndexBuffer::Bind(Ref<CommandBuffer> commandBuffer) const
@@ -131,12 +137,15 @@ namespace Hz
 
     VulkanUniformBuffer::~VulkanUniformBuffer()
     {
-        const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
-        for (size_t i = 0; i < framesInFlight; i++)
+        Renderer::Free([buffers = m_Buffers, allocations = m_Allocations]()
         {
-            if (m_Buffers[i] != VK_NULL_HANDLE)
-                VkUtils::Allocator::DestroyBuffer(m_Buffers[i], m_Allocations[i]);
-        }
+            const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
+            for (size_t i = 0; i < framesInFlight; i++)
+            {
+                if (buffers[i] != VK_NULL_HANDLE)
+                    VkUtils::Allocator::DestroyBuffer(buffers[i], allocations[i]);
+            }
+        });
     }
 
     void VulkanUniformBuffer::SetData(void* data, size_t size, size_t offset)
@@ -153,33 +162,6 @@ namespace Hz
 		}
     }
 
-    void VulkanUniformBuffer::Upload(Ref<DescriptorSet> set, Descriptor element)
-    {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        VulkanDescriptorSet* vkSet = HzCast(VulkanDescriptorSet, set->Src());
-
-		const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
-		for (size_t i = 0; i < framesInFlight; i++)
-		{
-			VkDescriptorBufferInfo bufferInfo = {};
-			bufferInfo.buffer = m_Buffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = m_Size;
-
-			VkWriteDescriptorSet descriptorWrite = {};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = vkSet->GetVkDescriptorSet((uint32_t)i);
-			descriptorWrite.dstBinding = element.Binding;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrite.descriptorCount = element.Count;
-			descriptorWrite.pBufferInfo = &bufferInfo;
-
-			vkUpdateDescriptorSets(context.GetDevice()->GetVkDevice(), 1, &descriptorWrite, 0, nullptr);
-		}
-    }
-
     VulkanStorageBuffer::VulkanStorageBuffer(const BufferSpecification& specs, size_t dataSize)
     {
         const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
@@ -192,12 +174,15 @@ namespace Hz
 
     VulkanStorageBuffer::~VulkanStorageBuffer()
     {
-        const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
-        for (size_t i = 0; i < framesInFlight; i++)
+        Renderer::Free([buffers = m_Buffers, allocations = m_Allocations]()
         {
-            if (m_Buffers[i] != VK_NULL_HANDLE)
-                VkUtils::Allocator::DestroyBuffer(m_Buffers[i], m_Allocations[i]);
-        }
+            const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
+            for (size_t i = 0; i < framesInFlight; i++)
+            {
+                if (buffers[i] != VK_NULL_HANDLE)
+                    VkUtils::Allocator::DestroyBuffer(buffers[i], allocations[i]);
+            }
+        });
     }
 
     void VulkanStorageBuffer::SetData(void* data, size_t size, size_t offset)
@@ -211,33 +196,6 @@ namespace Hz
 			VkUtils::Allocator::MapMemory(m_Allocations[i], mappedMemory);
 			memcpy(static_cast<uint8_t*>(mappedMemory) + offset, data, size);
 			VkUtils::Allocator::UnMapMemory(m_Allocations[i]);
-		}
-    }
-
-    void VulkanStorageBuffer::Upload(Ref<DescriptorSet> set, Descriptor element)
-    {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        VulkanDescriptorSet* vkSet = HzCast(VulkanDescriptorSet, set->Src());
-
-		const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
-		for (size_t i = 0; i < framesInFlight; i++)
-		{
-			VkDescriptorBufferInfo bufferInfo = {};
-			bufferInfo.buffer = m_Buffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = m_Size;
-
-			VkWriteDescriptorSet descriptorWrite = {};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = vkSet->GetVkDescriptorSet((uint32_t)i);
-			descriptorWrite.dstBinding = element.Binding;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			descriptorWrite.descriptorCount = element.Count;
-			descriptorWrite.pBufferInfo = &bufferInfo;
-
-			vkUpdateDescriptorSets(context.GetDevice()->GetVkDevice(), 1, &descriptorWrite, 0, nullptr);
 		}
     }
 

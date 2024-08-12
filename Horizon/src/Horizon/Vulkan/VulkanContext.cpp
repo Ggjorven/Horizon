@@ -88,28 +88,57 @@ namespace Hz
 
     VulkanContext::~VulkanContext()
     {
-		m_Device->Wait();
+        Renderer::FreeObjects();
 
         m_SwapChain.Reset();
 
-		VkUtils::Allocator::Destroy();
+        Renderer::FreeObjects();
+        VkUtils::Allocator::Destroy();
 
         m_PhysicalDevice.Reset();
-		m_Device.Reset();
+        m_Device.Reset();
 
-		if constexpr (s_Validation)
+        if constexpr (s_Validation)
         {
             if (m_DebugMessenger)
-			    DestroyDebugUtilsMessengerEXT(m_VulkanInstance, m_DebugMessenger, nullptr);
+                DestroyDebugUtilsMessengerEXT(m_VulkanInstance, m_DebugMessenger, nullptr);
         }
 
-		vkDestroyInstance(m_VulkanInstance, nullptr);
+        vkDestroyInstance(m_VulkanInstance, nullptr);
     }
 
     void VulkanContext::Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
     {
         InitInstance();
         InitDevices(width, height, vsync, framesInFlight);
+    }
+
+    void VulkanContext::Free(FreeFunction&& func)
+    {
+        std::scoped_lock<std::mutex> lock(m_FreeQueueMutex);
+        m_FreeQueue.push(func);
+    }
+
+    void VulkanContext::FreeObjects()
+    {
+        if (m_FreeQueue.empty()) return;
+
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+        context.GetDevice()->Wait(); // Wait till idle
+
+        // We repeat this, because sometimes the function calls Free() of another objects and that will be unresolved without repeating
+        do
+        {
+            std::queue<FreeFunction> functions = {};
+            functions.swap(m_FreeQueue);
+
+            while (!functions.empty())
+            {
+                auto func = functions.front();
+                func();
+                functions.pop();
+            }
+        } while (!m_FreeQueue.empty());
     }
 
     void VulkanContext::InitInstance()

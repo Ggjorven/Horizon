@@ -23,6 +23,9 @@ namespace Hz
         void EndFrame();
         void Present();
 
+        void BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state);
+        void EndDynamic(Ref<CommandBuffer> cmdBuf);
+
         void Begin(Ref<CommandBuffer> cmdBuf);
         void Begin(Ref<Renderpass> renderpass);
         void End(Ref<CommandBuffer> cmdBuf);
@@ -33,6 +36,7 @@ namespace Hz
         void Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount);
         void DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount);
 
+        uint32_t GetAcquiredImage() const;
         uint32_t GetCurrentFrame() const;
 
         inline VulkanTaskManager& GetTaskManager() { return m_Manager; }

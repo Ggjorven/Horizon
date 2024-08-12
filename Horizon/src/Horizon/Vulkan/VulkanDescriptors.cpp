@@ -3,14 +3,18 @@
 
 #include "Horizon/Core/Logging.hpp"
 
-#include "Horizon/Renderer/GraphicsContext.hpp"
 #include "Horizon/Renderer/Renderer.hpp"
+#include "Horizon/Renderer/GraphicsContext.hpp"
 #include "Horizon/Renderer/Pipeline.hpp"
 
 #include "Horizon/Vulkan/VulkanUtils.hpp"
+#include "Horizon/Vulkan/VulkanImage.hpp"
+#include "Horizon/Vulkan/VulkanBuffers.hpp"
 #include "Horizon/Vulkan/VulkanContext.hpp"
 #include "Horizon/Vulkan/VulkanPipeline.hpp"
 #include "Horizon/Vulkan/VulkanCommandBuffer.hpp"
+
+#include <Pulse/Types/TypeUtils.hpp>
 
 namespace Hz
 {
@@ -28,6 +32,100 @@ namespace Hz
 		vkCmdBindDescriptorSets(vkCmdBuf, (VkPipelineBindPoint)bindPoint, vkPipelineLayout, m_SetID, 1, &m_DescriptorSets[Renderer::GetCurrentFrame()], static_cast<uint32_t>(dynamicOffsets.size()), dynamicOffsets.data());
 	}
 
+    void VulkanDescriptorSet::Upload(const std::initializer_list<Uploadable>& elements)
+    {
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+
+        std::vector<VkWriteDescriptorSet> writes;
+        writes.reserve(elements.size() * (size_t)Renderer::GetSpecification().Buffers);
+
+        std::vector<VkDescriptorImageInfo> imageInfos = {};
+        std::vector<VkDescriptorBufferInfo> bufferInfos = {};
+
+        for (auto& [uploadable, descriptor] : elements)
+        {
+            std::visit([&](auto&& arg)
+            {
+                using T = Pulse::Types::Clean<decltype(arg)>;
+
+                if (std::is_same_v<T, Ref<Image>>)                  UploadImage(writes, imageInfos, arg, descriptor);
+                else if (std::is_same_v<T, Ref<UniformBuffer>>)     UploadUniformBuffer(writes, bufferInfos, arg, descriptor);
+                else if (std::is_same_v<T, Ref<StorageBuffer>>)     UploadStorageBuffer(writes, bufferInfos, arg, descriptor);
+            }, uploadable);
+        }
+
+        vkUpdateDescriptorSets(context.GetDevice()->GetVkDevice(), static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
+    }
+
+    void VulkanDescriptorSet::UploadImage(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorImageInfo>& imageInfos, Ref<Image> image, Descriptor descriptor)
+    {
+        VulkanImage* src = HzCast(VulkanImage, image->Src());
+
+		const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
+		for (size_t i = 0; i < framesInFlight; i++)
+		{
+			VkDescriptorImageInfo& imageInfo = imageInfos.emplace_back();
+			imageInfo.imageLayout = (VkImageLayout)src->m_Specification.Layout;
+			imageInfo.imageView = src->m_ImageView;
+			imageInfo.sampler = src->m_Sampler;
+
+			VkWriteDescriptorSet& descriptorWrite = writes.emplace_back();
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = m_DescriptorSets[i];
+			descriptorWrite.dstBinding = descriptor.Binding;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = (VkDescriptorType)descriptor.Type;
+			descriptorWrite.descriptorCount = descriptor.Count;
+			descriptorWrite.pImageInfo = &imageInfo;
+		}
+    }
+
+    void VulkanDescriptorSet::UploadUniformBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<UniformBuffer> buffer, Descriptor descriptor)
+    {
+        VulkanUniformBuffer* src = HzCast(VulkanUniformBuffer, buffer->Src());
+
+		const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
+		for (size_t i = 0; i < framesInFlight; i++)
+		{
+			VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
+			bufferInfo.buffer = src->m_Buffers[i];
+			bufferInfo.offset = 0;
+			bufferInfo.range = src->m_Size;
+
+			VkWriteDescriptorSet& descriptorWrite = writes.emplace_back();
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = m_DescriptorSets[i];
+			descriptorWrite.dstBinding = descriptor.Binding;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrite.descriptorCount = descriptor.Count;
+			descriptorWrite.pBufferInfo = &bufferInfo;
+		}
+    }
+
+    void VulkanDescriptorSet::UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<StorageBuffer> buffer, Descriptor descriptor)
+    {
+        VulkanStorageBuffer* src = HzCast(VulkanStorageBuffer, buffer->Src());
+
+		const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
+		for (size_t i = 0; i < framesInFlight; i++)
+		{
+			VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
+			bufferInfo.buffer = src->m_Buffers[i];
+			bufferInfo.offset = 0;
+			bufferInfo.range = src->m_Size;
+
+			VkWriteDescriptorSet& descriptorWrite = writes.emplace_back();
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = m_DescriptorSets[i];
+			descriptorWrite.dstBinding = descriptor.Binding;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			descriptorWrite.descriptorCount = descriptor.Count;
+			descriptorWrite.pBufferInfo = &bufferInfo;
+		}
+    }
+
     VulkanDescriptorSets::VulkanDescriptorSets(const std::initializer_list<DescriptorSetGroup>& specs)
     {
         for (auto& group : specs)
@@ -42,13 +140,16 @@ namespace Hz
 
     VulkanDescriptorSets::~VulkanDescriptorSets()
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+        Renderer::Free([descriptorPools = m_DescriptorPools, descriptorLayouts = m_DescriptorLayouts]()
+        {
+            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
-        for (auto& pool : m_DescriptorPools)
-				vkDestroyDescriptorPool(context.GetDevice()->GetVkDevice(), pool.second, nullptr);
+            for (auto& pool : descriptorPools)
+                vkDestroyDescriptorPool(context.GetDevice()->GetVkDevice(), pool.second, nullptr);
 
-        for (auto& layout : m_DescriptorLayouts)
-            vkDestroyDescriptorSetLayout(context.GetDevice()->GetVkDevice(), layout.second, nullptr);
+            for (auto& layout : descriptorLayouts)
+                vkDestroyDescriptorSetLayout(context.GetDevice()->GetVkDevice(), layout.second, nullptr);
+        });
     }
 
     void VulkanDescriptorSets::SetAmountOf(uint32_t setID, uint32_t amount)

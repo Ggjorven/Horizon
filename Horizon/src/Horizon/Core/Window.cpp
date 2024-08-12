@@ -28,7 +28,8 @@ namespace Hz
 
 		if (!s_GLFWInitialized)
 		{
-            HZ_ASSERT((glfwInit()), "[GLFW] glfwInit() failed!")
+            int result = glfwInit();
+            HZ_ASSERT((result), "[GLFW] glfwInit() failed!");
 
 			s_GLFWInitialized = true;
 			glfwSetErrorCallback(GLFWErrorCallBack);

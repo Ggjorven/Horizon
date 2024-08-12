@@ -38,8 +38,4 @@ namespace Hz
     // Don't include the * in the type.
     #define HzCast(type, obj) static_cast<type*>(static_cast<void*>(obj))
 
-    // A helper macro to 'safely' retrieve the appropriate context type
-    // Make sure that the type you're casting to is actually the type.
-    #define GetHzContext(api) *(HzCast(api##Context, GraphicsContext::Src())) // TODO: rRemove
-
 }

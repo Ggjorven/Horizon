@@ -8,6 +8,8 @@
 #include "Horizon/Vulkan/VulkanContext.hpp"
 #include "Horizon/Vulkan/VulkanCommandBuffer.hpp"
 
+#include <vk_mem_alloc.h>
+
 namespace Hz::VkUtils
 {
 
@@ -79,7 +81,19 @@ namespace Hz::VkUtils
         VK_CHECK_RESULT(vmaCreateAllocator(&allocatorInfo, &s_Allocator));
 	}
 
-	void Allocator::Destroy()
+    void Allocator::InitPipelineCache(const std::vector<uint8_t>& data)
+    {
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+
+        VkPipelineCacheCreateInfo cacheCreateInfo = {};
+        cacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+        cacheCreateInfo.initialDataSize = data.size();
+        cacheCreateInfo.pInitialData = data.data();
+
+        VK_CHECK_RESULT(vkCreatePipelineCache(context.GetDevice()->GetVkDevice(), &cacheCreateInfo, nullptr, &s_PipelineCache));
+    }
+
+    void Allocator::Destroy()
 	{
         vmaDestroyAllocator(s_Allocator);
         s_Allocator = VK_NULL_HANDLE;

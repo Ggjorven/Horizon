@@ -18,19 +18,38 @@ namespace Hz
     ///////////////////////////////////////////////////////////
 	// Specification
     ///////////////////////////////////////////////////////////
-	enum class LoadOperation : uint8_t  { Load, Clear };
+    enum class LoadOperation
+    {
+        Load = 0,
+        Clear = 1,
+        DontCare = 2,
+        NoneKHR = 1000400000,
+        NoneEXT = NoneKHR,
+    };
+
+    enum class StoreOperation
+    {
+        Store = 0,
+        DontCare = 1,
+        None = 1000301000,
+        NoneKHR = None,
+        NoneQCOM = None,
+        NoneEXT = None,
+    };
 
 	struct RenderpassSpecification
 	{
 	public:
-		std::vector<Ref<Image>> ColourAttachment = { }; // This is a vector since the swapchain has multiple images.
+		std::vector<Ref<Image>> ColourAttachment = { }; // This is a vector since the swapchain has multiple images (most of the time).
 		LoadOperation ColourLoadOp = LoadOperation::Clear;
+        StoreOperation ColourStoreOp = StoreOperation::Store;
 		glm::vec4 ColourClearColour = { 0.0f, 0.0f, 0.0f, 1.0f };
 		ImageLayout PreviousColourImageLayout = ImageLayout::Undefined;
 		ImageLayout FinalColourImageLayout = ImageLayout::PresentSrcKHR;
 
 		Ref<Image> DepthAttachment = nullptr;
 		LoadOperation DepthLoadOp = LoadOperation::Clear;
+        StoreOperation DepthStoreOp = StoreOperation::Store;
 		ImageLayout PreviousDepthImageLayout = ImageLayout::Undefined;
 		ImageLayout FinalDepthImageLayout = ImageLayout::Depth;
 	};

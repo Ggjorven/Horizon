@@ -17,6 +17,30 @@
 #include "Horizon/Vulkan/VulkanDescriptors.hpp"
 #include "Horizon/Vulkan/VulkanCommandBuffer.hpp"
 
+static VKAPI_ATTR VkResult VKAPI_CALL CreateRayTracingPipelinesKHR(VkDevice device, VkDeferredOperationKHR deferredOperation, VkPipelineCache pipelineCache, uint32_t createInfoCount, const VkRayTracingPipelineCreateInfoKHR* pCreateInfos, const VkAllocationCallbacks*  pAllocator, VkPipeline* pPipelines)
+{
+    const Hz::VulkanContext& context = *HzCast(Hz::VulkanContext, Hz::GraphicsContext::Src());
+
+    auto func = (PFN_vkCreateRayTracingPipelinesKHR)vkGetInstanceProcAddr(context.GetVkInstance(), "vkCreateRayTracingPipelinesKHR");
+
+	if (func != nullptr)
+		return func(device, deferredOperation, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
+
+	return VK_ERROR_EXTENSION_NOT_PRESENT;
+}
+
+static VKAPI_ATTR VkResult VKAPI_CALL CreateRayTracingPipelinesNV(VkDevice device, VkPipelineCache pipelineCache, uint32_t createInfoCount, const VkRayTracingPipelineCreateInfoNV* pCreateInfos, const VkAllocationCallbacks* pAllocator, VkPipeline* pPipelines)
+{
+    const Hz::VulkanContext& context = *HzCast(Hz::VulkanContext, Hz::GraphicsContext::Src());
+
+    auto func = (PFN_vkCreateRayTracingPipelinesNV)vkGetInstanceProcAddr(context.GetVkInstance(), "vkCreateRayTracingPipelinesNV");
+
+	if (func != nullptr)
+		return func(device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
+
+	return VK_ERROR_EXTENSION_NOT_PRESENT;
+}
+
 namespace Hz
 {
 
@@ -30,10 +54,11 @@ namespace Hz
     VulkanPipeline::VulkanPipeline(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader)
         : m_Specification(specs)
     {
-        HZ_ASSERT(((specs.Type == PipelineType::Compute) || (specs.Type == PipelineType::RayTracingKHR) || (specs.Type == PipelineType::RayTracingNV)), "Used pipeline compute/raytracing constructor but Type != PipelineType::Compute || PipelineType::RayTracingKHR || PipelineType::RayTracingNV");
-
         switch (specs.Type)
         {
+        case PipelineType::Graphics:
+            CreateGraphicsPipeline(sets, shader, nullptr);
+            break;
         case PipelineType::Compute:
             CreateComputePipeline(sets, shader);
             break;
@@ -52,10 +77,13 @@ namespace Hz
 
     VulkanPipeline::~VulkanPipeline()
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+        Renderer::Free([pipeline = m_Pipeline, pipelineLayout = m_PipelineLayout]()
+        {
+            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
-        vkDestroyPipeline(context.GetDevice()->GetVkDevice(), m_Pipeline, nullptr);
-        vkDestroyPipelineLayout(context.GetDevice()->GetVkDevice(), m_PipelineLayout, nullptr);
+            vkDestroyPipeline(context.GetDevice()->GetVkDevice(), pipeline, nullptr);
+            vkDestroyPipelineLayout(context.GetDevice()->GetVkDevice(), pipelineLayout, nullptr);
+        });
     }
 
     void VulkanPipeline::Use(Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint)
@@ -72,7 +100,7 @@ namespace Hz
 		vkCmdDispatch(vkCommand->GetVkCommandBuffer(Renderer::GetCurrentFrame()), width, height, depth);
     }
 
-    void VulkanPipeline::CreateGraphicsPipeline(Ref<DescriptorSets> sets, Ref<Shader> shader, Ref<Renderpass> renderpass)
+    void VulkanPipeline::CreateGraphicsPipeline(Ref<DescriptorSets> sets, Ref<Shader> shader, Ref<Renderpass> renderpass) // Renderpass may be null
     {
         const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
@@ -210,12 +238,12 @@ namespace Hz
 		pipelineInfo.pColorBlendState = &colorBlending;
 		pipelineInfo.pDynamicState = &dynamicState;
 		pipelineInfo.layout = m_PipelineLayout;
-		pipelineInfo.renderPass = HzCast(VulkanRenderpass, renderpass->Src())->GetVkRenderPass();
+		pipelineInfo.renderPass = (renderpass ? HzCast(VulkanRenderpass, renderpass->Src())->GetVkRenderPass() : nullptr);
 		pipelineInfo.subpass = 0;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 		pipelineInfo.basePipelineIndex = -1; // Optional
 
-        VK_CHECK_RESULT(vkCreateGraphicsPipelines(context.GetDevice()->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline));
+        VK_CHECK_RESULT(vkCreateGraphicsPipelines(context.GetDevice()->GetVkDevice(), VkUtils::Allocator::s_PipelineCache, 1, &pipelineInfo, nullptr, &m_Pipeline));
     }
 
     void VulkanPipeline::CreateComputePipeline(Ref<DescriptorSets> sets, Ref<Shader> shader)
@@ -258,8 +286,6 @@ namespace Hz
 
     void VulkanPipeline::CreateRayTracingPipelineKHR(Ref<DescriptorSets> sets, Ref<Shader> shader)
     {
-        HZ_ASSERT(0, "TODO: ...");
-        /**
         const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         auto vkShader = HzCast(VulkanShader, shader->Src());
@@ -413,14 +439,11 @@ namespace Hz
         rayTracingPipelineCreateInfo.flags = 0; // Adjust as needed
 
         // Create the ray tracing pipeline
-        VK_CHECK_RESULT(vkCreateRayTracingPipelinesKHR(context.GetDevice()->GetVkDevice(), VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &rayTracingPipelineCreateInfo, nullptr, &m_Pipeline));
-        */
+        VK_CHECK_RESULT(CreateRayTracingPipelinesKHR(context.GetDevice()->GetVkDevice(), VK_NULL_HANDLE, VkUtils::Allocator::s_PipelineCache, 1, &rayTracingPipelineCreateInfo, nullptr, &m_Pipeline));
     }
 
     void VulkanPipeline::CreateRayTracingPipelineNV(Ref<DescriptorSets> sets, Ref<Shader> shader)
     {
-        HZ_ASSERT(0, "TODO: ...");
-        /*
         const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
         auto vkShader = HzCast(VulkanShader, shader->Src());
@@ -571,8 +594,7 @@ namespace Hz
         rayTracingPipelineCreateInfo.flags = 0; // Adjust as needed
 
         // Create the ray tracing pipeline
-        VK_CHECK_RESULT(vkCreateRayTracingPipelinesNV(context.GetDevice()->GetVkDevice(), VK_NULL_HANDLE, 1, &rayTracingPipelineCreateInfo, nullptr, &m_Pipeline));
-        */
+        VK_CHECK_RESULT(CreateRayTracingPipelinesNV(context.GetDevice()->GetVkDevice(), VkUtils::Allocator::s_PipelineCache, 1, &rayTracingPipelineCreateInfo, nullptr, &m_Pipeline));
     }
 
     VkVertexInputBindingDescription VulkanPipeline::GetBindingDescription()

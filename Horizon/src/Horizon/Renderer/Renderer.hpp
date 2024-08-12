@@ -9,6 +9,10 @@
 
 #include <Pulse/Enum/Enum.hpp>
 
+#include <glm/glm.hpp>
+
+#include <queue>
+#include <functional>
 #include <type_traits>
 
 namespace Hz
@@ -20,6 +24,9 @@ namespace Hz
 
     class GraphicsContext;
 
+    ///////////////////////////////////////////////////////////
+    // Specifications
+    ///////////////////////////////////////////////////////////
     enum class ExecutionPolicy : uint8_t
     {
         InOrder = 1 << 0,           // Execute commands sequentially, submits to waited on by next (WaitForPrevious) commandBuffer
@@ -29,7 +36,26 @@ namespace Hz
     };
     enum class Queue    : uint8_t  { Graphics, Present, Compute };
 
-    class Renderer
+    struct DynamicRenderState
+    {
+    public:
+        Ref<Image> ColourAttachment = nullptr; // If using swapchain images use Renderer::GetAcquiredImage() as the index.
+        LoadOperation ColourLoadOp = LoadOperation::Clear;
+        StoreOperation ColourStoreOp = StoreOperation::Store;
+        glm::vec4 ColourClearValue = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+        Ref<Image> DepthAttachment = nullptr;
+        LoadOperation DepthLoadOp = LoadOperation::Clear;
+        StoreOperation DepthStoreOp = StoreOperation::Store;
+        float DepthClearValue = 1.0f;
+    };
+
+    using FreeFunction = std::function<void()>;
+
+    ///////////////////////////////////////////////////////////
+    // Core class
+    ///////////////////////////////////////////////////////////
+    class Renderer // !TODO: ResourceFree Queue!! // TODO: VMA as header only
     {
     public:
         using RendererType = VulkanRenderer;
@@ -45,6 +71,10 @@ namespace Hz
         static void EndFrame();
         static void Present();
 
+        // Note: These are only when you actually want to use dynamic rendering, 'static' rendering using renderpasses can be done just with Begin() etc.
+        static void BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state);
+        static void EndDynamic(Ref<CommandBuffer> cmdBuf);
+
         // Execution of Renderpasses/CommandBuffers
         static void Begin(Ref<CommandBuffer> cmdBuf);
         static void Begin(Ref<Renderpass> renderpass);
@@ -56,6 +86,11 @@ namespace Hz
         static void Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount = 3, uint32_t instanceCount = 1);
         static void DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount = 1);
 
+        // Note: The 2 functions actually call back to the GraphicsContext.
+        static void Free(FreeFunction&& func); // Adds to the renderfree queue
+        static void FreeObjects(); // Executes the free queue
+
+        static uint32_t GetAcquiredImage();
         static uint32_t GetCurrentFrame();
         static const RendererSpecification& GetSpecification();
 

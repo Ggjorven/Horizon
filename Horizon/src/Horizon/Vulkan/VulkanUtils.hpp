@@ -5,6 +5,8 @@
 
 #include <Pulse/Enum/Enum.hpp>
 
+#include <vector>
+
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 
@@ -32,6 +34,7 @@ namespace Hz::VkUtils
     {
     public:
         static void Init();
+        static void InitPipelineCache(const std::vector<uint8_t>& data); // Note: This function is not used anywhere, but I like giving the user the option
         static void Destroy();
 
     public:
@@ -50,6 +53,9 @@ namespace Hz::VkUtils
         // Utils
         static void MapMemory(VmaAllocation& allocation, void*& mapData);
 		static void UnMapMemory(VmaAllocation& allocation);
+
+    public:
+        inline static VkPipelineCache s_PipelineCache = VK_NULL_HANDLE;
     };
 
 }

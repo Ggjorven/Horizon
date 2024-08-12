@@ -3,9 +3,11 @@
 
 #include "Horizon/Core/Logging.hpp"
 
+#include "Horizon/Renderer/GraphicsContext.hpp"
 #include "Horizon/Renderer/Buffers.hpp"
 
 #include "Horizon/Vulkan/VulkanRenderer.hpp"
+#include "Horizon/Vulkan/VulkanContext.hpp"
 
 namespace Hz
 {
@@ -41,6 +43,16 @@ namespace Hz
     void Renderer::Present()
     {
         s_Instance->Present();
+    }
+
+    void Renderer::BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state)
+    {
+        s_Instance->BeginDynamic(cmdBuf, std::move(state));
+    }
+
+    void Renderer::EndDynamic(Ref<CommandBuffer> cmdBuf)
+    {
+        s_Instance->EndDynamic(cmdBuf);
     }
 
     void Renderer::Begin(Ref<CommandBuffer> cmdBuf)
@@ -81,6 +93,22 @@ namespace Hz
     void Renderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
     {
         s_Instance->DrawIndexed(cmdBuf, indexBuffer, instanceCount);
+    }
+
+    // Note: The 2 functions below actually use the GraphicsContect since the queue needs to live even after the renderer is destroyed
+    void Renderer::Free(FreeFunction&& func)
+    {
+        (*HzCast(VulkanContext, GraphicsContext::Src())).Free(std::move(func));
+    }
+
+    void Renderer::FreeObjects()
+    {
+        (*HzCast(VulkanContext, GraphicsContext::Src())).FreeObjects();
+    }
+
+    uint32_t Renderer::GetAcquiredImage()
+    {
+        return s_Instance->GetAcquiredImage();
     }
 
     uint32_t Renderer::GetCurrentFrame()

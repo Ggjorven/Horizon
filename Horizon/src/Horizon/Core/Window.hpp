@@ -4,6 +4,7 @@
 #include "Horizon/Core/Events.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
+#include "Horizon/Renderer/Renderer.hpp"
 
 #include <cstdint>
 #include <string>
@@ -49,7 +50,7 @@ namespace Hz
 		void SetVSync(bool vsync);
 		void SetTitle(const std::string& title);
 
-		//inline bool IsVSync() const { return m_Renderer->GetSpecification().VSync; } // TODO: Renderer::GetSpecification().VSync
+		inline bool IsVSync() const { return Renderer::GetSpecification().VSync; }
 		inline bool IsOpen() const { return !m_Closed; }
         inline bool IsMinimized() const { return ((m_Specification.Width == 0) || (m_Specification.Height == 0)); }
 

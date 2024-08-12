@@ -23,7 +23,12 @@ namespace Hz
 		inline uint32_t GetSetID() const { return m_SetID; }
 		inline const VkDescriptorSet GetVkDescriptorSet(uint32_t index) const { return m_DescriptorSets[index]; }
 
-        // !TODO: Add some kind of Upload function which can take multiple inputs to optimize for speed
+        void Upload(const std::initializer_list<Uploadable>& elements);
+
+    private:
+        void UploadImage(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorImageInfo>& imageInfos, Ref<Image> image, Descriptor descriptor);
+        void UploadUniformBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<UniformBuffer> buffer, Descriptor descriptor);
+        void UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<StorageBuffer> buffer, Descriptor descriptor);
 
 	private:
 		uint32_t m_SetID = 0;

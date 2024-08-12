@@ -147,11 +147,6 @@ namespace Hz
         m_Instance->SetData(data, size, offset);
     }
 
-    void UniformBuffer::Upload(Ref<DescriptorSet> set, Descriptor element)
-    {
-        m_Instance->Upload(set, element);
-    }
-
     size_t UniformBuffer::GetSize() const
     {
         return m_Instance->GetSize();
@@ -197,11 +192,6 @@ namespace Hz
     size_t StorageBuffer::GetSize() const
     {
         return m_Instance->GetSize();
-    }
-
-    void StorageBuffer::Upload(Ref<DescriptorSet> set, Descriptor element)
-    {
-        m_Instance->Upload(set, element);
     }
 
     Ref<StorageBuffer> StorageBuffer::Create(const BufferSpecification& specs, size_t dataSize)

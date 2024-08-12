@@ -3,12 +3,15 @@
 #include "Horizon/Core/Memory.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
+#include "Horizon/Renderer/Buffers.hpp"
+#include "Horizon/Renderer/Image.hpp"
 
 #include <Pulse/Enum/Enum.hpp>
 
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <variant>
 #include <utility>
 #include <unordered_set>
 #include <unordered_map>
@@ -138,6 +141,19 @@ namespace Hz
         ~DescriptorSetGroup() = default;
     };
 
+    struct Uploadable
+    {
+    public:
+        using Type = std::variant<Ref<Image>, Ref<UniformBuffer>, Ref<StorageBuffer>>;
+    public:
+        Type Value;
+        Descriptor Element;
+
+    public:
+        Uploadable(Type value, Descriptor element);
+        ~Uploadable() = default;
+    };
+
     ///////////////////////////////////////////////////////////
 	// Core class
 	///////////////////////////////////////////////////////////
@@ -151,6 +167,8 @@ namespace Hz
 		~DescriptorSet();
 
 		void Bind(Ref<Pipeline> pipeline, Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint = PipelineBindPoint::Graphics, const std::vector<uint32_t>& dynamicOffsets = { });
+
+        void Upload(const std::initializer_list<Uploadable>& elements);
 
         // Returns underlying type pointer
         inline DescriptorSetType* Src() { return m_Instance; }

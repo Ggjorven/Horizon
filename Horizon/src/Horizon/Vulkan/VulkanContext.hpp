@@ -3,6 +3,7 @@
 #include "Horizon/Core/Memory.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
+#include "Horizon/Renderer/Renderer.hpp"
 #include "Horizon/Renderer/Image.hpp"
 
 #include "Horizon/Vulkan/VulkanDevice.hpp"
@@ -12,6 +13,8 @@
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
+#include <queue>
+#include <mutex>
 #include <utility>
 
 namespace Hz
@@ -27,6 +30,9 @@ namespace Hz
         ~VulkanContext();
 
         void Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight);
+
+        void Free(FreeFunction&& func);
+        void FreeObjects();
 
 		inline const VkInstance GetVkInstance() const { return m_VulkanInstance; }
 		inline const VkDebugUtilsMessengerEXT GetVkDebugger() const { return m_DebugMessenger; }
@@ -55,6 +61,9 @@ namespace Hz
 		Ref<VulkanDevice> m_Device = nullptr;
         Ref<VulkanPhysicalDevice> m_PhysicalDevice = nullptr;
 		Ref<VulkanSwapChain> m_SwapChain = nullptr;
+
+        std::mutex m_FreeQueueMutex;
+        std::queue<FreeFunction> m_FreeQueue;
 
         void* m_Window;
 

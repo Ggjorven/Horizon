@@ -19,9 +19,6 @@ namespace Hz
     class VulkanImage;
     class VulkanRenderer;
 
-    struct Descriptor;
-    class DescriptorSet;
-
     ///////////////////////////////////////////////////////////
 	// Specifications
 	///////////////////////////////////////////////////////////
@@ -182,7 +179,6 @@ namespace Hz
 
         void Resize(uint32_t width, uint32_t height);
 
-        void Upload(Ref<DescriptorSet> set, Descriptor element);
         void Transition(ImageLayout initial, ImageLayout final);
 
         const ImageSpecification& GetSpecification() const;

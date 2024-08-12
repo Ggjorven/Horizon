@@ -13,6 +13,8 @@
 namespace Hz
 {
 
+    class VulkanDescriptorSet;
+
     VkFormat DataTypeToVkFormat(DataType type);
 
 	class VulkanVertexBuffer
@@ -54,8 +56,6 @@ namespace Hz
 		VulkanUniformBuffer(const BufferSpecification& specs, size_t dataSize);
 		~VulkanUniformBuffer();
 
-		void Upload(Ref<DescriptorSet> set, Descriptor element);
-
 		void SetData(void* data, size_t size, size_t offset);
 
         inline size_t GetSize() const { return m_Size; }
@@ -65,6 +65,8 @@ namespace Hz
 		std::vector<VmaAllocation> m_Allocations = { };
 
 		size_t m_Size;
+
+        friend class VulkanDescriptorSet;
 	};
 
     /* // TODO: Implement
@@ -94,6 +96,8 @@ namespace Hz
 		size_t m_AlignmentOfOneElement = 0;
 
 		std::vector<std::pair<void*, size_t>> m_IndexedData = { };
+
+        friend class VulkanDescriptorSet;
 	};
     */
 
@@ -105,8 +109,6 @@ namespace Hz
 
 		void SetData(void* data, size_t size, size_t offset);
 
-		void Upload(Ref<DescriptorSet> set, Descriptor element);
-
 		inline size_t GetSize() const { return m_Size; }
 
 	private:
@@ -114,6 +116,8 @@ namespace Hz
 		std::vector<VmaAllocation> m_Allocations = { };
 
 		size_t m_Size;
+
+        friend class VulkanDescriptorSet;
 	};
 
 }

@@ -86,33 +86,6 @@ namespace Hz
 		CreateImage(width, height);
 	}
 
-    void VulkanImage::Upload(Ref<DescriptorSet> set, Descriptor element)
-    {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        auto vkSet = HzCast(VulkanDescriptorSet, set->Src());
-
-		const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
-		for (size_t i = 0; i < framesInFlight; i++)
-		{
-			VkDescriptorImageInfo imageInfo = {};
-			imageInfo.imageLayout = (VkImageLayout)m_Specification.Layout;
-			imageInfo.imageView = m_ImageView;
-			imageInfo.sampler = m_Sampler;
-
-			VkWriteDescriptorSet descriptorWrite = {};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = vkSet->GetVkDescriptorSet((uint32_t)i);
-			descriptorWrite.dstBinding = element.Binding;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = (VkDescriptorType)element.Type;
-			descriptorWrite.descriptorCount = element.Count;
-			descriptorWrite.pImageInfo = &imageInfo;
-
-			vkUpdateDescriptorSets(context.GetDevice()->GetVkDevice(), 1, &descriptorWrite, 0, nullptr);
-		}
-    }
-
     void VulkanImage::Transition(ImageLayout initial, ImageLayout final)
     {
         if (initial == final) return;
@@ -339,7 +312,6 @@ namespace Hz
 		if (m_Specification.MipMaps)
 			m_Miplevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
-        // TODO: Remove NoMipMaps flag
 		m_Allocation = VkUtils::Allocator::AllocateImage(width, height, m_Miplevels, (VkFormat)m_Specification.Format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | (VkImageUsageFlagBits)m_Specification.Flags, VMA_MEMORY_USAGE_GPU_ONLY, m_Image);
 
 		m_ImageView = VkUtils::Allocator::CreateImageView(m_Image, (VkFormat)m_Specification.Format, GetVulkanImageAspectFromImageUsage(m_Specification.Flags), m_Miplevels);
@@ -446,18 +418,18 @@ namespace Hz
 
     void VulkanImage::Destroy()
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+        Renderer::Free([sampler = m_Sampler, imageView = m_ImageView, image = m_Image, allocation = m_Allocation]()
+        {
+            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
-        auto device = context.GetDevice();
-        device->Wait();
+            if (sampler)
+                vkDestroySampler(context.GetDevice()->GetVkDevice(), sampler, nullptr);
+            if (imageView)
+                vkDestroyImageView(context.GetDevice()->GetVkDevice(), imageView, nullptr);
 
-        if (m_Sampler)
-            vkDestroySampler(device->GetVkDevice(), m_Sampler, nullptr);
-        if (m_ImageView)
-            vkDestroyImageView(device->GetVkDevice(), m_ImageView, nullptr);
-
-        if (m_Image != VK_NULL_HANDLE && m_Allocation != VK_NULL_HANDLE)
-            VkUtils::Allocator::DestroyImage(m_Image, m_Allocation);
+            if (image != VK_NULL_HANDLE && allocation != VK_NULL_HANDLE)
+                VkUtils::Allocator::DestroyImage(image, allocation);
+        });
     }
 
    static VkImageAspectFlags GetVulkanImageAspectFromImageUsage(ImageUsageFlags usage)

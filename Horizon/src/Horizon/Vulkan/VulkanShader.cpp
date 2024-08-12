@@ -23,10 +23,15 @@ namespace Hz
 
     VulkanShader::~VulkanShader()
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+        // Note: This might be redundant since shaders are only usefuls when a pipeline needs to be created.
+        // But better safe than sorry.
+        Renderer::Free([shaders = m_Shaders]()
+        {
+            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
-        for (auto& [stage, shader] : m_Shaders)
-            vkDestroyShaderModule(context.GetDevice()->GetVkDevice(), shader, nullptr);
+            for (auto& [stage, shader] : shaders)
+                vkDestroyShaderModule(context.GetDevice()->GetVkDevice(), shader, nullptr);
+        });
     }
 
     VkShaderModule VulkanShader::CreateShaderModule(const std::vector<char>& code)

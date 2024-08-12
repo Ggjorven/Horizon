@@ -8,6 +8,8 @@
 #include <shaderc/shaderc.h>
 #include <shaderc/shaderc.hpp>
 
+#include <streambuf>
+
 namespace Hz
 {
 
@@ -85,7 +87,7 @@ namespace Hz
         std::ifstream file(path);
         HZ_ASSERT((file.is_open() && file.good()), "Failed to open file: '{0}'", path.string())
 
-		std::string content((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+		std::string content = std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
 
 		file.close();
 		return content;

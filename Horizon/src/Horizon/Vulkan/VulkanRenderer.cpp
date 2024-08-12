@@ -6,6 +6,7 @@
 
 #include "Horizon/Renderer/Renderer.hpp"
 #include "Horizon/Renderer/GraphicsContext.hpp"
+#include "Horizon/Renderer/Image.hpp"
 #include "Horizon/Renderer/Buffers.hpp"
 #include "Horizon/Renderer/CommandBuffer.hpp"
 
@@ -14,6 +15,7 @@
 #include "Horizon/Vulkan/VulkanCommandBuffer.hpp"
 #include "Horizon/Vulkan/VulkanRenderpass.hpp"
 #include "Horizon/Vulkan/VulkanBuffers.hpp"
+#include "Horizon/Vulkan/VulkanImage.hpp"
 
 #include <numeric>
 
@@ -42,6 +44,8 @@ namespace Hz
         if (Window::Get().IsMinimized())
             return;
 
+        Renderer::FreeObjects();
+
         VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
         auto swapChain = context.GetSwapChain();
 
@@ -49,13 +53,15 @@ namespace Hz
             auto& fences = m_Manager.GetFences();
             if (!fences.empty())
             {
-                vkWaitForFences(context.GetDevice()->GetVkDevice(), (uint32_t)fences.size(), fences.data(), VK_TRUE, 18446744073709551615ull);
+                vkWaitForFences(context.GetDevice()->GetVkDevice(), (uint32_t)fences.size(), fences.data(), VK_TRUE, ULONG_LONG_MAX);
                 vkResetFences(context.GetDevice()->GetVkDevice(), (uint32_t)fences.size(), fences.data());
             }
+            m_Manager.ResetFences();
 
             m_Manager.Add(context.GetSwapChain()->GetCurrentImageAvailableSemaphore());
         }
-        { // Acquire SwapChain Image
+        {
+            // Acquire SwapChain Image
             uint32_t acquiredImage = swapChain->AcquireNextImage();
             swapChain->m_AcquiredImage = acquiredImage;
         }
@@ -65,8 +71,6 @@ namespace Hz
     {
         if (Window::Get().IsMinimized())
             return;
-
-        // Note: This function is empty, because there is nothing to be done
     }
 
     void VulkanRenderer::Present()
@@ -90,11 +94,13 @@ namespace Hz
 
 		VkResult result = VK_SUCCESS;
 		{
-			// Note(Jorben): Without these 2 lines there is a memory leak when validation layers are enabled.
+			// Note(Jorben): Without this line there is a memory leak on windows when validation layers are enabled.
+            #if defined(HZ_PLATFORM_WINDOWS)
 			if constexpr (VulkanContext::s_Validation)
 			{
 				vkQueueWaitIdle(context.GetDevice()->GetGraphicsQueue());
 			}
+            #endif
 
 			result = vkQueuePresentKHR(context.GetDevice()->GetPresentQueue(), &presentInfo);
 		}
@@ -109,8 +115,63 @@ namespace Hz
 			HZ_LOG_ERROR("Failed to present swap chain image!");
 		}
 
-        m_Manager.Reset();
+        m_Manager.ResetSemaphores();
 		swapChain->m_CurrentFrame = (swapChain->m_CurrentFrame + 1) % (uint32_t)m_Specification.Buffers;
+    }
+
+    void VulkanRenderer::BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state)
+    {
+        VulkanCommandBuffer* vkCmdBuf = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+
+        VkRenderingAttachmentInfo colourAttachment = {};
+        colourAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        colourAttachment.imageView = (state.ColourAttachment ? HzCast(VulkanImage, state.ColourAttachment->Src())->GetVkImageView() : VK_NULL_HANDLE);
+        colourAttachment.imageLayout = (state.ColourAttachment ? (VkImageLayout)state.ColourAttachment->GetSpecification().Layout : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        colourAttachment.loadOp = (VkAttachmentLoadOp)state.ColourLoadOp;
+        colourAttachment.storeOp = (VkAttachmentStoreOp)state.ColourStoreOp;
+        colourAttachment.clearValue = { state.ColourClearValue.r, state.ColourClearValue.g, state.ColourClearValue.b, state.ColourClearValue.a };
+
+        VkRenderingAttachmentInfo depthAttachment = {};
+        depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        depthAttachment.imageView = (state.DepthAttachment ? HzCast(VulkanImage, state.DepthAttachment->Src())->GetVkImageView() : VK_NULL_HANDLE);
+        depthAttachment.imageLayout = (state.DepthAttachment ? (VkImageLayout)state.DepthAttachment->GetSpecification().Layout : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        depthAttachment.loadOp = (VkAttachmentLoadOp)state.DepthLoadOp;
+        depthAttachment.storeOp = (VkAttachmentStoreOp)state.DepthStoreOp;
+        depthAttachment.clearValue = { state.DepthClearValue };
+
+        uint32_t width = 0, height = 0;
+        if (state.ColourAttachment)
+        {
+            width = state.ColourAttachment->GetSpecification().Width;
+            height = state.ColourAttachment->GetSpecification().Height;
+        }
+        else if (state.DepthAttachment)
+        {
+            width = state.DepthAttachment->GetSpecification().Width;
+            height = state.DepthAttachment->GetSpecification().Height;
+        }
+        else
+        {
+            HZ_ASSERT(false, "No Colour or Depth attachment passed in to BeginDynamic(..., state)");
+        }
+
+        VkRenderingInfo renderingInfo = {};
+        renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        renderingInfo.renderArea.offset = { 0, 0 };
+        renderingInfo.renderArea.extent = { width, height };
+        renderingInfo.layerCount = 1;
+        renderingInfo.colorAttachmentCount = (state.ColourAttachment ? 1 : 0);
+        renderingInfo.pColorAttachments = (state.ColourAttachment ? &colourAttachment : nullptr);
+        renderingInfo.pDepthAttachment =(state.DepthAttachment ? &depthAttachment : nullptr);
+
+        vkCmdBeginRendering(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), &renderingInfo);
+    }
+
+    void VulkanRenderer::EndDynamic(Ref<CommandBuffer> cmdBuf)
+    {
+        VulkanCommandBuffer* vkCmdBuf = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+
+        vkCmdEndRendering(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()));
     }
 
     void VulkanRenderer::Begin(Ref<CommandBuffer> cmdBuf)
@@ -235,7 +296,7 @@ namespace Hz
 				semaphores.push_back(semaphore);
 		}
 
-		std::vector<VkPipelineStageFlags> waitStages(semaphores.size(), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+		std::vector<VkPipelineStageFlags> waitStages(semaphores.size(), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT); // TODO: Make customizable?
 
 		submitInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
 		submitInfo.pWaitSemaphores = semaphores.data();
@@ -289,6 +350,13 @@ namespace Hz
     {
         auto vkCmdBuf = HzCast(VulkanCommandBuffer, cmdBuf->Src());
 		vkCmdDrawIndexed(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), indexBuffer->GetCount(), instanceCount, 0, 0, 0);
+    }
+
+    uint32_t VulkanRenderer::GetAcquiredImage() const
+    {
+        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+
+        return context.GetSwapChain()->GetAquiredImage();
     }
 
     uint32_t VulkanRenderer::GetCurrentFrame() const

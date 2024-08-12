@@ -82,8 +82,8 @@ namespace Hz
 
 		const PipelineSpecification& GetSpecification() const;
 
-		static Ref<Pipeline> Create(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader, Ref<Renderpass> renderpass); // Graphics constructor
-		static Ref<Pipeline> Create(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader); // Compute/RayTracingKHR/RayTracingNV constructor
+		static Ref<Pipeline> Create(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader, Ref<Renderpass> renderpass); // Only for graphics
+		static Ref<Pipeline> Create(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader); // All pipeline types
 
         // Returns underlying type pointer
         inline PipelineType* Src() { return m_Instance; }

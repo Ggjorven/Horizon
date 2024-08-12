@@ -57,11 +57,6 @@ namespace Hz
         m_Instance->Resize(width, height);
 	}
 
-    void Image::Upload(Ref<DescriptorSet> set, Descriptor element)
-    {
-        m_Instance->Upload(set, element);
-    }
-
     void Image::Transition(ImageLayout initial, ImageLayout final)
     {
         m_Instance->Transition(initial, final);

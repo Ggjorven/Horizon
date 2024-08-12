@@ -11,15 +11,13 @@
 namespace Hz
 {
 
-    struct Descriptor;
-    class CommandBuffer;
-    class DescriptorSet;
-
     class VulkanVertexBuffer;
     class VulkanIndexBuffer;
     class VulkanUniformBuffer;
     class VulkanDynamicUniformBuffer;
     class VulkanStorageBuffer;
+
+    class CommandBuffer;
 
     ///////////////////////////////////////////////////////////
 	// Specifications
@@ -146,8 +144,6 @@ namespace Hz
 
 		void SetData(void* data, size_t size, size_t offset = 0);
 
-		void Upload(Ref<DescriptorSet> set, Descriptor element);
-
         size_t GetSize() const;
 
         // Returns underlying type pointer
@@ -194,8 +190,6 @@ namespace Hz
 		~StorageBuffer();
 
 		void SetData(void* data, size_t size, size_t offset = 0);
-
-		void Upload(Ref<DescriptorSet> set, Descriptor element);
 
 		size_t GetSize() const;
 

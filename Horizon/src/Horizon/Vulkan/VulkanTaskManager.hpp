@@ -23,12 +23,19 @@ namespace Hz
         VulkanTaskManager() = default;
         ~VulkanTaskManager() = default;
 
-        void Reset(); // Resets current frame containers
+        void ResetFences(); // Resets current frame fences
+        void ResetSemaphores(); // Resets current frame semaphores
 
         void Add(VulkanCommandBuffer* cmdBuf, ExecutionPolicy policy);
-        void Add(VkSemaphore semaphore); // Adds it to the frame wait queue (m_Semaphores[frame][1])
+        void Add(VkSemaphore semaphore); // Internal function for swapchain image available semaphore
 
-        void Remove(VkSemaphore semaphore); // It removes the semaphore if it exists (it checks both semaphore vectors)
+        void Remove(VkSemaphore semaphore); // It removes the semaphore from current frame if it exists (it checks both semaphore vectors)
+        void Remove(VkSemaphore semaphore, uint32_t frame);
+        void RemoveFromAll(VkSemaphore semaphore); // It removes the semaphore from all vectors if it exists
+
+        void Remove(VkFence fence); // It removes the fence from current frame if it exists
+        void Remove(VkFence fence, uint32_t frame);
+        void RemoveFromAll(VkFence fence); // It removes the fence from all vectors if it exists
 
         VkSemaphore GetNext();
 

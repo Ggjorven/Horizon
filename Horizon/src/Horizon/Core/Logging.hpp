@@ -86,12 +86,13 @@ namespace Hz
 				HZ_LOG_FATAL(__VA_ARGS__); \
 				PULSE_DEBUG_BREAK(); \
 			}
-	#elif defined(HZ_RELEASE)
+	#elif defined(HZ_CONFIG_RELEASE)
 		#define HZ_ASSERT(value, ...) if (!(value)) \
 			{ \
-				CT_LOG_FATAL(__VA_ARGS__); \
+				HZ_LOG_FATAL(__VA_ARGS__); \
 			}
 	#else
+        // Note: Don't put function calls in HZ_ASSERT! They don't run in DIST
 		#define HZ_ASSERT(value, ...)
 	#endif
 

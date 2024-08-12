@@ -13,6 +13,7 @@
 #include <utility>
 #include <algorithm>
 #include <functional>
+#include <iterator>
 
 #include <cstdint>
 #include <cstdlib>

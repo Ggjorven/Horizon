@@ -22,6 +22,7 @@ namespace Hz
 		~VulkanSwapChain();
 
 		void Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight);
+        void Destroy();
 
 		inline const VkFormat GetColourFormat() const { return m_ColourFormat; }
 

@@ -74,7 +74,7 @@ namespace Hz
             colorAttachment.format = (VkFormat)m_Specification.ColourAttachment[0]->GetSpecification().Format;
             colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
             colorAttachment.loadOp = (VkAttachmentLoadOp)m_Specification.ColourLoadOp;
-            colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            colorAttachment.storeOp = (VkAttachmentStoreOp)m_Specification.ColourStoreOp;
             colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
             colorAttachment.initialLayout = (VkImageLayout)m_Specification.PreviousColourImageLayout;
@@ -91,7 +91,7 @@ namespace Hz
             depthAttachment.format = (VkFormat)m_Specification.DepthAttachment->GetSpecification().Format;
             depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
             depthAttachment.loadOp = (VkAttachmentLoadOp)m_Specification.DepthLoadOp;
-            depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            depthAttachment.storeOp = (VkAttachmentStoreOp)m_Specification.DepthStoreOp;
             depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
             depthAttachment.initialLayout = (VkImageLayout)m_Specification.PreviousDepthImageLayout;
@@ -198,12 +198,15 @@ namespace Hz
 
     void VulkanRenderpass::Destroy()
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+        Renderer::Free([frameBuffers = m_Framebuffers, renderpass = m_RenderPass]()
+        {
+            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
 
-        for (auto& framebuffer : m_Framebuffers)
-            vkDestroyFramebuffer(context.GetDevice()->GetVkDevice(), framebuffer, nullptr);
+            for (auto& framebuffer : frameBuffers)
+                vkDestroyFramebuffer(context.GetDevice()->GetVkDevice(), framebuffer, nullptr);
 
-        vkDestroyRenderPass(context.GetDevice()->GetVkDevice(), m_RenderPass, nullptr);
+            vkDestroyRenderPass(context.GetDevice()->GetVkDevice(), renderpass, nullptr);
+        });
     }
 
 }
