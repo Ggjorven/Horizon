@@ -50,7 +50,12 @@ Dependencies =
 	{
 		LibName = "Pulse",
 		IncludeDir = "%{wks.location}/vendor/Pulse/Pulse/src"
-	}
+	},
+    Tracy =
+    {
+        LibName = "Tracy",
+		IncludeDir = "%{wks.location}/vendor/tracy/tracy/public"
+    }
 }
 ------------------------------------------------------------------------------
 
@@ -77,6 +82,7 @@ workspace "Horizon"
 
 group "Dependencies"
 	include "vendor/glfw"
+    include "vendor/tracy"
 	include "vendor/Pulse/Pulse"
 group ""
 

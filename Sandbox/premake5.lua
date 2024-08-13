@@ -30,6 +30,7 @@ project "Sandbox"
 		"%{Dependencies.glm.IncludeDir}",
 		"%{Dependencies.stb.IncludeDir}",
 		"%{Dependencies.Pulse.IncludeDir}",
+		"%{Dependencies.Tracy.IncludeDir}",
 	}
 
 	links
@@ -50,6 +51,11 @@ project "Sandbox"
 		systemversion "latest"
 		staticruntime "on"
 
+        defines
+        {
+            "NOMINMAX"
+        }
+
 		includedirs
 		{
 			"%{Dependencies.Vulkan.Windows.IncludeDir}",
@@ -69,6 +75,7 @@ project "Sandbox"
 		links
 		{
 			"%{Dependencies.glfw.LibName}",
+			"%{Dependencies.Tracy.LibName}",
 			"%{Dependencies.Pulse.LibName}",
 
 			"%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.Vulkan.Linux.LibName}",
@@ -80,10 +87,20 @@ project "Sandbox"
 		runtime "Debug"
 		symbols "on"
 
+        defines
+        {
+            "TRACY_ENABLE"
+        }
+
 	filter "configurations:Release"
 		defines "HZ_CONFIG_RELEASE"
 		runtime "Release"
 		optimize "on"
+
+        defines
+        {
+            "TRACY_ENABLE"
+        }
 
 	filter "configurations:Dist"
 		defines "HZ_CONFIG_DIST"

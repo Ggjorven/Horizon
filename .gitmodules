@@ -13,3 +13,6 @@
 [submodule "vendor/stb"]
 	path = vendor/stb
 	url = https://github.com/nothings/stb.git
+[submodule "vendor/tracy/tracy"]
+	path = vendor/tracy/tracy
+	url = https://github.com/Ggjorven/tracy.git

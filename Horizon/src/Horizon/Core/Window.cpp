@@ -2,6 +2,7 @@
 #include "Window.hpp"
 
 #include "Horizon/Core/Logging.hpp"
+#include "Horizon/Utils/Profiler.hpp"
 
 #include "Horizon/Renderer/Renderer.hpp"
 #include "Horizon/Renderer/GraphicsContext.hpp"
@@ -146,11 +147,13 @@ namespace Hz
 
 	void Window::PollEvents()
 	{
+        HZ_MARK_FRAME();
 		glfwPollEvents();
 	}
 
 	void Window::SwapBuffers()
 	{
+        HZ_PROFILE_SCOPE("Window::SwapBuffers");
         Renderer::Present();
 	}
 

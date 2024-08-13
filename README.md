@@ -147,3 +147,4 @@ Contributions are welcome! Please fork the repository and create a pull request 
   - `glm` [https://github.com/icaven/glm.git](https://github.com/icaven/glm.git)
   - `vma` [https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git)
   - `premake-vscode` [https://github.com/peter1745/premake-vscode/tree/main](https://github.com/peter1745/premake-vscode.git)
+  - `tracy` [https://github.com/wolfpld/tracy.git](https://github.com/wolfpld/tracy.git)
