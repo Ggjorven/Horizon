@@ -3,6 +3,8 @@
 
 #include "Horizon/Core/Logging.hpp"
 
+#include <Pulse/Enum/Enum.hpp>
+
 namespace Hz
 {
 
@@ -25,6 +27,8 @@ namespace Hz
 
         uint32_t frame = Renderer::GetCurrentFrame();
         m_Fences[frame].emplace_back(cmdBuf->GetVkInFlightFence(frame));
+
+        using namespace Pulse::Enum::Bitwise;
 
         if (policy & ExecutionPolicy::InOrder)
             m_Semaphores[frame].first.push_back(cmdBuf->GetVkRenderFinishedSemaphore(frame));

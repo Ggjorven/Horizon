@@ -24,8 +24,6 @@ namespace Hz
     class VulkanDescriptorSet;
     class VulkanDescriptorSets;
 
-    using namespace Pulse::Enum::Bitwise;
-
 	class Pipeline;
 	class CommandBuffer;
 

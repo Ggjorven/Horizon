@@ -13,6 +13,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+using namespace Pulse::Enum::Bitwise;
+
 namespace Hz
 {
 
@@ -25,7 +27,7 @@ namespace Hz
 	}
 
 	ImageSpecification::ImageSpecification(const std::filesystem::path& path, ImageUsageFlags flags)
-		: Usage(ImageUsage::File), Path(path), Flags(flags)
+		: Usage(ImageUsage::File), Path(path), Flags(flags | ImageUsageFlags::Colour | ImageUsageFlags::Sampled)
 	{
 	}
 

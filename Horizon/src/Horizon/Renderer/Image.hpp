@@ -4,8 +4,6 @@
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
 
-#include <Pulse/Enum/Enum.hpp>
-
 #include <cstdint>
 #include <variant>
 #include <filesystem>
@@ -13,8 +11,6 @@
 
 namespace Hz
 {
-
-    using namespace Pulse::Enum::Bitwise;
 
     class VulkanImage;
     class VulkanRenderer;
@@ -121,7 +117,7 @@ namespace Hz
 	public:
 		ImageSpecification() = default;
 		ImageSpecification(uint32_t width, uint32_t height, ImageUsageFlags flags);
-		ImageSpecification(const std::filesystem::path& path, ImageUsageFlags flags = ImageUsageFlags::Sampled | ImageUsageFlags::Colour);
+		ImageSpecification(const std::filesystem::path& path, ImageUsageFlags flags);
 		~ImageSpecification() = default;
 	};
 

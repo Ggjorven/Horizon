@@ -12,6 +12,9 @@
 #include "Horizon/Vulkan/VulkanImage.hpp"
 #include "Horizon/Vulkan/VulkanPhysicalDevice.hpp"
 
+#include <Pulse/Core/Defines.hpp>
+#include <Pulse/Enum/Enum.hpp>
+
 namespace Hz
 {
 
@@ -246,6 +249,8 @@ namespace Hz
 
 		if (!m_DepthStencil)
 		{
+            using namespace Pulse::Enum::Bitwise;
+
 			ImageSpecification specs = {};
 			specs.Usage = ImageUsage::Size;
 			specs.Format = (ImageFormat)VkUtils::FindDepthFormat();
@@ -292,7 +297,7 @@ namespace Hz
 
 		uint32_t imageIndex = 0;
 
-		VkResult result = vkAcquireNextImageKHR(context.GetDevice()->GetVkDevice(), m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
+		VkResult result = vkAcquireNextImageKHR(context.GetDevice()->GetVkDevice(), m_SwapChain, Pulse::Numeric::Max<uint64_t>(), m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			auto& window = Window::Get();

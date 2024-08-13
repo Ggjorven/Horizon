@@ -1,16 +1,9 @@
-#include "CustomApp.hpp"
-
-#include <Horizon/Core/Application.hpp>
-
-using namespace Hz;
+#include "Core/Application.hpp"
 
 int main(int argc, char* argv[])
 {
-    Application application = {};
-
-    CustomApp* app = new CustomApp();
-    app->Run();
-    delete app;
+    Sandbox::Application app = {};
+    app.Run();
 
     return 0;
 }

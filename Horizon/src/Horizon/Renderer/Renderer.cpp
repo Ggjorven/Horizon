@@ -9,6 +9,8 @@
 #include "Horizon/Vulkan/VulkanRenderer.hpp"
 #include "Horizon/Vulkan/VulkanContext.hpp"
 
+#include <Pulse/Enum/Enum.hpp>
+
 namespace Hz
 {
 
@@ -77,11 +79,25 @@ namespace Hz
 
     void Renderer::Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
+        if (policy == ExecutionPolicy::None) [[unlikely]]
+        {
+            using namespace Pulse::Enum::Bitwise;
+            policy |= ExecutionPolicy::WaitForPrevious;
+            policy |= ExecutionPolicy::InOrder;
+        }
+
         s_Instance->Submit(cmdBuf, policy, queue, waitOn);
     }
 
     void Renderer::Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
+        if (policy == ExecutionPolicy::None) [[unlikely]]
+        {
+            using namespace Pulse::Enum::Bitwise;
+            policy |= ExecutionPolicy::WaitForPrevious;
+            policy |= ExecutionPolicy::InOrder;
+        }
+
         s_Instance->Submit(renderpass, policy, queue, waitOn);
     }
 

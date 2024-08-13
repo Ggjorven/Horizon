@@ -10,8 +10,6 @@
 #include <Pulse/Enum/Enum.hpp>
 #include <Pulse/Types/Concepts.hpp>
 
-using namespace Pulse::Enum::Bitwise;
-
 namespace Hz
 {
 
@@ -38,7 +36,7 @@ namespace Hz
 		virtual EventType GetEventType() const override { return GetStaticType(); }
 
 #define EVENT_CLASS_CATEGORY(category) \
-		virtual EventCategory GetCategoryFlags() const override { return category; }
+		virtual EventCategory GetCategoryFlags() const override { using namespace Pulse::Enum::Bitwise; return category; }
 
 	class Event
 	{
@@ -51,7 +49,7 @@ namespace Hz
 
 		virtual std::string ToString() const { return static_cast<std::string>(Pulse::Enum::Name(GetEventType())); }
 
-		inline bool IsInCategory(EventCategory category) const { return GetCategoryFlags() & category; }
+		inline bool IsInCategory(EventCategory category) const { using namespace Pulse::Enum::Bitwise; return GetCategoryFlags() & category; }
 
 	public:
 		bool Handled = false;
