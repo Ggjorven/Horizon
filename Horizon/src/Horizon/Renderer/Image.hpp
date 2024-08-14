@@ -12,9 +12,6 @@
 namespace Hz
 {
 
-    class VulkanImage;
-    class VulkanRenderer;
-
     ///////////////////////////////////////////////////////////
 	// Specifications
 	///////////////////////////////////////////////////////////
@@ -164,30 +161,18 @@ namespace Hz
     class Image : public RefCounted
     {
     public:
-        using ImageType = VulkanImage;
-        static_assert(std::is_same_v<ImageType, VulkanImage>, "Unsupported image type selected.");
-    public:
-        Image(const ImageSpecification& specs, const SamplerSpecification& samplerSpecs = {});
-        Image(ImageType* src); // Takes ownership of passed in object
-        ~Image();
+        Image() = default;
+        virtual ~Image() = default;
 
-        void SetData(void* data, size_t size);
+        virtual void SetData(void* data, size_t size) = 0;
 
-        void Resize(uint32_t width, uint32_t height);
+        virtual void Resize(uint32_t width, uint32_t height) = 0;
 
-        void Transition(ImageLayout initial, ImageLayout final);
+        virtual void Transition(ImageLayout initial, ImageLayout final) = 0;
 
-        const ImageSpecification& GetSpecification() const;
-
-        // Returns underlying type pointer
-        inline ImageType* Src() { return m_Instance; }
+        virtual const ImageSpecification& GetSpecification() const = 0;
 
         static Ref<Image> Create(const ImageSpecification& specs, const SamplerSpecification& samplerSpecs = {});
-
-    private:
-        ImageType* m_Instance;
-
-        friend class VulkanRenderer;
     };
 
 }

@@ -34,44 +34,12 @@ namespace Hz
 	///////////////////////////////////////////////////////////
 	// Core class
 	///////////////////////////////////////////////////////////
-	Image::Image(const ImageSpecification& specs, const SamplerSpecification& samplerSpecs)
-        : m_Instance(new Image::ImageType(specs, samplerSpecs))
-	{
-    }
-
-    Image::Image(ImageType* src)
-        : m_Instance(src)
+    Ref<Image> Image::Create(const ImageSpecification& specs, const SamplerSpecification& samplerSpecs)
     {
-    }
+        if constexpr (RendererSpecification::API == RenderingAPI::Vulkan)
+            return Ref<VulkanImage>::Create(specs, samplerSpecs);
 
-    Image::~Image()
-	{
-        delete m_Instance;
-	}
-
-    void Image::SetData(void* data, size_t size)
-	{
-        m_Instance->SetData(data, size);
-	}
-
-	void Image::Resize(uint32_t width, uint32_t height)
-	{
-        m_Instance->Resize(width, height);
-	}
-
-    void Image::Transition(ImageLayout initial, ImageLayout final)
-    {
-        m_Instance->Transition(initial, final);
-	}
-
-    const ImageSpecification& Image::GetSpecification() const
-    {
-        return m_Instance->GetSpecification();
-    }
-
-    Ref<Image> Image::Create(const ImageSpecification &specs, const SamplerSpecification& samplerSpecs)
-    {
-        return Ref<Image>::Create(specs, samplerSpecs);
+        return nullptr;
     }
 
 }

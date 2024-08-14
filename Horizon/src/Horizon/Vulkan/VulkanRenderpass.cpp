@@ -32,10 +32,8 @@ namespace Hz
 
     void VulkanRenderpass::Resize(uint32_t width, uint32_t height)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
         for (auto& framebuffer : m_Framebuffers)
-            vkDestroyFramebuffer(context.GetDevice()->GetVkDevice(), framebuffer, nullptr);
+            vkDestroyFramebuffer(VulkanContext::GetDevice()->GetVkDevice(), framebuffer, nullptr);
 
         CreateFramebuffers(width, height);
     }
@@ -60,8 +58,6 @@ namespace Hz
 
     void VulkanRenderpass::CreateRenderpass()
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
         ///////////////////////////////////////////////////////////
         // Renderpass
         ///////////////////////////////////////////////////////////
@@ -149,18 +145,16 @@ namespace Hz
         renderPassInfo.dependencyCount = (uint32_t)dependencies.size();
         renderPassInfo.pDependencies = dependencies.data();
 
-        VK_CHECK_RESULT(vkCreateRenderPass(context.GetDevice()->GetVkDevice(), &renderPassInfo, nullptr, &m_RenderPass));
+        VK_CHECK_RESULT(vkCreateRenderPass(VulkanContext::GetDevice()->GetVkDevice(), &renderPassInfo, nullptr, &m_RenderPass));
     }
 
     void VulkanRenderpass::CreateFramebuffers(uint32_t width, uint32_t height)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
         ///////////////////////////////////////////////////////////
         // Framebuffers
         ///////////////////////////////////////////////////////////
         // Framebuffer creation
-        m_Framebuffers.resize(context.GetSwapChain()->GetSwapChainImages().size());
+        m_Framebuffers.resize(VulkanContext::GetSwapChain()->GetSwapChainImages().size());
         for (size_t i = 0; i < m_Framebuffers.size(); i++)
         {
             std::vector<VkImageView> attachments = { };
@@ -168,18 +162,18 @@ namespace Hz
             {
                 if (m_Specification.ColourAttachment.size() == 1)
                 {
-                    VulkanImage* vkImage = HzCast(VulkanImage, m_Specification.ColourAttachment[0]->Src());
+                    Ref<VulkanImage> vkImage = m_Specification.ColourAttachment[0].As<VulkanImage>();
                     attachments.push_back(vkImage->GetVkImageView());
                 }
                 else // If the size is not equal to 1 it has to be equal to the amount of swapchain images
                 {
-                    VulkanImage* vkImage = HzCast(VulkanImage, m_Specification.ColourAttachment[i]->Src());
+                    Ref<VulkanImage> vkImage = m_Specification.ColourAttachment[i].As<VulkanImage>();
                     attachments.push_back(vkImage->GetVkImageView());
                 }
             }
             if (m_Specification.DepthAttachment)
             {
-                VulkanImage* vkImage = HzCast(VulkanImage, m_Specification.DepthAttachment->Src());
+                Ref<VulkanImage> vkImage = m_Specification.DepthAttachment.As<VulkanImage>();
                 attachments.push_back(vkImage->GetVkImageView());
             }
 
@@ -192,7 +186,7 @@ namespace Hz
             framebufferInfo.height = height;
             framebufferInfo.layers = 1;
 
-            VK_CHECK_RESULT(vkCreateFramebuffer(context.GetDevice()->GetVkDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]));
+            VK_CHECK_RESULT(vkCreateFramebuffer(VulkanContext::GetDevice()->GetVkDevice(), &framebufferInfo, nullptr, &m_Framebuffers[i]));
         }
     }
 
@@ -200,12 +194,12 @@ namespace Hz
     {
         Renderer::Free([frameBuffers = m_Framebuffers, renderpass = m_RenderPass]()
         {
-            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+            auto device = VulkanContext::GetDevice()->GetVkDevice();
 
             for (auto& framebuffer : frameBuffers)
-                vkDestroyFramebuffer(context.GetDevice()->GetVkDevice(), framebuffer, nullptr);
+                vkDestroyFramebuffer(device, framebuffer, nullptr);
 
-            vkDestroyRenderPass(context.GetDevice()->GetVkDevice(), renderpass, nullptr);
+            vkDestroyRenderPass(device, renderpass, nullptr);
         });
     }
 

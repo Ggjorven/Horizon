@@ -6,16 +6,9 @@
 
 #include <cstdint>
 #include <string>
-#include <type_traits>
 
 namespace Hz
 {
-
-    class VulkanVertexBuffer;
-    class VulkanIndexBuffer;
-    class VulkanUniformBuffer;
-    class VulkanDynamicUniformBuffer;
-    class VulkanStorageBuffer;
 
     class CommandBuffer;
 
@@ -91,68 +84,41 @@ namespace Hz
 	///////////////////////////////////////////////////////////
 	class VertexBuffer : public RefCounted
 	{
-	public:
-        using VertexBufferType = VulkanVertexBuffer;
-        static_assert(std::is_same_v<VertexBufferType, VulkanVertexBuffer>, "Unsupported vertexbuffer type selected.");
     public:
-		VertexBuffer(const BufferSpecification& specs, void* data, size_t size);
-		~VertexBuffer();
+		VertexBuffer() = default;
+		virtual ~VertexBuffer() = default;
 
-		void Bind(Ref<CommandBuffer> commandBuffer) const;
+		virtual void Bind(Ref<CommandBuffer> commandBuffer) const = 0;
         static void Bind(Ref<CommandBuffer> commandBuffer, std::vector<Ref<VertexBuffer>>&& buffers);
 
-        // Returns underlying type pointer
-        inline VertexBufferType* Src() { return m_Instance; }
-
 		static Ref<VertexBuffer> Create(const BufferSpecification& specs, void* data, size_t size);
-
-    private:
-        VertexBufferType* m_Instance;
 	};
 
 	class IndexBuffer : public RefCounted
 	{
-	public:
-        using IndexBufferType = VulkanIndexBuffer;
-        static_assert(std::is_same_v<IndexBufferType, VulkanIndexBuffer>, "Unsupported indexbuffer type selected.");
     public:
-		IndexBuffer(const BufferSpecification& specs, uint32_t* indices, uint32_t count);
-		~IndexBuffer();
+		IndexBuffer() = default;
+		virtual ~IndexBuffer() = default;
 
-		void Bind(Ref<CommandBuffer> commandBuffer) const;
+		virtual void Bind(Ref<CommandBuffer> commandBuffer) const = 0;
 
-		uint32_t GetCount() const;
-
-        // Returns underlying type pointer
-        inline IndexBufferType* Src() { return m_Instance; }
+		virtual uint32_t GetCount() const = 0;
 
 		static Ref<IndexBuffer> Create(const BufferSpecification& specs, uint32_t* indices, uint32_t count);
-
-    private:
-        IndexBufferType* m_Instance;
 	};
 
 	// Note: Needs to be created after the pipeline
 	class UniformBuffer : public RefCounted
 	{
-	public:
-        using UniformBufferType = VulkanUniformBuffer;
-        static_assert(std::is_same_v<UniformBufferType, VulkanUniformBuffer>, "Unsupported uniformbuffer type selected.");
     public:
-		UniformBuffer(const BufferSpecification& specs, size_t dataSize);
-		~UniformBuffer();
+		UniformBuffer() = default;
+		virtual ~UniformBuffer() = default;
 
-		void SetData(void* data, size_t size, size_t offset = 0);
+		virtual void SetData(void* data, size_t size, size_t offset = 0) = 0;
 
-        size_t GetSize() const;
-
-        // Returns underlying type pointer
-        inline UniformBufferType* Src() { return m_Instance; }
+        virtual size_t GetSize() const = 0;
 
 		static Ref<UniformBuffer> Create(const BufferSpecification& specs, size_t dataSize);
-
-    private:
-        UniformBufferType* m_Instance;
 	};
 
     /* // TODO: To be implemented. (Come up with a better design)
@@ -183,23 +149,14 @@ namespace Hz
 	class StorageBuffer : public RefCounted
 	{
 	public:
-        using StorageBufferType = VulkanStorageBuffer;
-        static_assert(std::is_same_v<StorageBufferType, VulkanStorageBuffer>, "Unsupported storagebuffer type selected.");
-    public:
-		StorageBuffer(const BufferSpecification& specs, size_t dataSize);
-		~StorageBuffer();
+		StorageBuffer() = default;
+		virtual ~StorageBuffer() = default;
 
-		void SetData(void* data, size_t size, size_t offset = 0);
+		virtual void SetData(void* data, size_t size, size_t offset = 0) = 0;
 
-		size_t GetSize() const;
-
-        // Returns underlying type pointer
-        inline StorageBufferType* Src() { return m_Instance; }
+		virtual size_t GetSize() const = 0;
 
 		static Ref<StorageBuffer> Create(const BufferSpecification& specs, size_t dataSize);
-
-    private:
-        StorageBufferType* m_Instance;
 	};
 
 }

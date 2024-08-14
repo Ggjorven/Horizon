@@ -80,64 +80,12 @@ namespace Hz
     ///////////////////////////////////////////////////////////
     // Core class
     ///////////////////////////////////////////////////////////
-    DescriptorSet::DescriptorSet(DescriptorSetType* src)
-        : m_Instance(src)
-    {
-    }
-
-    DescriptorSet::~DescriptorSet()
-    {
-        delete m_Instance;
-    }
-
-    void DescriptorSet::Bind(Ref<Pipeline> pipeline, Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets)
-    {
-        m_Instance->Bind(pipeline, commandBuffer, bindPoint, dynamicOffsets);
-    }
-
-    void DescriptorSet::Upload(const std::initializer_list<Uploadable>& elements)
-    {
-        m_Instance->Upload(elements);
-    }
-
-    DescriptorSets::DescriptorSets(const std::initializer_list<DescriptorSetGroup>& specs)
-        : m_Instance(new DescriptorSetsType(std::move(specs)))
-    {
-    }
-
-    DescriptorSets::DescriptorSets(DescriptorSetsType* src)
-        : m_Instance(src)
-    {
-    }
-
-    DescriptorSets::~DescriptorSets()
-    {
-        delete m_Instance;
-    }
-
-    void DescriptorSets::SetAmountOf(uint32_t setID, uint32_t amount)
-    {
-        m_Instance->SetAmountOf(setID, amount);
-    }
-
-    uint32_t DescriptorSets::GetAmountOf(uint32_t setID) const
-    {
-        return m_Instance->GetAmountOf(setID);
-    }
-
-    const DescriptorSetLayout& DescriptorSets::GetLayout(uint32_t setID) const
-    {
-        return m_Instance->GetLayout(setID);
-    }
-
-    std::vector<Ref<DescriptorSet>>& DescriptorSets::GetSets(uint32_t setID)
-    {
-        return m_Instance->GetSets(setID);
-    }
-
     Ref<DescriptorSets> DescriptorSets::Create(const std::initializer_list<DescriptorSetGroup>& specs)
     {
-        return Ref<DescriptorSets>::Create(std::move(specs));
+        if constexpr (RendererSpecification::API == RenderingAPI::Vulkan)
+            return Ref<VulkanDescriptorSets>::Create(std::move(specs));
+
+		return nullptr;
     }
 
 }

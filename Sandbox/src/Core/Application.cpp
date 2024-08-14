@@ -4,6 +4,7 @@
 
 #include "Forward+/ForwardPlusRenderer.hpp"
 
+#include <Pulse/Enum/Enum.hpp>
 #include <Pulse/Time/Timer.hpp>
 
 using namespace Hz;
@@ -49,13 +50,15 @@ namespace Sandbox
 
             // Render
             {
+                using namespace Pulse::Enum::Bitwise;
+
                 Renderer::BeginFrame();
 
                 m_Renderers[m_Mode]->OnRender();
 
                 Renderer::Begin(cmd);
                 Renderer::End(cmd);
-                Renderer::Submit(cmd);
+                Renderer::Submit(cmd, ExecutionPolicy::InOrder | ExecutionPolicy::WaitForPrevious);
 
                 Renderer::EndFrame();
                 m_Window->SwapBuffers();

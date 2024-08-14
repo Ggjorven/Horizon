@@ -5,8 +5,6 @@
 #include "Horizon/Renderer/RendererSpecification.hpp"
 #include "Horizon/Renderer/Buffers.hpp"
 
-//#include "Horizon/Renderer/Descriptors.hpp"
-
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
 
@@ -17,13 +15,13 @@ namespace Hz
 
     VkFormat DataTypeToVkFormat(DataType type);
 
-	class VulkanVertexBuffer
+	class VulkanVertexBuffer : public VertexBuffer
 	{
 	public:
 		VulkanVertexBuffer(const BufferSpecification& specs, void* data, size_t size);
 		~VulkanVertexBuffer();
 
-		void Bind(Ref<CommandBuffer> commandBuffer) const;
+		void Bind(Ref<CommandBuffer> commandBuffer) const override;
 		static void Bind(Ref<CommandBuffer> commandBuffer, std::vector<Ref<VertexBuffer>>&& buffers);
 
 	private:
@@ -33,15 +31,15 @@ namespace Hz
 		size_t m_BufferSize;
 	};
 
-	class VulkanIndexBuffer
+	class VulkanIndexBuffer : public IndexBuffer
 	{
 	public:
 		VulkanIndexBuffer(const BufferSpecification& specs, uint32_t* indices, uint32_t count);
 		~VulkanIndexBuffer();
 
-		void Bind(Ref<CommandBuffer> commandBuffer) const;
+		void Bind(Ref<CommandBuffer> commandBuffer) const override;
 
-		inline uint32_t GetCount() const { return m_Count; }
+		inline uint32_t GetCount() const override { return m_Count; }
 
 	private:
 		VkBuffer m_Buffer = VK_NULL_HANDLE;
@@ -50,15 +48,15 @@ namespace Hz
 		uint32_t m_Count;
 	};
 
-	class VulkanUniformBuffer
+	class VulkanUniformBuffer : public UniformBuffer
 	{
 	public:
 		VulkanUniformBuffer(const BufferSpecification& specs, size_t dataSize);
 		~VulkanUniformBuffer();
 
-		void SetData(void* data, size_t size, size_t offset);
+		void SetData(void* data, size_t size, size_t offset) override;
 
-        inline size_t GetSize() const { return m_Size; }
+        inline size_t GetSize() const override { return m_Size; }
 
 	private:
 		std::vector<VkBuffer> m_Buffers = { };
@@ -101,15 +99,15 @@ namespace Hz
 	};
     */
 
-	class VulkanStorageBuffer
+	class VulkanStorageBuffer : public StorageBuffer
     {
 	public:
 		VulkanStorageBuffer(const BufferSpecification& specs, size_t dataSize);
 		~VulkanStorageBuffer();
 
-		void SetData(void* data, size_t size, size_t offset);
+		void SetData(void* data, size_t size, size_t offset) override;
 
-		inline size_t GetSize() const { return m_Size; }
+		inline size_t GetSize() const override { return m_Size; }
 
 	private:
 		std::vector<VkBuffer> m_Buffers = { };

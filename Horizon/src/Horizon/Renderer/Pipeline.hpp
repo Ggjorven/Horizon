@@ -10,8 +10,6 @@
 namespace Hz
 {
 
-    class VulkanPipeline;
-
 	class Renderpass;
 	class DescriptorSets;
 	class CommandBuffer;
@@ -67,29 +65,19 @@ namespace Hz
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	class Pipeline : public RefCounted // Note: Pipeline does not keep the shader/descriptorsets/renderpass alive/in scope
 	{
-	public:
-        using PipelineType = VulkanPipeline;
-        static_assert(std::is_same_v<PipelineType, VulkanPipeline>, "Unsupported pipeline type selected.");
     public:
-		Pipeline(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader, Ref<Renderpass> renderpass);
-		Pipeline(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader);
-		~Pipeline();
+		Pipeline() = default;
+		virtual ~Pipeline() = default;
 
-		void Use(Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint = PipelineBindPoint::Graphics);
+		virtual void Use(Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint = PipelineBindPoint::Graphics) = 0;
 
         // Make sure a compute shader is present in the current pipeline and the pipeline is bound.
-        void DispatchCompute(Ref<CommandBuffer> commandBuffer, uint32_t width, uint32_t height, uint32_t depth);
+        virtual void DispatchCompute(Ref<CommandBuffer> commandBuffer, uint32_t width, uint32_t height, uint32_t depth) = 0;
 
-		const PipelineSpecification& GetSpecification() const;
+		virtual const PipelineSpecification& GetSpecification() const = 0;
 
 		static Ref<Pipeline> Create(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader, Ref<Renderpass> renderpass); // Only for graphics
 		static Ref<Pipeline> Create(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader); // All pipeline types
-
-        // Returns underlying type pointer
-        inline PipelineType* Src() { return m_Instance; }
-
-    private:
-        PipelineType* m_Instance;
 	};
 
 }

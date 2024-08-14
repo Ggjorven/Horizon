@@ -66,15 +66,15 @@ namespace Hz
 
     void VulkanVertexBuffer::Bind(Ref<CommandBuffer> commandBuffer) const
     {
-        VulkanCommandBuffer* src = HzCast(VulkanCommandBuffer, commandBuffer->Src());
+        Ref<VulkanCommandBuffer> vkCmdBuf = commandBuffer.As<VulkanCommandBuffer>();
 
         VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(src->GetVkCommandBuffer(Renderer::GetCurrentFrame()), 0, 1, &m_Buffer, offsets);
+		vkCmdBindVertexBuffers(vkCmdBuf->GetVkCommandBuffer(Renderer::GetCurrentFrame()), 0, 1, &m_Buffer, offsets);
     }
 
     void VulkanVertexBuffer::Bind(Ref<CommandBuffer> commandBuffer, std::vector<Ref<VertexBuffer>>&& buffers)
     {
-        VulkanCommandBuffer* vkCommandBuffer = HzCast(VulkanCommandBuffer, commandBuffer->Src());
+        Ref<VulkanCommandBuffer> vkCmdBuf = commandBuffer.As<VulkanCommandBuffer>();
 
         std::vector<VkBuffer> vkBuffers;
         vkBuffers.reserve(buffers.size());
@@ -83,11 +83,11 @@ namespace Hz
 
         for (auto& buffer : buffers)
         {
-            VulkanVertexBuffer* vkVertexBuffer = HzCast(VulkanVertexBuffer, buffer->Src());
+            Ref<VulkanVertexBuffer> vkVertexBuffer = buffer.As<VulkanVertexBuffer>();
             vkBuffers.push_back(vkVertexBuffer->m_Buffer);
         }
 
-        vkCmdBindVertexBuffers(vkCommandBuffer->GetVkCommandBuffer(Renderer::GetCurrentFrame()), 0, static_cast<uint32_t>(vkBuffers.size()), vkBuffers.data(), offsets.data());
+        vkCmdBindVertexBuffers(vkCmdBuf->GetVkCommandBuffer(Renderer::GetCurrentFrame()), 0, static_cast<uint32_t>(vkBuffers.size()), vkBuffers.data(), offsets.data());
     }
 
     VulkanIndexBuffer::VulkanIndexBuffer(const BufferSpecification& specs, uint32_t* indices, uint32_t count)
@@ -120,9 +120,9 @@ namespace Hz
 
     void VulkanIndexBuffer::Bind(Ref<CommandBuffer> commandBuffer) const
     {
-        VulkanCommandBuffer* src = HzCast(VulkanCommandBuffer, commandBuffer->Src());
+        Ref<VulkanCommandBuffer> vkCmdBuf = commandBuffer.As<VulkanCommandBuffer>();
 
-		vkCmdBindIndexBuffer(src->GetVkCommandBuffer(Renderer::GetCurrentFrame()), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindIndexBuffer(vkCmdBuf->GetVkCommandBuffer(Renderer::GetCurrentFrame()), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
     }
 
     VulkanUniformBuffer::VulkanUniformBuffer(const BufferSpecification& specs, size_t dataSize)

@@ -21,12 +21,15 @@ namespace Hz
     {
     public:
         VulkanTaskManager() = default;
-        ~VulkanTaskManager() = default;
+        ~VulkanTaskManager()
+        {
+
+        }
 
         void ResetFences(); // Resets current frame fences
         void ResetSemaphores(); // Resets current frame semaphores
 
-        void Add(VulkanCommandBuffer* cmdBuf, ExecutionPolicy policy);
+        void Add(Ref<VulkanCommandBuffer> cmdBuf, ExecutionPolicy policy);
         void Add(VkSemaphore semaphore); // Internal function for swapchain image available semaphore
 
         void Remove(VkSemaphore semaphore); // It removes the semaphore from current frame if it exists (it checks both semaphore vectors)

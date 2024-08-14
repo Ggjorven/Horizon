@@ -60,25 +60,16 @@ namespace Hz
 
 	class Shader : public RefCounted // Note: Once this object has been used for pipeline creation it can die with no consequences.
 	{
-	public:
-        using ShaderType = VulkanShader;
-        static_assert(std::is_same_v<ShaderType, VulkanShader>, "Unsupported shader type selected.");
     public:
-		Shader(const ShaderSpecification& specs);
-		~Shader();
+		Shader() = default;
+		virtual ~Shader() = default;
 
-        const ShaderSpecification& GetSpecification() const;
+        virtual const ShaderSpecification& GetSpecification() const = 0;
 
         static std::string ReadGLSL(const std::filesystem::path& path);
 		static std::vector<char> ReadSPIRV(const std::filesystem::path& path);
 
 		static Ref<Shader> Create(const ShaderSpecification& specs);
-
-        // Returns underlying type pointer
-        inline ShaderType* Src() { return m_Instance; }
-
-    private:
-        ShaderType* m_Instance;
 	};
 
 }

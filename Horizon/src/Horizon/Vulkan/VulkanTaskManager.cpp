@@ -21,7 +21,7 @@ namespace Hz
         m_Semaphores[frame].second.clear();
     }
 
-    void VulkanTaskManager::Add(VulkanCommandBuffer* cmdBuf, ExecutionPolicy policy)
+    void VulkanTaskManager::Add(Ref<VulkanCommandBuffer> cmdBuf, ExecutionPolicy policy)
     {
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 

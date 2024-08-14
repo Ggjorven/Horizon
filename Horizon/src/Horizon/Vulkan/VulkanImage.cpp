@@ -346,11 +346,9 @@ namespace Hz
 
 	void VulkanImage::GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
 		// Check if image format supports linear blitting
 		VkFormatProperties formatProperties;
-		vkGetPhysicalDeviceFormatProperties(context.GetPhysicalDevice()->GetVkPhysicalDevice(), imageFormat, &formatProperties);
+		vkGetPhysicalDeviceFormatProperties(VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice(), imageFormat, &formatProperties);
         HZ_VERIFY(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT, "Texture image format does not support linear blitting!");
 
 		VulkanCommand command = VulkanCommand(true);
@@ -420,12 +418,12 @@ namespace Hz
     {
         Renderer::Free([sampler = m_Sampler, imageView = m_ImageView, image = m_Image, allocation = m_Allocation]()
         {
-            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+            auto device = VulkanContext::GetDevice()->GetVkDevice();
 
             if (sampler)
-                vkDestroySampler(context.GetDevice()->GetVkDevice(), sampler, nullptr);
+                vkDestroySampler(device, sampler, nullptr);
             if (imageView)
-                vkDestroyImageView(context.GetDevice()->GetVkDevice(), imageView, nullptr);
+                vkDestroyImageView(device, imageView, nullptr);
 
             if (image != VK_NULL_HANDLE && allocation != VK_NULL_HANDLE)
                 VkUtils::Allocator::DestroyImage(image, allocation);

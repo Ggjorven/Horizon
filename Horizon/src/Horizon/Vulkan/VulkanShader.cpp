@@ -27,24 +27,22 @@ namespace Hz
         // But better safe than sorry.
         Renderer::Free([shaders = m_Shaders]()
         {
-            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+            auto device = VulkanContext::GetDevice()->GetVkDevice();
 
             for (auto& [stage, shader] : shaders)
-                vkDestroyShaderModule(context.GetDevice()->GetVkDevice(), shader, nullptr);
+                vkDestroyShaderModule(device, shader, nullptr);
         });
     }
 
     VkShaderModule VulkanShader::CreateShaderModule(const std::vector<char>& code)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
 		VkShaderModuleCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = code.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
 		VkShaderModule shaderModule = VK_NULL_HANDLE;
-        VK_CHECK_RESULT(vkCreateShaderModule(context.GetDevice()->GetVkDevice(), &createInfo, nullptr, &shaderModule));
+        VK_CHECK_RESULT(vkCreateShaderModule(VulkanContext::GetDevice()->GetVkDevice(), &createInfo, nullptr, &shaderModule));
 
 		return shaderModule;
     }

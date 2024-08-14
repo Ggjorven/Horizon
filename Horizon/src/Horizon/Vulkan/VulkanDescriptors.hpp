@@ -12,18 +12,18 @@ namespace Hz
 
 	class VulkanPipeline;
 
-	class VulkanDescriptorSet
+	class VulkanDescriptorSet : public DescriptorSet
 	{
 	public:
 		VulkanDescriptorSet(uint32_t setID, const std::vector<VkDescriptorSet>& sets);
 		~VulkanDescriptorSet() = default;
 
-		void Bind(Ref<Pipeline> pipeline, Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets);
+		void Bind(Ref<Pipeline> pipeline, Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets) override;
 
 		inline uint32_t GetSetID() const { return m_SetID; }
 		inline const VkDescriptorSet GetVkDescriptorSet(uint32_t index) const { return m_DescriptorSets[index]; }
 
-        void Upload(const std::initializer_list<Uploadable>& elements);
+        void Upload(const std::initializer_list<Uploadable>& elements) override;
 
     private:
         void UploadImage(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorImageInfo>& imageInfos, Ref<Image> image, Descriptor descriptor);
@@ -37,17 +37,17 @@ namespace Hz
 		std::vector<VkDescriptorSet> m_DescriptorSets = { };
 	};
 
-	class VulkanDescriptorSets
+	class VulkanDescriptorSets : public DescriptorSets
 	{
 	public:
 		VulkanDescriptorSets(const std::initializer_list<DescriptorSetGroup>& specs);
 		~VulkanDescriptorSets();
 
-        void SetAmountOf(uint32_t setID, uint32_t amount);
-		uint32_t GetAmountOf(uint32_t setID) const;
+        void SetAmountOf(uint32_t setID, uint32_t amount) override;
+		uint32_t GetAmountOf(uint32_t setID) const override;
 
-		const DescriptorSetLayout& GetLayout(uint32_t setID);
-		std::vector<Ref<DescriptorSet>>& GetSets(uint32_t setID);
+		const DescriptorSetLayout& GetLayout(uint32_t setID) const override;
+		std::vector<Ref<DescriptorSet>>& GetSets(uint32_t setID) override;
 
 	private:
 		void CreateDescriptorSetLayout(uint32_t setID);

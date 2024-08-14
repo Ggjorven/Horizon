@@ -21,8 +21,6 @@ namespace Hz
 	VulkanSwapChain::VulkanSwapChain(VkSurfaceKHR surface)
 		: m_Surface(surface)
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
         FindImageFormatAndColorSpace();
 
 		///////////////////////////////////////////////////////////
@@ -30,46 +28,44 @@ namespace Hz
 		///////////////////////////////////////////////////////////
 		if (!m_CommandPool)
 		{
-			QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices::Find(m_Surface, context.GetPhysicalDevice()->GetVkPhysicalDevice());
+			QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices::Find(m_Surface, VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice());
 
 			VkCommandPoolCreateInfo poolInfo = {};
 			poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 			poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 			poolInfo.queueFamilyIndex = queueFamilyIndices.GraphicsFamily.value();
 
-			VK_CHECK_RESULT(vkCreateCommandPool(context.GetDevice()->GetVkDevice(), &poolInfo, nullptr, &m_CommandPool));
+			VK_CHECK_RESULT(vkCreateCommandPool(VulkanContext::GetDevice()->GetVkDevice(), &poolInfo, nullptr, &m_CommandPool));
 		}
 	}
 
 	VulkanSwapChain::~VulkanSwapChain()
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+        auto device = VulkanContext::GetDevice()->GetVkDevice();
+        VulkanContext::GetDevice()->Wait();
 
-        context.GetDevice()->Wait();
-        vkQueueWaitIdle(context.GetDevice()->GetGraphicsQueue());
+        vkQueueWaitIdle(VulkanContext::GetDevice()->GetGraphicsQueue());
 
 		if (m_SwapChain)
-			vkDestroySwapchainKHR(context.GetDevice()->GetVkDevice(), m_SwapChain, nullptr);
+			vkDestroySwapchainKHR(device, m_SwapChain, nullptr);
 
 		m_Images.clear();
 		m_DepthStencil.Reset();
 
-		vkDestroyCommandPool(context.GetDevice()->GetVkDevice(), m_CommandPool, nullptr);
+		vkDestroyCommandPool(device, m_CommandPool, nullptr);
 
 		for (size_t i = 0; i < m_ImageAvailableSemaphores.size(); i++)
-			vkDestroySemaphore(context.GetDevice()->GetVkDevice(), m_ImageAvailableSemaphores[i], nullptr);
+			vkDestroySemaphore(device, m_ImageAvailableSemaphores[i], nullptr);
 
-        vkDestroySurfaceKHR(context.GetVkInstance(), m_Surface, nullptr);
+        vkDestroySurfaceKHR(VulkanContext::GetVkInstance(), m_Surface, nullptr);
 	}
 
 	void VulkanSwapChain::Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
 		///////////////////////////////////////////////////////////
 		// SwapChain
 		///////////////////////////////////////////////////////////
-		SwapChainSupportDetails details = SwapChainSupportDetails::Query(m_Surface, context.GetPhysicalDevice()->GetVkPhysicalDevice());
+		SwapChainSupportDetails details = SwapChainSupportDetails::Query(m_Surface, VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice());
 
 		VkExtent2D swapchainExtent = {};
 		// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
@@ -178,21 +174,22 @@ namespace Hz
 		if (details.Capabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT)
 			swapchainCI.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
+        auto device = VulkanContext::GetDevice()->GetVkDevice();
 		auto oldSwapchain = m_SwapChain;
-		VK_CHECK_RESULT(vkCreateSwapchainKHR(context.GetDevice()->GetVkDevice(), &swapchainCI, nullptr, &m_SwapChain));
+		VK_CHECK_RESULT(vkCreateSwapchainKHR(device, &swapchainCI, nullptr, &m_SwapChain));
 
         m_Images.clear(); // Destroys imageviews
 
 		if (oldSwapchain)
-			vkDestroySwapchainKHR(context.GetDevice()->GetVkDevice(), oldSwapchain, nullptr); // Destroys images?
+			vkDestroySwapchainKHR(device, oldSwapchain, nullptr); // Destroys images?
 
 		// Get the swap chain images
 		uint32_t imageCount = 0;
 		std::vector<VkImage> tempImages = { };
 
-		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(context.GetDevice()->GetVkDevice(), m_SwapChain, &imageCount, NULL));
+		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(device, m_SwapChain, &imageCount, NULL));
 		tempImages.resize(imageCount);
-		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(context.GetDevice()->GetVkDevice(), m_SwapChain, &imageCount, tempImages.data()));
+		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(device, m_SwapChain, &imageCount, tempImages.data()));
 
 		if (m_Images.empty()) m_Images.resize((size_t)imageCount); // Make sure we can access the appropriate indices
 		for (uint32_t i = 0; i < imageCount; i++)
@@ -218,7 +215,7 @@ namespace Hz
 			colorAttachmentView.flags = 0;
 
             VkImageView imageView = VK_NULL_HANDLE;
-            VK_CHECK_RESULT(vkCreateImageView(context.GetDevice()->GetVkDevice(), &colorAttachmentView, nullptr, &imageView));
+            VK_CHECK_RESULT(vkCreateImageView(device, &colorAttachmentView, nullptr, &imageView));
 
 			ImageSpecification specs = {};
 			specs.Usage = ImageUsage::None;
@@ -231,18 +228,18 @@ namespace Hz
 
             if (m_Images[i])
             {
-                VulkanImage* src = HzCast(VulkanImage, m_Images[i]->Src());
+                Ref<VulkanImage> src = m_Images[i].As<VulkanImage>();
 
                 // Destroy old image view
-                vkDestroyImageView(context.GetDevice()->GetVkDevice(), src->m_ImageView, nullptr);
+                vkDestroyImageView(device, src->m_ImageView, nullptr);
 
                 // Set new data
                 src->m_Specification = specs;
                 src->m_Image = tempImages[i];
-                src->m_ImageView;
+                src->m_ImageView = imageView;
             }
             else
-                m_Images[i] = Ref<Image>::Create(new VulkanImage(specs, tempImages[i], imageView));
+                m_Images[i] = Ref<VulkanImage>::Create(specs, tempImages[i], imageView);
 
             m_Images[i]->Transition(ImageLayout::Undefined, ImageLayout::PresentSrcKHR);
 		}
@@ -260,7 +257,7 @@ namespace Hz
 			specs.Layout = ImageLayout::DepthStencil;
             specs.MipMaps = false;
 
-			m_DepthStencil = Ref<Image>::Create(specs);
+			m_DepthStencil = Image::Create(specs);
 		}
 		else
 			m_DepthStencil->Resize(width, height);
@@ -281,7 +278,7 @@ namespace Hz
 
 			for (size_t i = 0; i < (size_t)framesInFlight; i++)
 			{
-                VK_CHECK_RESULT(vkCreateSemaphore(context.GetDevice()->GetVkDevice(), &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]));
+                VK_CHECK_RESULT(vkCreateSemaphore(device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]));
 			}
 		}
 	}
@@ -293,11 +290,9 @@ namespace Hz
 
     uint32_t VulkanSwapChain::AcquireNextImage()
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
 		uint32_t imageIndex = 0;
 
-		VkResult result = vkAcquireNextImageKHR(context.GetDevice()->GetVkDevice(), m_SwapChain, Pulse::Numeric::Max<uint64_t>(), m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
+		VkResult result = vkAcquireNextImageKHR(VulkanContext::GetDevice()->GetVkDevice(), m_SwapChain, Pulse::Numeric::Max<uint64_t>(), m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			auto& window = Window::Get();
@@ -313,9 +308,7 @@ namespace Hz
 
 	void VulkanSwapChain::FindImageFormatAndColorSpace()
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        const VkPhysicalDevice physicalDevice = context.GetPhysicalDevice()->GetVkPhysicalDevice();
+        const VkPhysicalDevice physicalDevice = VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice();
 		const VkSurfaceKHR surface = m_Surface;
 
 		// Get list of supported surface formats

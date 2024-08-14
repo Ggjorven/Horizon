@@ -15,18 +15,18 @@ namespace Hz
 
 	class VulkanDescriptorSets;
 
-	class VulkanPipeline
+	class VulkanPipeline : public Pipeline
 	{
 	public:
 		VulkanPipeline(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader, Ref<Renderpass> renderpass);
 		VulkanPipeline(const PipelineSpecification& specs, Ref<DescriptorSets> sets, Ref<Shader> shader);
 		~VulkanPipeline();
 
-		void Use(Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint);
+		void Use(Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint) override;
 
-        void DispatchCompute(Ref<CommandBuffer> commandBuffer, uint32_t width, uint32_t height, uint32_t depth);
+        void DispatchCompute(Ref<CommandBuffer> commandBuffer, uint32_t width, uint32_t height, uint32_t depth) override;
 
-		inline const PipelineSpecification& GetSpecification() const { return m_Specification; };
+		inline const PipelineSpecification& GetSpecification() const override { return m_Specification; };
 
 		inline const VkPipeline GetVkPipeline() const { return m_Pipeline; }
 		inline const VkPipelineLayout GetVkPipelineLayout() const { return m_PipelineLayout; }

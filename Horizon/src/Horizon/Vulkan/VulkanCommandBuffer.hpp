@@ -3,6 +3,7 @@
 #include "Horizon/Core/Memory.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
+#include "Horizon/Renderer/CommandBuffer.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -13,7 +14,7 @@ namespace Hz
 
     class VulkanRenderer;
 
-	class VulkanCommandBuffer
+	class VulkanCommandBuffer : public CommandBuffer
 	{
 	public:
 		VulkanCommandBuffer();

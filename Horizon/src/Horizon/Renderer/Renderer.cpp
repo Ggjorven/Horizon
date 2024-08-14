@@ -14,126 +14,121 @@
 namespace Hz
 {
 
-    Renderer::RendererType* Renderer::s_Instance = nullptr;
+    // Static type selection
+    template<RenderingAPI API> struct RendererSelector;
+    template<> struct RendererSelector<RenderingAPI::Vulkan> { using Type = VulkanRenderer; };
+
+    using RendererType = typename RendererSelector<RendererSpecification::API>::Type;
 
     void Renderer::Init(const RendererSpecification& specs)
     {
-        s_Instance = new RendererType(specs);
+        RendererType::Init(specs);
+    }
+
+    bool Renderer::Initialized()
+    {
+        return RendererType::Initialized();;
     }
 
     void Renderer::Destroy()
     {
-        delete s_Instance;
-        s_Instance = nullptr;
+        RendererType::Destroy();
     }
 
     void Renderer::Recreate(uint32_t width, uint32_t height, const bool vsync)
     {
-        s_Instance->Recreate(width, height, vsync);
+        RendererType::Recreate(width, height, vsync);
     }
 
     void Renderer::BeginFrame()
     {
-        s_Instance->BeginFrame();
+        RendererType::BeginFrame();
     }
 
     void Renderer::EndFrame()
     {
-        s_Instance->EndFrame();
+        RendererType::EndFrame();
     }
 
     void Renderer::Present()
     {
-        s_Instance->Present();
+        RendererType::Present();
     }
 
     void Renderer::BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state)
     {
-        s_Instance->BeginDynamic(cmdBuf, std::move(state));
+        RendererType::BeginDynamic(cmdBuf, std::move(state));
     }
 
     void Renderer::EndDynamic(Ref<CommandBuffer> cmdBuf)
     {
-        s_Instance->EndDynamic(cmdBuf);
+        RendererType::EndDynamic(cmdBuf);
     }
 
     void Renderer::Begin(Ref<CommandBuffer> cmdBuf)
     {
-        s_Instance->Begin(cmdBuf);
+        RendererType::Begin(cmdBuf);
     }
 
     void Renderer::Begin(Ref<Renderpass> renderpass)
     {
-        s_Instance->Begin(renderpass);
+        RendererType::Begin(renderpass);
     }
 
     void Renderer::End(Ref<CommandBuffer> cmdBuf)
     {
-        s_Instance->End(cmdBuf);
+        RendererType::End(cmdBuf);
     }
 
     void Renderer::End(Ref<Renderpass> renderpass)
     {
-        s_Instance->End(renderpass);
+        RendererType::End(renderpass);
     }
 
     void Renderer::Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
-        if (policy == ExecutionPolicy::None) [[unlikely]]
-        {
-            using namespace Pulse::Enum::Bitwise;
-            policy |= ExecutionPolicy::WaitForPrevious;
-            policy |= ExecutionPolicy::InOrder;
-        }
-
-        s_Instance->Submit(cmdBuf, policy, queue, waitOn);
+        RendererType::Submit(cmdBuf, policy, queue, waitOn);
     }
 
     void Renderer::Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
-        if (policy == ExecutionPolicy::None) [[unlikely]]
-        {
-            using namespace Pulse::Enum::Bitwise;
-            policy |= ExecutionPolicy::WaitForPrevious;
-            policy |= ExecutionPolicy::InOrder;
-        }
-
-        s_Instance->Submit(renderpass, policy, queue, waitOn);
+        RendererType::Submit(renderpass, policy, queue, waitOn);
     }
 
     void Renderer::Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount)
     {
-        s_Instance->Draw(cmdBuf, vertexCount, instanceCount);
+        RendererType::Draw(cmdBuf, vertexCount, instanceCount);
     }
 
     void Renderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
     {
-        s_Instance->DrawIndexed(cmdBuf, indexBuffer, instanceCount);
+        RendererType::DrawIndexed(cmdBuf, indexBuffer, instanceCount);
     }
 
     // Note: The 2 functions below actually use the GraphicsContect since the queue needs to live even after the renderer is destroyed
     void Renderer::Free(FreeFunction&& func)
     {
-        (*HzCast(VulkanContext, GraphicsContext::Src())).Free(std::move(func));
+        RendererType::Free(std::move(func));
     }
 
     void Renderer::FreeObjects()
     {
-        (*HzCast(VulkanContext, GraphicsContext::Src())).FreeObjects();
+        RendererType::FreeObjects();
     }
 
     uint32_t Renderer::GetAcquiredImage()
     {
-        return s_Instance->GetAcquiredImage();
+        return RendererType::GetAcquiredImage();
     }
 
     uint32_t Renderer::GetCurrentFrame()
     {
-        return s_Instance->GetCurrentFrame();
+        return RendererType::GetCurrentFrame();
     }
 
     const RendererSpecification& Renderer::GetSpecification()
     {
-        return s_Instance->GetSpecification();
+        return RendererType::GetSpecification();
     }
+
 }

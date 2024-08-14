@@ -27,12 +27,10 @@ namespace Hz::VkUtils
 
 	VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
 		for (VkFormat format : candidates)
 		{
 			VkFormatProperties props;
-			vkGetPhysicalDeviceFormatProperties(context.GetPhysicalDevice()->GetVkPhysicalDevice(), format, &props);
+			vkGetPhysicalDeviceFormatProperties(VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice(), format, &props);
 
 			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
 				return format;
@@ -64,8 +62,6 @@ namespace Hz::VkUtils
 
 	void Allocator::Init()
 	{
-		const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
 		VkAllocationCallbacks callbacks = {};
 		callbacks.pUserData = nullptr;
 		callbacks.pfnAllocation = VmaAllocFn;
@@ -75,9 +71,9 @@ namespace Hz::VkUtils
 		callbacks.pfnInternalFree = nullptr;
 
 		VmaAllocatorCreateInfo allocatorInfo = {};
-		allocatorInfo.instance = context.GetVkInstance();
-		allocatorInfo.physicalDevice = context.GetPhysicalDevice()->GetVkPhysicalDevice();
-		allocatorInfo.device = context.GetDevice()->GetVkDevice();
+		allocatorInfo.instance = VulkanContext::GetVkInstance();
+		allocatorInfo.physicalDevice = VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice();
+		allocatorInfo.device = VulkanContext::GetDevice()->GetVkDevice();
 		allocatorInfo.pAllocationCallbacks = &callbacks;
 
         VK_CHECK_RESULT(vmaCreateAllocator(&allocatorInfo, &s_Allocator));
@@ -85,14 +81,12 @@ namespace Hz::VkUtils
 
     void Allocator::InitPipelineCache(const std::vector<uint8_t>& data)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
         VkPipelineCacheCreateInfo cacheCreateInfo = {};
         cacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
         cacheCreateInfo.initialDataSize = data.size();
         cacheCreateInfo.pInitialData = data.data();
 
-        VK_CHECK_RESULT(vkCreatePipelineCache(context.GetDevice()->GetVkDevice(), &cacheCreateInfo, nullptr, &s_PipelineCache));
+        VK_CHECK_RESULT(vkCreatePipelineCache(VulkanContext::GetDevice()->GetVkDevice(), &cacheCreateInfo, nullptr, &s_PipelineCache));
     }
 
     void Allocator::Destroy()
@@ -191,8 +185,6 @@ namespace Hz::VkUtils
 
 	VkImageView Allocator::CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels)
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
 		VkImageViewCreateInfo viewInfo = {};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		viewInfo.image = image;
@@ -206,15 +198,13 @@ namespace Hz::VkUtils
 		viewInfo.subresourceRange.aspectMask = aspectFlags;
 
 		VkImageView imageView = VK_NULL_HANDLE;
-        VK_CHECK_RESULT(vkCreateImageView(context.GetDevice()->GetVkDevice(), &viewInfo, nullptr, &imageView));
+        VK_CHECK_RESULT(vkCreateImageView(VulkanContext::GetDevice()->GetVkDevice(), &viewInfo, nullptr, &imageView));
 
 		return imageView;
 	}
 
 	VkSampler Allocator::CreateSampler(VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressmode, VkSamplerMipmapMode mipmapMode, uint32_t mipLevels)
 	{
-		const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
 		VkSamplerCreateInfo samplerInfo = {};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 		samplerInfo.magFilter = magFilter;
@@ -224,7 +214,7 @@ namespace Hz::VkUtils
 		samplerInfo.addressModeW = addressmode;
 
 		VkPhysicalDeviceProperties properties = {};
-		vkGetPhysicalDeviceProperties(context.GetPhysicalDevice()->GetVkPhysicalDevice(), &properties);
+		vkGetPhysicalDeviceProperties(VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice(), &properties);
 
 		samplerInfo.anisotropyEnable = VK_TRUE;								// Can be disabled: just set VK_FALSE
 		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy; // And 1.0f
@@ -240,7 +230,7 @@ namespace Hz::VkUtils
 		samplerInfo.mipLodBias = 0.0f; // Optional
 
 		VkSampler sampler = VK_NULL_HANDLE;
-        VK_CHECK_RESULT(vkCreateSampler(context.GetDevice()->GetVkDevice(), &samplerInfo, nullptr, &sampler));
+        VK_CHECK_RESULT(vkCreateSampler(VulkanContext::GetDevice()->GetVkDevice(), &samplerInfo, nullptr, &sampler));
 
 		return sampler;
 	}

@@ -60,29 +60,19 @@ namespace Hz
     class Renderpass : public RefCounted
     {
     public:
-        using RenderpassType = VulkanRenderpass;
-        static_assert(std::is_same_v<RenderpassType, VulkanRenderpass>, "Unsupported rendererpass type selected.");
-    public:
-        Renderpass(const RenderpassSpecification& specs, Ref<CommandBuffer> commandBuffer = nullptr);
-        Renderpass(RenderpassType* src);
-        ~Renderpass();
+        Renderpass() = default;
+        virtual ~Renderpass() = default;
 
         // The Begin, End & Submit function are in the Renderer
 
-        void Resize(uint32_t width, uint32_t height);
+        virtual void Resize(uint32_t width, uint32_t height) = 0;
 
-        std::pair<uint32_t, uint32_t> GetSize() const;
+        virtual std::pair<uint32_t, uint32_t> GetSize() const = 0;
 
-		const RenderpassSpecification& GetSpecification();
-		Ref<CommandBuffer> GetCommandBuffer();
-
-        // Returns underlying type pointer
-       inline RenderpassType* Src() { return m_Instance; }
+		virtual const RenderpassSpecification& GetSpecification() = 0;
+		virtual Ref<CommandBuffer> GetCommandBuffer() = 0;
 
         static Ref<Renderpass> Create(const RenderpassSpecification& specs, Ref<CommandBuffer> commandBuffer = nullptr);
-
-    private:
-        RenderpassType* m_Instance;
     };
 
 
