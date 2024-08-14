@@ -246,8 +246,6 @@ namespace Hz
 
 		if (!m_DepthStencil)
 		{
-            using namespace Pulse::Enum::Bitwise;
-
 			ImageSpecification specs = {};
 			specs.Usage = ImageUsage::Size;
 			specs.Format = (ImageFormat)VkUtils::FindDepthFormat();

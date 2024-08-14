@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
 
@@ -42,6 +42,7 @@ namespace Hz
         SampleBlockMatchQCOM = 0x00200000,
         ShadingRateImageNV = FragmentShadingRateKHR,
 	};
+    ENABLE_BITWISE(ImageUsageFlags)
 
 	enum class ImageLayout : uint32_t
 	{
@@ -114,7 +115,7 @@ namespace Hz
 	public:
 		ImageSpecification() = default;
 		ImageSpecification(uint32_t width, uint32_t height, ImageUsageFlags flags);
-		ImageSpecification(const std::filesystem::path& path, ImageUsageFlags flags);
+		ImageSpecification(const std::filesystem::path& path, ImageUsageFlags flags = ImageUsageFlags::Colour | ImageUsageFlags::Sampled);
 		~ImageSpecification() = default;
 	};
 

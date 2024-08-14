@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
 #include "Horizon/Renderer/CommandBuffer.hpp"
@@ -22,12 +22,13 @@ namespace Hz
     ///////////////////////////////////////////////////////////
     enum class ExecutionPolicy : uint8_t
     {
-        None = 0,
         InOrder = 1 << 0,           // Execute commands sequentially, submits to waited on by next (WaitForPrevious) commandBuffer
         Parallel = 1 << 1,          // Execute commands in parallel but synchronized by the frame
         WaitForPrevious = 1 << 2,   // Wait for the completion of the previous (InOrder) command buffer
         NoWait = 1 << 3             // Do not wait for the previous (InOrder) command buffer
     };
+    ENABLE_BITWISE(ExecutionPolicy)
+
     enum class Queue    : uint8_t  { Graphics, Present, Compute };
 
     struct DynamicRenderState
@@ -72,8 +73,8 @@ namespace Hz
         static void Begin(Ref<Renderpass> renderpass);
         static void End(Ref<CommandBuffer> cmdBuf);
         static void End(Ref<Renderpass> renderpass);
-        static void Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue = Queue::Graphics, const std::vector<Ref<CommandBuffer>>& waitOn = {});
-        static void Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue = Queue::Graphics, const std::vector<Ref<CommandBuffer>>& waitOn = {});
+        static void Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy = ExecutionPolicy::InOrder | ExecutionPolicy::WaitForPrevious, Queue queue = Queue::Graphics, const std::vector<Ref<CommandBuffer>>& waitOn = {});
+        static void Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy = ExecutionPolicy::InOrder | ExecutionPolicy::WaitForPrevious, Queue queue = Queue::Graphics, const std::vector<Ref<CommandBuffer>>& waitOn = {});
 
         static void Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount = 3, uint32_t instanceCount = 1);
         static void DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount = 1);

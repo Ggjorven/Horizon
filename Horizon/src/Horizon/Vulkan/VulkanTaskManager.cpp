@@ -28,8 +28,6 @@ namespace Hz
         uint32_t frame = Renderer::GetCurrentFrame();
         m_Fences[frame].emplace_back(cmdBuf->GetVkInFlightFence(frame));
 
-        using namespace Pulse::Enum::Bitwise;
-
         if (policy & ExecutionPolicy::InOrder)
             m_Semaphores[frame].first.push_back(cmdBuf->GetVkRenderFinishedSemaphore(frame));
         else if (policy & ExecutionPolicy::Parallel)

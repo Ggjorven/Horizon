@@ -285,7 +285,6 @@ namespace Hz
 			s_Data->Manager.Remove(semaphore); // Removes it if it exists
 		}
 
-        using namespace Pulse::Enum::Bitwise;
 		if (policy & ExecutionPolicy::WaitForPrevious)
 		{
             auto semaphore = s_Data->Manager.GetNext();
@@ -392,8 +391,6 @@ namespace Hz
 
     void VulkanRenderer::VerifyExectionPolicy(ExecutionPolicy& policy) // Should only be used in Debug
     {
-        using namespace Pulse::Enum::Bitwise;
-
         if (!(policy & ExecutionPolicy::InOrder) && !(policy & ExecutionPolicy::Parallel))
         {
             HZ_LOG_WARN("Failed to specify base ExecutionPolicy state. Resorting to ExecutionPolicy::InOrder");

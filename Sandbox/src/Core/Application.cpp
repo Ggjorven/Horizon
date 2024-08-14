@@ -50,15 +50,13 @@ namespace Sandbox
 
             // Render
             {
-                using namespace Pulse::Enum::Bitwise;
-
                 Renderer::BeginFrame();
 
                 m_Renderers[m_Mode]->OnRender();
 
                 Renderer::Begin(cmd);
                 Renderer::End(cmd);
-                Renderer::Submit(cmd, ExecutionPolicy::InOrder | ExecutionPolicy::WaitForPrevious);
+                Renderer::Submit(cmd);
 
                 Renderer::EndFrame();
                 m_Window->SwapBuffers();

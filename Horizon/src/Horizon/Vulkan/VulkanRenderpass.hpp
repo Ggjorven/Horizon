@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 
 #include "Horizon/Renderer/Renderpass.hpp"
 #include "Horizon/Renderer/CommandBuffer.hpp"
