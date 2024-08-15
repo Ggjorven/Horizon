@@ -1,5 +1,7 @@
 #include "hzpch.h"
-#include "Window.hpp"
+
+#if defined(HZ_PLATFORM_MACOS)
+#include "Horizon/Core/Window.hpp"
 
 #include "Horizon/Core/Logging.hpp"
 #include "Horizon/Utils/Profiler.hpp"
@@ -210,3 +212,4 @@ namespace Hz
     }
 
 }
+#endif

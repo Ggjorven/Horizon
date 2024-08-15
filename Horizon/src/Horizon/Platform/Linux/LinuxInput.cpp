@@ -1,5 +1,7 @@
 #include "hzpch.h"
-#include "Input.hpp"
+
+#if defined(HZ_PLATFORM_LINUX)
+#include "Horizon/Core/Input/Input.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -49,3 +51,4 @@ namespace Hz
     }
 
 }
+#endif

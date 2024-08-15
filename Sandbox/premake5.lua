@@ -82,6 +82,17 @@ project "Sandbox"
             "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.LibName}",
 		}
 
+    -- TODO: Properly implement MacOS
+    filter "system:macosx"
+		defines "HZ_PLATFORM_MACOS"
+		systemversion "latest"
+		staticruntime "on"
+
+		includedirs
+		{
+			"%{Dependencies.Vulkan.MacOS.IncludeDir}",
+		}
+
 	filter "configurations:Debug"
 		defines "HZ_CONFIG_DEBUG"
 		runtime "Debug"

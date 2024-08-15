@@ -129,21 +129,27 @@ namespace Hz
 		appInfo.apiVersion = VK_MAKE_API_VERSION(0, Version.first, Version.second, 0);
 
 		#if defined(HZ_PLATFORM_WINDOWS)
-			#define VK_KHR_WIN32_SURFACE_EXTENSION_NAME "VK_KHR_win32_surface"
-		#elif defined(HZ_PLATFORM_LINUX)
-			#define VK_KHR_WIN32_SURFACE_EXTENSION_NAME "VK_KHR_xcb_surface"
-		#endif // TODO: MacOS
+            #define VK_KHR_SURFACE_TYPE_NAME "VK_KHR_win32_surface"
+        #elif defined(HZ_PLATFORM_LINUX)
+            #define VK_KHR_SURFACE_TYPE_NAME "VK_KHR_xcb_surface"
+        #elif defined(HZ_PLATFORM_MACOS)
+            #define VK_KHR_SURFACE_TYPE_NAME "VK_KHR_metal_surface"
+        #else
+            #error "Unsupported platform"
+        #endif
 
-		std::vector<const char*> instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
+
+		std::vector<const char*> instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_TYPE_NAME };
 		if constexpr (s_Validation)
 		{
             if (!ValidationLayersSupported())
             {
+                // We only give this error once, but we still do this check below
                 HZ_LOG_ERROR("Validation layers are not supported!");
             }
             else
             {
-                instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); // Very little performance hit, can be used in Release.
+                instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
                 instanceExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
                 instanceExtensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
             }

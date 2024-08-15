@@ -8,6 +8,7 @@
 namespace Hz
 {
 
+    // Note: The input class is implemented based on platform
 	class Input
 	{
 	public:

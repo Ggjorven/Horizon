@@ -21,6 +21,18 @@ Dependencies =
 			LibName = "vulkan",
 			IncludeDir = "%{VULKAN_SDK}/include/",
 			LibDir = "%{VULKAN_SDK}/lib/"
+		},
+        MacOS = -- TODO: Implement -- Note: We expect VULKAN_SDK to be /Users/XXX/VulkanSDK/XVersionX/ (macOS or iOS)
+		{
+			LibName = "vulkan",
+			IncludeDir = "%{VULKAN_SDK}/../macOS/include/",
+			LibDir = "%{VULKAN_SDK}/../macOS/lib/"
+		},
+        iOS = -- Not supported -- Note: We expect VULKAN_SDK to be /Users/XXX/VulkanSDK/XVersionX/ (macOS or iOS)
+		{
+			LibName = "vulkan",
+			IncludeDir = "%{VULKAN_SDK}/../iOS/include/",
+			LibDir = "%{VULKAN_SDK}/../iOS/lib/"
 		}
 	},
 	ShaderC =

@@ -88,6 +88,25 @@ project "Horizon"
 			"Xrandr", "Xi", "GLU", "GL", "X11", "dl", "pthread", "stdc++fs"
 		}
 
+    -- TODO: Properly implement MacOS
+    filter "system:macosx"
+		defines "HZ_PLATFORM_MACOS"
+		systemversion "latest"
+		staticruntime "on"
+
+		includedirs
+		{
+			"%{Dependencies.Vulkan.MacOS.IncludeDir}"
+		}
+
+		links
+		{
+			"%{Dependencies.Vulkan.MacOS.LibDir}/%{Dependencies.Vulkan.MacOS.LibName}",
+            "%{Dependencies.Vulkan.MacOS.LibDir}/%{Dependencies.ShaderC.LibName}",
+
+            -- TODO: Check for any other links needed
+		}
+
 	filter "configurations:Debug"
 		defines "HZ_CONFIG_DEBUG"
 		runtime "Debug"

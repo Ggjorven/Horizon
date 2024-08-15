@@ -29,8 +29,8 @@ namespace Hz
 		~WindowSpecification() = default;
 	};
 
-    // Only a single window is supported at a time
-    class Window : public RefCounted
+    // Note: The window class is implemented based on platform
+    class Window : public RefCounted // Only a single window is supported at a time
 	{
 	public:
 		Window(const WindowSpecification windowSpecs, const RendererSpecification rendererSpecs);
