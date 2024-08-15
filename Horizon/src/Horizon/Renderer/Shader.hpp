@@ -42,7 +42,7 @@ namespace Hz
     {
     public:
         // Compiles GLSL/HLSL(TODO) to SPIR-V which can be remapped to any shading language
-        template<ShadingLanguage Language>
+        template<ShadingLanguage Language = ShadingLanguage::GLSL>
         static std::vector<char> Compile(ShaderStage stage, const std::string& code)
         {
             if constexpr (Language == ShadingLanguage::GLSL)

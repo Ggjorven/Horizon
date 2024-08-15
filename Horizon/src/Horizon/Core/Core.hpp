@@ -6,6 +6,8 @@
 
 #include <Pulse/Core/Defines.hpp>
 
+#include <Pulse/Text/Format.hpp>
+
 #include <Pulse/Enum/Enum.hpp>
 
 namespace Hz
@@ -43,7 +45,19 @@ namespace Hz
     using f32 = Pulse::f32;
     using f64 = Pulse::f64;
 
-    using str = Pulse::str;
+    ///////////////////////////////////////////////////////////
+    // Text
+    ///////////////////////////////////////////////////////////
+    namespace Text
+    {
+
+        template<typename ...TArgs>
+        [[nodiscard]] inline std::string Format(std::string_view fmt, const TArgs& ...args)
+        {
+            return Pulse::Text::Format(fmt, args...);
+        }
+
+    }
 
     ///////////////////////////////////////////////////////////
     // Enum

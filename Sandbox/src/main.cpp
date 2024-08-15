@@ -1,9 +1,11 @@
-#include "Core/Application.hpp"
+#include "CustomApp.hpp"
 
 int main(int argc, char* argv[])
 {
-    Sandbox::Application app = {};
-    app.Run();
+    {
+        CustomApp app = {};
+        app.Run();
+    }
 
     return 0;
 }

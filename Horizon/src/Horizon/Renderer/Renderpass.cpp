@@ -11,7 +11,7 @@ namespace Hz
     Ref<Renderpass> Renderpass::Create(const RenderpassSpecification& specs, Ref<CommandBuffer> commandBuffer)
     {
         if constexpr (RendererSpecification::API == RenderingAPI::Vulkan)
-            return Ref<VulkanRenderpass>::Create(specs, commandBuffer);
+            return Ref<VulkanRenderpass>::Create(specs, (commandBuffer ? commandBuffer : CommandBuffer::Create()));
 
         return nullptr;
     }
