@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 
 #include "Horizon/Renderer/Image.hpp"
 
@@ -13,20 +13,20 @@ namespace Hz
     class VulkanSwapChain;
     class VulkanDescriptorSet;
 
-    class VulkanImage
+    class VulkanImage : public Image
 	{
 	public:
 		VulkanImage(const ImageSpecification& specs, const SamplerSpecification& samplerSpecs);
         VulkanImage(const ImageSpecification& specs, const VkImage image, const VkImageView imageView); // For swapchain
 		~VulkanImage();
 
-		void SetData(void* data, size_t size);
+		void SetData(void* data, size_t size) override;
 
-		void Resize(uint32_t width, uint32_t height);
+		void Resize(uint32_t width, uint32_t height) override;
 
-		void Transition(ImageLayout initial, ImageLayout final);
+		void Transition(ImageLayout initial, ImageLayout final) override;
 
-		inline const ImageSpecification& GetSpecification() const { return m_Specification; }
+		inline const ImageSpecification& GetSpecification() const override { return m_Specification; }
 
 		inline uint32_t GetWidth() const { return m_Specification.Width; }
 		inline uint32_t GetHeight() const { return m_Specification.Height; }

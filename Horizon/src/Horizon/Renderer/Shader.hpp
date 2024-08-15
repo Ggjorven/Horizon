@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 #include "Horizon/Core/Logging.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
@@ -42,7 +42,7 @@ namespace Hz
     {
     public:
         // Compiles GLSL/HLSL(TODO) to SPIR-V which can be remapped to any shading language
-        template<ShadingLanguage Language>
+        template<ShadingLanguage Language = ShadingLanguage::GLSL>
         static std::vector<char> Compile(ShaderStage stage, const std::string& code)
         {
             if constexpr (Language == ShadingLanguage::GLSL)
@@ -60,25 +60,16 @@ namespace Hz
 
 	class Shader : public RefCounted // Note: Once this object has been used for pipeline creation it can die with no consequences.
 	{
-	public:
-        using ShaderType = VulkanShader;
-        static_assert(std::is_same_v<ShaderType, VulkanShader>, "Unsupported shader type selected.");
     public:
-		Shader(const ShaderSpecification& specs);
-		~Shader();
+		Shader() = default;
+		virtual ~Shader() = default;
 
-        const ShaderSpecification& GetSpecification() const;
+        virtual const ShaderSpecification& GetSpecification() const = 0;
 
         static std::string ReadGLSL(const std::filesystem::path& path);
 		static std::vector<char> ReadSPIRV(const std::filesystem::path& path);
 
 		static Ref<Shader> Create(const ShaderSpecification& specs);
-
-        // Returns underlying type pointer
-        inline ShaderType* Src() { return m_Instance; }
-
-    private:
-        ShaderType* m_Instance;
 	};
 
 }

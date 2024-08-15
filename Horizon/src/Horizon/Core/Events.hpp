@@ -1,16 +1,15 @@
 #pragma once
 
-#include <string>
-#include <sstream>
-#include <functional>
-
+#include "Horizon/Core/Core.hpp"
 #include "Horizon/Core/Input/KeyCodes.hpp"
 #include "Horizon/Core/Input/MouseCodes.hpp"
 
-#include <Pulse/Enum/Enum.hpp>
 #include <Pulse/Types/Concepts.hpp>
 
-using namespace Pulse::Enum::Bitwise;
+#include <string>
+#include <sstream>
+#include <functional>
+#include <type_traits>
 
 namespace Hz
 {
@@ -32,6 +31,7 @@ namespace Hz
 		Mouse = 1 << 3,
 		MouseButton = 1 << 4
 	};
+    ENABLE_BITWISE(EventCategory)
 
 #define EVENT_CLASS_TYPE(type) \
 		static EventType GetStaticType() { return EventType::type; } \
@@ -49,9 +49,9 @@ namespace Hz
 		virtual EventType GetEventType() const = 0;
 		virtual EventCategory GetCategoryFlags() const = 0;
 
-		virtual std::string ToString() const { return static_cast<std::string>(Pulse::Enum::Name(GetEventType())); }
+		virtual std::string ToString() const { return static_cast<std::string>(Enum::Name(GetEventType())); }
 
-		inline bool IsInCategory(EventCategory category) const { return GetCategoryFlags() & category; }
+		inline bool IsInCategory(EventCategory category) const { return (bool)(GetCategoryFlags() & category); }
 
 	public:
 		bool Handled = false;

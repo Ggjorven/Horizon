@@ -8,24 +8,9 @@
 namespace Hz
 {
 
-    CommandBuffer::CommandBuffer()
-        : m_Instance(new CommandBufferType())
-    {
-    }
-
-    CommandBuffer::CommandBuffer(CommandBufferType *src)
-        : m_Instance(src)
-    {
-    }
-
-    CommandBuffer::~CommandBuffer()
-    {
-        delete m_Instance;
-    }
-
     Ref<CommandBuffer> CommandBuffer::Create()
     {
-        return Ref<CommandBuffer>::Create();
+        return Ref<VulkanCommandBuffer>::Create();
     }
 
 }

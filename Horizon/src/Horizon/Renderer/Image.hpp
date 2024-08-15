@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
-
-#include <Pulse/Enum/Enum.hpp>
 
 #include <cstdint>
 #include <variant>
@@ -13,11 +11,6 @@
 
 namespace Hz
 {
-
-    using namespace Pulse::Enum::Bitwise;
-
-    class VulkanImage;
-    class VulkanRenderer;
 
     ///////////////////////////////////////////////////////////
 	// Specifications
@@ -49,6 +42,7 @@ namespace Hz
         SampleBlockMatchQCOM = 0x00200000,
         ShadingRateImageNV = FragmentShadingRateKHR,
 	};
+    ENABLE_BITWISE(ImageUsageFlags)
 
 	enum class ImageLayout : uint32_t
 	{
@@ -121,7 +115,7 @@ namespace Hz
 	public:
 		ImageSpecification() = default;
 		ImageSpecification(uint32_t width, uint32_t height, ImageUsageFlags flags);
-		ImageSpecification(const std::filesystem::path& path, ImageUsageFlags flags = ImageUsageFlags::Sampled | ImageUsageFlags::Colour);
+		ImageSpecification(const std::filesystem::path& path, ImageUsageFlags flags = ImageUsageFlags::Colour | ImageUsageFlags::Sampled);
 		~ImageSpecification() = default;
 	};
 
@@ -168,30 +162,18 @@ namespace Hz
     class Image : public RefCounted
     {
     public:
-        using ImageType = VulkanImage;
-        static_assert(std::is_same_v<ImageType, VulkanImage>, "Unsupported image type selected.");
-    public:
-        Image(const ImageSpecification& specs, const SamplerSpecification& samplerSpecs = {});
-        Image(ImageType* src); // Takes ownership of passed in object
-        ~Image();
+        Image() = default;
+        virtual ~Image() = default;
 
-        void SetData(void* data, size_t size);
+        virtual void SetData(void* data, size_t size) = 0;
 
-        void Resize(uint32_t width, uint32_t height);
+        virtual void Resize(uint32_t width, uint32_t height) = 0;
 
-        void Transition(ImageLayout initial, ImageLayout final);
+        virtual void Transition(ImageLayout initial, ImageLayout final) = 0;
 
-        const ImageSpecification& GetSpecification() const;
-
-        // Returns underlying type pointer
-        inline ImageType* Src() { return m_Instance; }
+        virtual const ImageSpecification& GetSpecification() const = 0;
 
         static Ref<Image> Create(const ImageSpecification& specs, const SamplerSpecification& samplerSpecs = {});
-
-    private:
-        ImageType* m_Instance;
-
-        friend class VulkanRenderer;
     };
 
 }

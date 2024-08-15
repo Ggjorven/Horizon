@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 
 #include "Horizon/Renderer/Renderpass.hpp"
 #include "Horizon/Renderer/CommandBuffer.hpp"
@@ -14,7 +14,7 @@ namespace Hz
 
     class VulkanRenderer;
 
-	class VulkanRenderpass
+	class VulkanRenderpass : public Renderpass
 	{
 	public:
 		VulkanRenderpass(RenderpassSpecification specs, Ref<CommandBuffer> commandBuffer);
@@ -22,12 +22,12 @@ namespace Hz
 
         // The Begin, End & Submit methods are in the Renderer
 
-		void Resize(uint32_t width, uint32_t height);
+		void Resize(uint32_t width, uint32_t height) override;
 
-        std::pair<uint32_t, uint32_t> GetSize() const;
+        std::pair<uint32_t, uint32_t> GetSize() const override;
 
-		inline const RenderpassSpecification& GetSpecification() { return m_Specification; }
-		inline const Ref<CommandBuffer> GetCommandBuffer() { return m_CommandBuffer; }
+		inline const RenderpassSpecification& GetSpecification() override { return m_Specification; }
+		inline Ref<CommandBuffer> GetCommandBuffer() override { return m_CommandBuffer; }
 
 		inline const VkRenderPass GetVkRenderPass() const { return m_RenderPass; }
 		inline std::vector<VkFramebuffer>& GetVkFrameBuffers() { return m_Framebuffers; };

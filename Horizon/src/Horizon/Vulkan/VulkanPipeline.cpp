@@ -19,9 +19,7 @@
 
 static VKAPI_ATTR VkResult VKAPI_CALL CreateRayTracingPipelinesKHR(VkDevice device, VkDeferredOperationKHR deferredOperation, VkPipelineCache pipelineCache, uint32_t createInfoCount, const VkRayTracingPipelineCreateInfoKHR* pCreateInfos, const VkAllocationCallbacks*  pAllocator, VkPipeline* pPipelines)
 {
-    const Hz::VulkanContext& context = *HzCast(Hz::VulkanContext, Hz::GraphicsContext::Src());
-
-    auto func = (PFN_vkCreateRayTracingPipelinesKHR)vkGetInstanceProcAddr(context.GetVkInstance(), "vkCreateRayTracingPipelinesKHR");
+    auto func = (PFN_vkCreateRayTracingPipelinesKHR)vkGetInstanceProcAddr(Hz::VulkanContext::GetVkInstance(), "vkCreateRayTracingPipelinesKHR");
 
 	if (func != nullptr)
 		return func(device, deferredOperation, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
@@ -31,9 +29,7 @@ static VKAPI_ATTR VkResult VKAPI_CALL CreateRayTracingPipelinesKHR(VkDevice devi
 
 static VKAPI_ATTR VkResult VKAPI_CALL CreateRayTracingPipelinesNV(VkDevice device, VkPipelineCache pipelineCache, uint32_t createInfoCount, const VkRayTracingPipelineCreateInfoNV* pCreateInfos, const VkAllocationCallbacks* pAllocator, VkPipeline* pPipelines)
 {
-    const Hz::VulkanContext& context = *HzCast(Hz::VulkanContext, Hz::GraphicsContext::Src());
-
-    auto func = (PFN_vkCreateRayTracingPipelinesNV)vkGetInstanceProcAddr(context.GetVkInstance(), "vkCreateRayTracingPipelinesNV");
+    auto func = (PFN_vkCreateRayTracingPipelinesNV)vkGetInstanceProcAddr(Hz::VulkanContext::GetVkInstance(), "vkCreateRayTracingPipelinesNV");
 
 	if (func != nullptr)
 		return func(device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
@@ -79,32 +75,30 @@ namespace Hz
     {
         Renderer::Free([pipeline = m_Pipeline, pipelineLayout = m_PipelineLayout]()
         {
-            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+            auto device = VulkanContext::GetDevice()->GetVkDevice();
 
-            vkDestroyPipeline(context.GetDevice()->GetVkDevice(), pipeline, nullptr);
-            vkDestroyPipelineLayout(context.GetDevice()->GetVkDevice(), pipelineLayout, nullptr);
+            vkDestroyPipeline(device, pipeline, nullptr);
+            vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
         });
     }
 
     void VulkanPipeline::Use(Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint)
     {
-        VulkanCommandBuffer* vkCommand = HzCast(VulkanCommandBuffer, commandBuffer->Src());
+        Ref<VulkanCommandBuffer> src = commandBuffer.As<VulkanCommandBuffer>();
 
-		vkCmdBindPipeline(vkCommand->GetVkCommandBuffer(Renderer::GetCurrentFrame()), (VkPipelineBindPoint)bindPoint, m_Pipeline);
+		vkCmdBindPipeline(src->GetVkCommandBuffer(Renderer::GetCurrentFrame()), (VkPipelineBindPoint)bindPoint, m_Pipeline);
     }
 
     void VulkanPipeline::DispatchCompute(Ref<CommandBuffer> commandBuffer, uint32_t width, uint32_t height, uint32_t depth)
     {
-        VulkanCommandBuffer* vkCommand = HzCast(VulkanCommandBuffer, commandBuffer->Src());
+        Ref<VulkanCommandBuffer> src = commandBuffer.As<VulkanCommandBuffer>();
 
-		vkCmdDispatch(vkCommand->GetVkCommandBuffer(Renderer::GetCurrentFrame()), width, height, depth);
+		vkCmdDispatch(src->GetVkCommandBuffer(Renderer::GetCurrentFrame()), width, height, depth);
     }
 
     void VulkanPipeline::CreateGraphicsPipeline(Ref<DescriptorSets> sets, Ref<Shader> shader, Ref<Renderpass> renderpass) // Renderpass may be null
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        auto vkShader = HzCast(VulkanShader, shader->Src());
+        auto vkShader = shader.As<VulkanShader>();
 
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages = { };
 		if (vkShader->GetShaders().contains(ShaderStage::Vertex))
@@ -208,7 +202,7 @@ namespace Hz
 		dynamicState.pDynamicStates = dynamicStates.data();
 
 		// Descriptor layouts
-		auto vkDescriptorSets = HzCast(VulkanDescriptorSets, sets->Src());
+		auto vkDescriptorSets = sets.As<VulkanDescriptorSets>();
 
 		std::vector<VkDescriptorSetLayout> descriptorLayouts = { };
 		descriptorLayouts.reserve(vkDescriptorSets->m_DescriptorLayouts.size());
@@ -222,7 +216,7 @@ namespace Hz
 		pipelineLayoutInfo.setLayoutCount = (uint32_t)descriptorLayouts.size();
 		pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
 
-        VK_CHECK_RESULT(vkCreatePipelineLayout(context.GetDevice()->GetVkDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
+        VK_CHECK_RESULT(vkCreatePipelineLayout(VulkanContext::GetDevice()->GetVkDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
 
 		// Create the actual graphics pipeline (where we actually use the shaders and other info)
 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
@@ -238,19 +232,17 @@ namespace Hz
 		pipelineInfo.pColorBlendState = &colorBlending;
 		pipelineInfo.pDynamicState = &dynamicState;
 		pipelineInfo.layout = m_PipelineLayout;
-		pipelineInfo.renderPass = (renderpass ? HzCast(VulkanRenderpass, renderpass->Src())->GetVkRenderPass() : nullptr);
+		pipelineInfo.renderPass = (renderpass ? renderpass.As<VulkanRenderpass>()->GetVkRenderPass() : nullptr);
 		pipelineInfo.subpass = 0;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 		pipelineInfo.basePipelineIndex = -1; // Optional
 
-        VK_CHECK_RESULT(vkCreateGraphicsPipelines(context.GetDevice()->GetVkDevice(), VkUtils::Allocator::s_PipelineCache, 1, &pipelineInfo, nullptr, &m_Pipeline));
+        VK_CHECK_RESULT(vkCreateGraphicsPipelines(VulkanContext::GetDevice()->GetVkDevice(), VkUtils::Allocator::s_PipelineCache, 1, &pipelineInfo, nullptr, &m_Pipeline));
     }
 
     void VulkanPipeline::CreateComputePipeline(Ref<DescriptorSets> sets, Ref<Shader> shader)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        auto vkShader = HzCast(VulkanShader, shader->Src());
+        auto vkShader = shader.As<VulkanShader>();
 
 		VkPipelineShaderStageCreateInfo computeShaderStageInfo = {};
 		computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -258,7 +250,7 @@ namespace Hz
 		computeShaderStageInfo.module = vkShader->GetShader(ShaderStage::Compute);
 		computeShaderStageInfo.pName = "main";
 
-		auto vkDescriptorSets = HzCast(VulkanDescriptorSets, sets->Src());
+		auto vkDescriptorSets = sets.As<VulkanDescriptorSets>();
 
 		std::vector<VkDescriptorSetLayout> descriptorLayouts;
 		descriptorLayouts.reserve(vkDescriptorSets->m_DescriptorLayouts.size());
@@ -272,7 +264,7 @@ namespace Hz
 		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorLayouts.size());
 		pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
 
-        VK_CHECK_RESULT(vkCreatePipelineLayout(context.GetDevice()->GetVkDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
+        VK_CHECK_RESULT(vkCreatePipelineLayout(VulkanContext::GetDevice()->GetVkDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
 
 		VkComputePipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -281,14 +273,12 @@ namespace Hz
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 		pipelineInfo.basePipelineIndex = -1;
 
-        VK_CHECK_RESULT(vkCreateComputePipelines(context.GetDevice()->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline));
+        VK_CHECK_RESULT(vkCreateComputePipelines(VulkanContext::GetDevice()->GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline));
     }
 
     void VulkanPipeline::CreateRayTracingPipelineKHR(Ref<DescriptorSets> sets, Ref<Shader> shader)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        auto vkShader = HzCast(VulkanShader, shader->Src());
+        auto vkShader = shader.As<VulkanShader>();
 
         std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups = { };
         std::vector<VkPipelineShaderStageCreateInfo> shaderStages = { };
@@ -408,7 +398,7 @@ namespace Hz
         }
 
         // Descriptor layouts
-        auto vkDescriptorSets = HzCast(VulkanDescriptorSets, sets->Src());
+        auto vkDescriptorSets = sets.As<VulkanDescriptorSets>();
 
         std::vector<VkDescriptorSetLayout> descriptorLayouts;
         descriptorLayouts.reserve(vkDescriptorSets->m_DescriptorLayouts.size());
@@ -423,7 +413,7 @@ namespace Hz
         pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorLayouts.size());
         pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
 
-        VK_CHECK_RESULT(vkCreatePipelineLayout(context.GetDevice()->GetVkDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
+        VK_CHECK_RESULT(vkCreatePipelineLayout(VulkanContext::GetDevice()->GetVkDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
 
         // Pipeline create info
         VkRayTracingPipelineCreateInfoKHR rayTracingPipelineCreateInfo = {};
@@ -439,14 +429,12 @@ namespace Hz
         rayTracingPipelineCreateInfo.flags = 0; // Adjust as needed
 
         // Create the ray tracing pipeline
-        VK_CHECK_RESULT(CreateRayTracingPipelinesKHR(context.GetDevice()->GetVkDevice(), VK_NULL_HANDLE, VkUtils::Allocator::s_PipelineCache, 1, &rayTracingPipelineCreateInfo, nullptr, &m_Pipeline));
+        VK_CHECK_RESULT(CreateRayTracingPipelinesKHR(VulkanContext::GetDevice()->GetVkDevice(), VK_NULL_HANDLE, VkUtils::Allocator::s_PipelineCache, 1, &rayTracingPipelineCreateInfo, nullptr, &m_Pipeline));
     }
 
     void VulkanPipeline::CreateRayTracingPipelineNV(Ref<DescriptorSets> sets, Ref<Shader> shader)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        auto vkShader = HzCast(VulkanShader, shader->Src());
+        auto vkShader = shader.As<VulkanShader>();
 
         std::vector<VkRayTracingShaderGroupCreateInfoNV> shaderGroups;
         std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
@@ -566,7 +554,7 @@ namespace Hz
         }
 
         // Descriptor layouts
-        auto vkDescriptorSets = HzCast(VulkanDescriptorSets, sets->Src());
+        auto vkDescriptorSets = sets.As<VulkanDescriptorSets>();
 
         std::vector<VkDescriptorSetLayout> descriptorLayouts;
         descriptorLayouts.reserve(vkDescriptorSets->m_DescriptorLayouts.size());
@@ -581,7 +569,7 @@ namespace Hz
         pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorLayouts.size());
         pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
 
-        VK_CHECK_RESULT(vkCreatePipelineLayout(context.GetDevice()->GetVkDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
+        VK_CHECK_RESULT(vkCreatePipelineLayout(VulkanContext::GetDevice()->GetVkDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
 
         // Pipeline create info
         VkRayTracingPipelineCreateInfoNV rayTracingPipelineCreateInfo = {};
@@ -594,7 +582,7 @@ namespace Hz
         rayTracingPipelineCreateInfo.flags = 0; // Adjust as needed
 
         // Create the ray tracing pipeline
-        VK_CHECK_RESULT(CreateRayTracingPipelinesNV(context.GetDevice()->GetVkDevice(), VkUtils::Allocator::s_PipelineCache, 1, &rayTracingPipelineCreateInfo, nullptr, &m_Pipeline));
+        VK_CHECK_RESULT(CreateRayTracingPipelinesNV(VulkanContext::GetDevice()->GetVkDevice(), VkUtils::Allocator::s_PipelineCache, 1, &rayTracingPipelineCreateInfo, nullptr, &m_Pipeline));
     }
 
     VkVertexInputBindingDescription VulkanPipeline::GetBindingDescription()

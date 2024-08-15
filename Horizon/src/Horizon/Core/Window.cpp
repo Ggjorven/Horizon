@@ -153,7 +153,7 @@ namespace Hz
 
 	void Window::SwapBuffers()
 	{
-        HZ_PROFILE_SCOPE("Window::SwapBuffers");
+        HZ_PROFILE_SCOPE("SwapBuffers");
         Renderer::Present();
 	}
 

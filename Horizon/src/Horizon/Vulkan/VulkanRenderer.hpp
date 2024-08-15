@@ -6,6 +6,9 @@
 
 #include "Horizon/Vulkan/VulkanTaskManager.hpp"
 
+#include <queue>
+#include <mutex>
+
 namespace Hz
 {
 
@@ -14,41 +17,59 @@ namespace Hz
     class VulkanRenderer
     {
     public:
-        VulkanRenderer(const RendererSpecification& specs);
-        ~VulkanRenderer();
+        static void Init(const RendererSpecification& specs);
+        static bool Initialized();
+        static void Destroy();
 
-        void Recreate(uint32_t width, uint32_t height, const bool vsync);
+        static void Recreate(uint32_t width, uint32_t height, const bool vsync);
 
-        void BeginFrame();
-        void EndFrame();
-        void Present();
+        static void BeginFrame();
+        static void EndFrame();
+        static void Present();
 
-        void BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state);
-        void EndDynamic(Ref<CommandBuffer> cmdBuf);
+        static void BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state);
+        static void EndDynamic(Ref<CommandBuffer> cmdBuf);
 
-        void Begin(Ref<CommandBuffer> cmdBuf);
-        void Begin(Ref<Renderpass> renderpass);
-        void End(Ref<CommandBuffer> cmdBuf);
-        void End(Ref<Renderpass> renderpass);
-        void Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn);
-        void Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn);
+        static void Begin(Ref<CommandBuffer> cmdBuf);
+        static void Begin(Ref<Renderpass> renderpass);
+        static void End(Ref<CommandBuffer> cmdBuf);
+        static void End(Ref<Renderpass> renderpass);
+        static void Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn);
+        static void Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn);
 
-        void Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount);
-        void DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount);
+        static void Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount);
+        static void DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount);
 
-        uint32_t GetAcquiredImage() const;
-        uint32_t GetCurrentFrame() const;
+        static void Free(FreeFunction&& func);
+        static void FreeObjects();
 
-        inline VulkanTaskManager& GetTaskManager() { return m_Manager; }
-        inline const RendererSpecification& GetSpecification() const { return m_Specification; }
+        static uint32_t GetAcquiredImage();
+        static uint32_t GetCurrentFrame();
+
+        inline static VulkanTaskManager& GetTaskManager() { return s_Data->Manager; }
+        inline static const RendererSpecification& GetSpecification() { return s_Data->Specification; }
 
     private:
-        void VerifyExectionPolicy(ExecutionPolicy& policy);
+        static void VerifyExectionPolicy(ExecutionPolicy& policy);
 
     private:
-        RendererSpecification m_Specification;
+        // Note: We store our info in a struct, so we can ensure lifetime
+        // of all objects easily while the class remains static.
+        struct Info
+        {
+        public:
+            RendererSpecification Specification = {};
 
-        VulkanTaskManager m_Manager = {};
+            VulkanTaskManager Manager = {};
+        };
+
+        inline static Info* s_Data = nullptr;
+
+        // Note: We want to keep these alive till the end of the project,
+        // because after Renderer::Destroy is called we still destroy some vulkan
+        // related objects.
+        inline static std::mutex s_FreeQueueMutex = {};
+        inline static std::queue<FreeFunction> s_FreeQueue = {};
 
         friend class VulkanSwapChain;
     };

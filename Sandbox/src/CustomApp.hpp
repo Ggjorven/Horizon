@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Horizon/Core/Application.hpp>
 #include <Horizon/Core/Window.hpp>
 
 #include <Horizon/Renderer/Renderer.hpp>
@@ -26,6 +27,7 @@ private:
     void EventCallback(Event& e);
 
 private:
+    Application m_Application;
     Ref<Window> m_Window = nullptr; // Note: Windows needs to stay alive the longest
     bool m_Running = true;
 

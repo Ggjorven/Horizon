@@ -62,24 +62,12 @@ namespace Hz
 		return std::vector<char>(bytes, bytes + sizeInBytes);
     }
 
-    Shader::Shader(const ShaderSpecification& specs)
-        : m_Instance(new ShaderType(specs))
+    Ref<Shader> Shader::Create(const ShaderSpecification& specs)
     {
-    }
+        if constexpr (RendererSpecification::API == RenderingAPI::Vulkan)
+            return Ref<VulkanShader>::Create(specs);
 
-    Shader::~Shader()
-    {
-        delete m_Instance;
-    }
-
-    const ShaderSpecification& Shader::GetSpecification() const
-    {
-        return m_Instance->GetSpecification();
-    }
-
-    Ref<Shader> Shader::Create(const ShaderSpecification &specs)
-    {
-        return Ref<Shader>::Create(specs);
+        return nullptr;
     }
 
     std::string Shader::ReadGLSL(const std::filesystem::path& path)

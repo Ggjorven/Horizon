@@ -81,64 +81,38 @@ namespace Hz
     const std::vector<const char*> VulkanContext::s_RequestedValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 	const std::vector<const char*> VulkanContext::s_RequestedDeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-    VulkanContext::VulkanContext(void* window)
-        : m_Window(window)
+    void VulkanContext::Init(void* window, uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
     {
-    }
+        s_Data = new Info();
+        s_Data->Window = window;
 
-    VulkanContext::~VulkanContext()
-    {
-        Renderer::FreeObjects();
-
-        m_SwapChain.Reset();
-
-        Renderer::FreeObjects();
-        VkUtils::Allocator::Destroy();
-
-        m_PhysicalDevice.Reset();
-        m_Device.Reset();
-
-        if constexpr (s_Validation)
-        {
-            if (m_DebugMessenger)
-                DestroyDebugUtilsMessengerEXT(m_VulkanInstance, m_DebugMessenger, nullptr);
-        }
-
-        vkDestroyInstance(m_VulkanInstance, nullptr);
-    }
-
-    void VulkanContext::Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
-    {
         InitInstance();
         InitDevices(width, height, vsync, framesInFlight);
     }
 
-    void VulkanContext::Free(FreeFunction&& func)
+    void VulkanContext::Destroy()
     {
-        std::scoped_lock<std::mutex> lock(m_FreeQueueMutex);
-        m_FreeQueue.push(func);
-    }
+        Renderer::FreeObjects();
 
-    void VulkanContext::FreeObjects()
-    {
-        if (m_FreeQueue.empty()) return;
+        s_Data->SwapChain.Reset();
 
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-        context.GetDevice()->Wait(); // Wait till idle
+        Renderer::FreeObjects();
+        VkUtils::Allocator::Destroy();
 
-        // We repeat this, because sometimes the function calls Free() of another objects and that will be unresolved without repeating
-        do
+        s_Data->PhysicalDevice.Reset();
+        s_Data->Device.Reset();
+
+        if constexpr (s_Validation)
         {
-            std::queue<FreeFunction> functions = {};
-            functions.swap(m_FreeQueue);
+            if (s_Data->DebugMessenger)
+                DestroyDebugUtilsMessengerEXT(s_Data->VulkanInstance, s_Data->DebugMessenger, nullptr);
+        }
 
-            while (!functions.empty())
-            {
-                auto func = functions.front();
-                func();
-                functions.pop();
-            }
-        } while (!m_FreeQueue.empty());
+        vkDestroyInstance(s_Data->VulkanInstance, nullptr);
+
+        // Delete data
+        delete s_Data;
+        s_Data = nullptr;
     }
 
     void VulkanContext::InitInstance()
@@ -224,7 +198,7 @@ namespace Hz
 			createInfo.pNext = nullptr;
 		}
 
-		VK_CHECK_RESULT(vkCreateInstance(&createInfo, nullptr, &m_VulkanInstance));
+		VK_CHECK_RESULT(vkCreateInstance(&createInfo, nullptr, &s_Data->VulkanInstance));
 
 		///////////////////////////////////////////////////////////
 		// Debugger Creation
@@ -233,7 +207,7 @@ namespace Hz
 		{
             if (ValidationLayersSupported())
             {
-			    VK_CHECK_RESULT(CreateDebugUtilsMessengerEXT(m_VulkanInstance, &debugCreateInfo, nullptr, &m_DebugMessenger));
+			    VK_CHECK_RESULT(CreateDebugUtilsMessengerEXT(s_Data->VulkanInstance, &debugCreateInfo, nullptr, &s_Data->DebugMessenger));
             }
         }
     }
@@ -241,18 +215,18 @@ namespace Hz
     void VulkanContext::InitDevices(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
     {
         VkSurfaceKHR surface = VK_NULL_HANDLE;
-		VK_CHECK_RESULT(glfwCreateWindowSurface(m_VulkanInstance, static_cast<GLFWwindow*>(m_Window), nullptr, &surface));
+		VK_CHECK_RESULT(glfwCreateWindowSurface(s_Data->VulkanInstance, static_cast<GLFWwindow*>(s_Data->Window), nullptr, &surface));
 
         ///////////////////////////////////////////////////////////
 		// Other
 		///////////////////////////////////////////////////////////
-		m_PhysicalDevice = VulkanPhysicalDevice::Select(surface);
-		m_Device = VulkanDevice::Create(surface, m_PhysicalDevice);
+		s_Data->PhysicalDevice = VulkanPhysicalDevice::Select(surface);
+		s_Data->Device = VulkanDevice::Create(surface, s_Data->PhysicalDevice);
 
 		VkUtils::Allocator::Init();
 
-        m_SwapChain = VulkanSwapChain::Create(surface);
-        m_SwapChain->Init(width, height, vsync, framesInFlight);
+        s_Data->SwapChain = VulkanSwapChain::Create(surface);
+        s_Data->SwapChain->Init(width, height, vsync, framesInFlight);
     }
 
 }

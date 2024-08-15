@@ -16,15 +16,13 @@ namespace Hz
 
 	VulkanCommandBuffer::VulkanCommandBuffer()
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-		auto device = context.GetDevice()->GetVkDevice();
+		auto device = VulkanContext::GetDevice()->GetVkDevice();
 		const uint32_t framesInFlight = (uint32_t)Renderer::GetSpecification().Buffers;
 		m_CommandBuffers.resize(framesInFlight);
 
 		VkCommandBufferAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = context.GetSwapChain()->GetVkCommandPool();
+		allocInfo.commandPool = VulkanContext::GetSwapChain()->GetVkCommandPool();
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
 
@@ -51,21 +49,22 @@ namespace Hz
     {
         Renderer::Free([commandBuffers = m_CommandBuffers, renderFinishedSemaphores = m_RenderFinishedSemaphores, inFlightFences = m_InFlightFences]()
         {
-            const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-            VulkanRenderer* renderer = HzCast(VulkanRenderer, Renderer::Src());
+            auto device = VulkanContext::GetDevice()->GetVkDevice();
 
-            vkFreeCommandBuffers(context.GetDevice()->GetVkDevice(), context.GetSwapChain()->GetVkCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+            vkFreeCommandBuffers(VulkanContext::GetDevice()->GetVkDevice(), VulkanContext::GetSwapChain()->GetVkCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
 
             for (size_t i = 0; i < renderFinishedSemaphores.size(); i++)
             {
-                if (renderer)
+                // Note: In obscure ways this sometimes gets called after the renderer is destroyed.
+                // I don't want to impose some kind of lifetime rules, so this is the solution.
+                if (Renderer::Initialized())
                 {
-                    renderer->GetTaskManager().RemoveFromAll(renderFinishedSemaphores[i]);
-                    renderer->GetTaskManager().RemoveFromAll(inFlightFences[i]);
+                    VulkanRenderer::GetTaskManager().RemoveFromAll(renderFinishedSemaphores[i]);
+                    VulkanRenderer::GetTaskManager().RemoveFromAll(inFlightFences[i]);
                 }
 
-                vkDestroySemaphore(context.GetDevice()->GetVkDevice(), renderFinishedSemaphores[i], nullptr);
-                vkDestroyFence(context.GetDevice()->GetVkDevice(), inFlightFences[i], nullptr);
+                vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+                vkDestroyFence(device, inFlightFences[i], nullptr);
             }
         });
 	}
@@ -74,15 +73,13 @@ namespace Hz
 
 	VulkanCommand::VulkanCommand(bool start)
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
 		VkCommandBufferAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = context.GetSwapChain()->GetVkCommandPool();
+		allocInfo.commandPool = VulkanContext::GetSwapChain()->GetVkCommandPool();
 		allocInfo.commandBufferCount = 1;
 
-		VK_CHECK_RESULT(vkAllocateCommandBuffers(context.GetDevice()->GetVkDevice(), &allocInfo, &m_CommandBuffer));
+		VK_CHECK_RESULT(vkAllocateCommandBuffers(VulkanContext::GetDevice()->GetVkDevice(), &allocInfo, &m_CommandBuffer));
 
 		if (start)
 			Begin();
@@ -90,9 +87,7 @@ namespace Hz
 
 	VulkanCommand::~VulkanCommand()
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-		vkFreeCommandBuffers(context.GetDevice()->GetVkDevice(), context.GetSwapChain()->GetVkCommandPool(), 1, &m_CommandBuffer);
+		vkFreeCommandBuffers(VulkanContext::GetDevice()->GetVkDevice(), VulkanContext::GetSwapChain()->GetVkCommandPool(), 1, &m_CommandBuffer);
 	}
 
 	void VulkanCommand::Begin()
@@ -111,15 +106,14 @@ namespace Hz
 
 	void VulkanCommand::Submit()
 	{
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &m_CommandBuffer;
 
-		vkQueueSubmit(context.GetDevice()->GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(context.GetDevice()->GetGraphicsQueue());
+        auto queue = VulkanContext::GetDevice()->GetGraphicsQueue();
+		vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+		vkQueueWaitIdle(queue);
 	}
 
 	void VulkanCommand::EndAndSubmit()

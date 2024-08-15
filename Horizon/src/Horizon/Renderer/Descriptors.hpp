@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
 #include "Horizon/Renderer/Buffers.hpp"
@@ -16,15 +16,9 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <initializer_list>
-#include <type_traits>
 
 namespace Hz
 {
-
-    class VulkanDescriptorSet;
-    class VulkanDescriptorSets;
-
-    using namespace Pulse::Enum::Bitwise;
 
 	class Pipeline;
 	class CommandBuffer;
@@ -159,47 +153,28 @@ namespace Hz
 	///////////////////////////////////////////////////////////
     class DescriptorSet : public RefCounted
 	{
-	public:
-        using DescriptorSetType = VulkanDescriptorSet;
-        static_assert(std::is_same_v<DescriptorSetType, VulkanDescriptorSet>, "Unsupported descriptorset type selected.");
     public:
-		DescriptorSet(DescriptorSetType* src);
-		~DescriptorSet();
+		DescriptorSet() = default;
+		virtual ~DescriptorSet() = default;
 
-		void Bind(Ref<Pipeline> pipeline, Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint = PipelineBindPoint::Graphics, const std::vector<uint32_t>& dynamicOffsets = { });
+		virtual void Bind(Ref<Pipeline> pipeline, Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint = PipelineBindPoint::Graphics, const std::vector<uint32_t>& dynamicOffsets = { }) = 0;
 
-        void Upload(const std::initializer_list<Uploadable>& elements);
-
-        // Returns underlying type pointer
-        inline DescriptorSetType* Src() { return m_Instance; }
-
-    private:
-        DescriptorSetType* m_Instance;
+        virtual void Upload(const std::initializer_list<Uploadable>& elements) = 0;
     };
 
 	class DescriptorSets : public RefCounted
 	{
-	public:
-        using DescriptorSetsType = VulkanDescriptorSets;
-        static_assert(std::is_same_v<DescriptorSetsType, VulkanDescriptorSets>, "Unsupported descriptorsets type selected.");
     public:
-		DescriptorSets(const std::initializer_list<DescriptorSetGroup>& specs);
-		DescriptorSets(DescriptorSetsType* src);
-		~DescriptorSets();
+		DescriptorSets() = default;
+		virtual ~DescriptorSets() = default;
 
-        void SetAmountOf(uint32_t setID, uint32_t amount); // Create amount of setID's
-		uint32_t GetAmountOf(uint32_t setID) const;
+        virtual void SetAmountOf(uint32_t setID, uint32_t amount) = 0; // Create amount of setID's
+		virtual uint32_t GetAmountOf(uint32_t setID) const = 0;
 
-		const DescriptorSetLayout& GetLayout(uint32_t setID) const;
-		std::vector<Ref<DescriptorSet>>& GetSets(uint32_t setID);
-
-        // Returns underlying type pointer
-        inline DescriptorSetsType* Src() { return m_Instance; }
+		virtual const DescriptorSetLayout& GetLayout(uint32_t setID) const = 0;
+		virtual std::vector<Ref<DescriptorSet>>& GetSets(uint32_t setID) = 0;
 
 		static Ref<DescriptorSets> Create(const std::initializer_list<DescriptorSetGroup>& specs);
-
-    private:
-        DescriptorSetsType* m_Instance;
 	};
 
 }

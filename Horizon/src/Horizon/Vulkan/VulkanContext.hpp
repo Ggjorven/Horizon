@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
+#include "Horizon/Renderer/GraphicsContext.hpp"
 #include "Horizon/Renderer/Renderer.hpp"
 #include "Horizon/Renderer/Image.hpp"
 
@@ -26,46 +27,46 @@ namespace Hz
 	// Core functionality
 	///////////////////////////////////////////////////////////
 	public:
-		VulkanContext(void* window);
-        ~VulkanContext();
+        static void Init(void* window, uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight);
+        static void Destroy();
 
-        void Init(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight);
+		inline static const VkInstance GetVkInstance() { return s_Data->VulkanInstance; }
+		inline static const VkDebugUtilsMessengerEXT GetVkDebugger() { return s_Data->DebugMessenger; }
 
-        void Free(FreeFunction&& func);
-        void FreeObjects();
+		inline static Ref<VulkanDevice> GetDevice() { return s_Data->Device; }
+		inline static Ref<VulkanPhysicalDevice> GetPhysicalDevice() { return s_Data->PhysicalDevice; }
+		inline static Ref<VulkanSwapChain> GetSwapChain() { return s_Data->SwapChain; }
 
-		inline const VkInstance GetVkInstance() const { return m_VulkanInstance; }
-		inline const VkDebugUtilsMessengerEXT GetVkDebugger() const { return m_DebugMessenger; }
-
-		inline Ref<VulkanDevice> GetDevice() const { return m_Device; }
-		inline Ref<VulkanPhysicalDevice> GetPhysicalDevice() const { return m_PhysicalDevice; }
-		inline Ref<VulkanSwapChain> GetSwapChain() const { return m_SwapChain; }
-
-        inline std::vector<Ref<Image>>& GetSwapChainImages() { return m_SwapChain->GetSwapChainImages(); }
-		inline Ref<Image> GetDepthImage() { return m_SwapChain->GetDepthImage(); }
+        inline static std::vector<Ref<Image>>& GetSwapChainImages() { return s_Data->SwapChain->GetSwapChainImages(); }
+		inline static Ref<Image> GetDepthImage() { return s_Data->SwapChain->GetDepthImage(); }
 
     ///////////////////////////////////////////////////////////
 	// Private functions
 	///////////////////////////////////////////////////////////
     private:
-        void InitInstance();
-        void InitDevices(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight);
+        static void InitInstance();
+        static void InitDevices(uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight);
 
 	///////////////////////////////////////////////////////////
 	// Private variables
 	///////////////////////////////////////////////////////////
 	private:
-		VkInstance m_VulkanInstance = VK_NULL_HANDLE;
-		VkDebugUtilsMessengerEXT m_DebugMessenger = VK_NULL_HANDLE;
+        // Note: We store our info in a struct, so we can ensure lifetime
+        // of all objects easily while the class remains static.
+        struct Info
+        {
+        public:
+            VkInstance VulkanInstance = VK_NULL_HANDLE;
+            VkDebugUtilsMessengerEXT DebugMessenger = VK_NULL_HANDLE;
 
-		Ref<VulkanDevice> m_Device = nullptr;
-        Ref<VulkanPhysicalDevice> m_PhysicalDevice = nullptr;
-		Ref<VulkanSwapChain> m_SwapChain = nullptr;
+            Ref<VulkanDevice> Device = nullptr;
+            Ref<VulkanPhysicalDevice> PhysicalDevice = nullptr;
+            Ref<VulkanSwapChain> SwapChain = nullptr;
 
-        std::mutex m_FreeQueueMutex;
-        std::queue<FreeFunction> m_FreeQueue;
+            void* Window = nullptr;
+        };
 
-        void* m_Window;
+        inline static Info* s_Data = nullptr;
 
 	///////////////////////////////////////////////////////////
 	// Config variables

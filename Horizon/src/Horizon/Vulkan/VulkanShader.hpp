@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
 #include "Horizon/Renderer/Shader.hpp"
@@ -10,13 +10,13 @@
 namespace Hz
 {
 
-	class VulkanShader
+	class VulkanShader : public Shader
 	{
 	public:
 		VulkanShader(const ShaderSpecification& specs);
 		~VulkanShader();
 
-        inline const ShaderSpecification& GetSpecification() const { return m_Specification; }
+        inline const ShaderSpecification& GetSpecification() const override { return m_Specification; }
 
         inline const VkShaderModule GetShader(ShaderStage stage) { return m_Shaders[stage]; }
         inline const std::unordered_map<ShaderStage, VkShaderModule>& GetShaders() { return m_Shaders; }

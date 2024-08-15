@@ -17,26 +17,33 @@
 #include "Horizon/Vulkan/VulkanBuffers.hpp"
 #include "Horizon/Vulkan/VulkanImage.hpp"
 
-#include <numeric>
+#include <Pulse/Core/Defines.hpp>
+#include <Pulse/Enum/Enum.hpp>
 
 namespace Hz
 {
 
-    VulkanRenderer::VulkanRenderer(const RendererSpecification& specs)
-        : m_Specification(specs)
+    void VulkanRenderer::Init(const RendererSpecification& specs)
     {
+        s_Data = new Info();
+        s_Data->Specification = specs;
     }
 
-    VulkanRenderer::~VulkanRenderer()
+    bool VulkanRenderer::Initialized()
     {
+        return (s_Data != nullptr);
+    }
+
+    void VulkanRenderer::Destroy()
+    {
+        delete s_Data;
+        s_Data = nullptr;
     }
 
     void VulkanRenderer::Recreate(uint32_t width, uint32_t height, const bool vsync)
     {
-        VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        context.GetSwapChain()->Init(width, height, vsync, (uint8_t)Renderer::GetSpecification().Buffers);
-        m_Specification.VSync = vsync;
+        VulkanContext::GetSwapChain()->Init(width, height, vsync, (uint8_t)Renderer::GetSpecification().Buffers);
+        s_Data->Specification.VSync = vsync;
     }
 
     void VulkanRenderer::BeginFrame()
@@ -46,24 +53,23 @@ namespace Hz
 
         Renderer::FreeObjects();
 
-        VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-        auto swapChain = context.GetSwapChain();
-
+        auto swapChain = VulkanContext::GetSwapChain();
         {
-            auto& fences = m_Manager.GetFences();
+            auto& fences = s_Data->Manager.GetFences();
             if (!fences.empty())
             {
-                vkWaitForFences(context.GetDevice()->GetVkDevice(), (uint32_t)fences.size(), fences.data(), VK_TRUE, ULONG_LONG_MAX);
-                vkResetFences(context.GetDevice()->GetVkDevice(), (uint32_t)fences.size(), fences.data());
-            }
-            m_Manager.ResetFences();
+                auto device = VulkanContext::GetDevice()->GetVkDevice();
 
-            m_Manager.Add(context.GetSwapChain()->GetCurrentImageAvailableSemaphore());
+                vkWaitForFences(device, (uint32_t)fences.size(), fences.data(), VK_TRUE, Pulse::Numeric::Max<uint64_t>());
+                vkResetFences(device, (uint32_t)fences.size(), fences.data());
+            }
+            s_Data->Manager.ResetFences();
+
+            s_Data->Manager.Add(swapChain->GetCurrentImageAvailableSemaphore());
         }
         {
             // Acquire SwapChain Image
-            uint32_t acquiredImage = swapChain->AcquireNextImage();
-            swapChain->m_AcquiredImage = acquiredImage;
+            swapChain->m_AcquiredImage = swapChain->AcquireNextImage();;
         }
     }
 
@@ -78,10 +84,8 @@ namespace Hz
         if (Window::Get().IsMinimized())
             return;
 
-        VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        auto& semaphores = m_Manager.GetSemaphores();
-        auto swapChain = context.GetSwapChain();
+        auto& semaphores = s_Data->Manager.GetSemaphores();
+        auto swapChain = VulkanContext::GetSwapChain();
 
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -98,34 +102,34 @@ namespace Hz
             #if defined(HZ_PLATFORM_WINDOWS)
 			if constexpr (VulkanContext::s_Validation)
 			{
-				vkQueueWaitIdle(context.GetDevice()->GetGraphicsQueue());
+				vkQueueWaitIdle(VulkanContext::GetDevice()->GetGraphicsQueue());
 			}
             #endif
 
-			result = vkQueuePresentKHR(context.GetDevice()->GetPresentQueue(), &presentInfo);
+			result = vkQueuePresentKHR(VulkanContext::GetDevice()->GetPresentQueue(), &presentInfo);
 		}
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 		{
 			auto& window = Window::Get();
-			Recreate(window.GetWidth(), window.GetHeight(), m_Specification.VSync);
+			Recreate(window.GetWidth(), window.GetHeight(), s_Data->Specification.VSync);
 		}
 		else if (result != VK_SUCCESS)
 		{
 			HZ_LOG_ERROR("Failed to present swap chain image!");
 		}
 
-        m_Manager.ResetSemaphores();
-		swapChain->m_CurrentFrame = (swapChain->m_CurrentFrame + 1) % (uint32_t)m_Specification.Buffers;
+        s_Data->Manager.ResetSemaphores();
+		swapChain->m_CurrentFrame = (swapChain->m_CurrentFrame + 1) % (uint32_t)s_Data->Specification.Buffers;
     }
 
     void VulkanRenderer::BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state)
     {
-        VulkanCommandBuffer* vkCmdBuf = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+        Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
         VkRenderingAttachmentInfo colourAttachment = {};
         colourAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-        colourAttachment.imageView = (state.ColourAttachment ? HzCast(VulkanImage, state.ColourAttachment->Src())->GetVkImageView() : VK_NULL_HANDLE);
+        colourAttachment.imageView = (state.ColourAttachment ? state.ColourAttachment.As<VulkanImage>()->GetVkImageView() : VK_NULL_HANDLE);
         colourAttachment.imageLayout = (state.ColourAttachment ? (VkImageLayout)state.ColourAttachment->GetSpecification().Layout : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         colourAttachment.loadOp = (VkAttachmentLoadOp)state.ColourLoadOp;
         colourAttachment.storeOp = (VkAttachmentStoreOp)state.ColourStoreOp;
@@ -133,7 +137,7 @@ namespace Hz
 
         VkRenderingAttachmentInfo depthAttachment = {};
         depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-        depthAttachment.imageView = (state.DepthAttachment ? HzCast(VulkanImage, state.DepthAttachment->Src())->GetVkImageView() : VK_NULL_HANDLE);
+        depthAttachment.imageView = (state.DepthAttachment ? state.DepthAttachment.As<VulkanImage>()->GetVkImageView() : VK_NULL_HANDLE);
         depthAttachment.imageLayout = (state.DepthAttachment ? (VkImageLayout)state.DepthAttachment->GetSpecification().Layout : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         depthAttachment.loadOp = (VkAttachmentLoadOp)state.DepthLoadOp;
         depthAttachment.storeOp = (VkAttachmentStoreOp)state.DepthStoreOp;
@@ -169,21 +173,19 @@ namespace Hz
 
     void VulkanRenderer::EndDynamic(Ref<CommandBuffer> cmdBuf)
     {
-        VulkanCommandBuffer* vkCmdBuf = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+        Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
         vkCmdEndRendering(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()));
     }
 
     void VulkanRenderer::Begin(Ref<CommandBuffer> cmdBuf)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        VulkanCommandBuffer* src = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+        Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
 		uint32_t currentFrame = GetCurrentFrame();
-		VkCommandBuffer commandBuffer = src->m_CommandBuffers[currentFrame];
+		VkCommandBuffer commandBuffer = vkCmdBuf->m_CommandBuffers[currentFrame];
 
-		vkResetFences(context.GetDevice()->GetVkDevice(), 1, &src->m_InFlightFences[currentFrame]);
+		vkResetFences(VulkanContext::GetDevice()->GetVkDevice(), 1, &vkCmdBuf->m_InFlightFences[currentFrame]);
 		vkResetCommandBuffer(commandBuffer, 0);
 
 		VkCommandBufferBeginInfo beginInfo = {};
@@ -194,11 +196,9 @@ namespace Hz
 
     void VulkanRenderer::Begin(Ref<Renderpass> renderpass)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());;
-
         Ref<CommandBuffer> cmdBuf = renderpass->GetCommandBuffer();
-        VulkanRenderpass* src = HzCast(VulkanRenderpass, renderpass->Src());
-        VulkanCommandBuffer* cmdSrc = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+        Ref<VulkanRenderpass> vkRenderpass = renderpass.As<VulkanRenderpass>();
+        Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
         Begin(cmdBuf);
 
@@ -207,18 +207,18 @@ namespace Hz
 
         VkRenderPassBeginInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = src->m_RenderPass;
-        renderPassInfo.framebuffer = src->m_Framebuffers[context.GetSwapChain()->GetAquiredImage()];
+        renderPassInfo.renderPass = vkRenderpass->m_RenderPass;
+        renderPassInfo.framebuffer = vkRenderpass->m_Framebuffers[VulkanContext::GetSwapChain()->GetAquiredImage()];
         renderPassInfo.renderArea.offset = { 0, 0 };
         renderPassInfo.renderArea.extent = extent;
 
         std::vector<VkClearValue> clearValues = {};
-        if (!src->m_Specification.ColourAttachment.empty())
+        if (!vkRenderpass->m_Specification.ColourAttachment.empty())
         {
-            VkClearValue colourClear = {{ { src->m_Specification.ColourClearColour.r, src->m_Specification.ColourClearColour.g, src->m_Specification.ColourClearColour.b, src->m_Specification.ColourClearColour.a } }};
+            VkClearValue colourClear = {{ { vkRenderpass->m_Specification.ColourClearColour.r, vkRenderpass->m_Specification.ColourClearColour.g, vkRenderpass->m_Specification.ColourClearColour.b, vkRenderpass->m_Specification.ColourClearColour.a } }};
             clearValues.push_back(colourClear);
         }
-        if (src->m_Specification.DepthAttachment)
+        if (vkRenderpass->m_Specification.DepthAttachment)
         {
             VkClearValue depthClear = { { { 1.0f, 0 } } };
             clearValues.push_back(depthClear);
@@ -227,7 +227,7 @@ namespace Hz
         renderPassInfo.clearValueCount = (uint32_t)clearValues.size();
         renderPassInfo.pClearValues = clearValues.data();
 
-        vkCmdBeginRenderPass(cmdSrc->m_CommandBuffers[GetCurrentFrame()], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         VkViewport viewport = {};
         viewport.x = 0.0f;
@@ -236,42 +236,40 @@ namespace Hz
         viewport.height = (float)extent.height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
-        vkCmdSetViewport(cmdSrc->m_CommandBuffers[GetCurrentFrame()], 0, 1, &viewport);
+        vkCmdSetViewport(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()], 0, 1, &viewport);
 
         VkRect2D scissor = {};
         scissor.offset = { 0, 0 };
         scissor.extent = extent;
-        vkCmdSetScissor(cmdSrc->m_CommandBuffers[GetCurrentFrame()], 0, 1, &scissor);
+        vkCmdSetScissor(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()], 0, 1, &scissor);
     }
 
     void VulkanRenderer::End(Ref<CommandBuffer> cmdBuf)
     {
-        VulkanCommandBuffer* src = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+        Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
-        VK_CHECK_RESULT(vkEndCommandBuffer(src->m_CommandBuffers[GetCurrentFrame()]));
+        VK_CHECK_RESULT(vkEndCommandBuffer(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()]));
     }
 
     void VulkanRenderer::End(Ref<Renderpass> renderpass)
     {
-        VulkanCommandBuffer* src = HzCast(VulkanCommandBuffer, renderpass->GetCommandBuffer()->Src());
-        vkCmdEndRenderPass(src->m_CommandBuffers[GetCurrentFrame()]);
+        Ref<VulkanCommandBuffer> vkCmdBuf = renderpass->GetCommandBuffer().As<VulkanCommandBuffer>();
+        vkCmdEndRenderPass(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()]);
 
         End(renderpass->GetCommandBuffer());
     }
 
     void VulkanRenderer::Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
         #if defined(HZ_CONFIG_DEBUG)
             VerifyExectionPolicy(policy);
         #endif
 
-        VulkanCommandBuffer* src = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+        Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
 		uint32_t currentFrame = GetCurrentFrame();
-		VkDevice device = context.GetDevice()->GetVkDevice();
-		VkCommandBuffer commandBuffer = src->m_CommandBuffers[currentFrame];
+		auto device = VulkanContext::GetDevice()->GetVkDevice();
+		VkCommandBuffer commandBuffer = vkCmdBuf->m_CommandBuffers[currentFrame];
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -280,16 +278,16 @@ namespace Hz
 
 		for (auto cmd : waitOn)
 		{
-            VulkanCommandBuffer* vkCmd = HzCast(VulkanCommandBuffer, cmd->Src());
+            Ref<VulkanCommandBuffer> vkCmd = cmd.As<VulkanCommandBuffer>();
 			auto semaphore = vkCmd->m_RenderFinishedSemaphores[currentFrame];
 
 			semaphores.push_back(semaphore);
-			m_Manager.Remove(semaphore); // Removes it if it exists
+			s_Data->Manager.Remove(semaphore); // Removes it if it exists
 		}
 
 		if (policy & ExecutionPolicy::WaitForPrevious)
 		{
-            auto semaphore = m_Manager.GetNext();
+            auto semaphore = s_Data->Manager.GetNext();
 
 			// Check if it's not nullptr
 			if (semaphore)
@@ -305,24 +303,24 @@ namespace Hz
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
 		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &src->m_RenderFinishedSemaphores[currentFrame];
+		submitInfo.pSignalSemaphores = &vkCmdBuf->m_RenderFinishedSemaphores[currentFrame];
 
         // Submission
         switch (queue)
         {
         case Queue::Graphics:
         {
-            VK_CHECK_RESULT(vkQueueSubmit(context.GetDevice()->GetGraphicsQueue(), 1, &submitInfo, src->m_InFlightFences[currentFrame]));
+            VK_CHECK_RESULT(vkQueueSubmit(VulkanContext::GetDevice()->GetGraphicsQueue(), 1, &submitInfo, vkCmdBuf->m_InFlightFences[currentFrame]));
             break;
         }
         case Queue::Present:
         {
-            VK_CHECK_RESULT(vkQueueSubmit(context.GetDevice()->GetPresentQueue(), 1, &submitInfo, src->m_InFlightFences[currentFrame]));
+            VK_CHECK_RESULT(vkQueueSubmit(VulkanContext::GetDevice()->GetPresentQueue(), 1, &submitInfo, vkCmdBuf->m_InFlightFences[currentFrame]));
             break;
         }
         case Queue::Compute:
         {
-            VK_CHECK_RESULT(vkQueueSubmit(context.GetDevice()->GetComputeQueue(), 1, &submitInfo, src->m_InFlightFences[currentFrame]));
+            VK_CHECK_RESULT(vkQueueSubmit(VulkanContext::GetDevice()->GetComputeQueue(), 1, &submitInfo, vkCmdBuf->m_InFlightFences[currentFrame]));
             break;
         }
 
@@ -332,7 +330,7 @@ namespace Hz
         }
 
 
-		m_Manager.Add(src, policy);
+		s_Data->Manager.Add(vkCmdBuf, policy);
     }
 
     void VulkanRenderer::Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
@@ -342,28 +340,53 @@ namespace Hz
 
     void VulkanRenderer::Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount)
     {
-        auto vkCmdBuf = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+        Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
+
 		vkCmdDraw(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), vertexCount, instanceCount, 0, 0);
     }
 
     void VulkanRenderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
     {
-        auto vkCmdBuf = HzCast(VulkanCommandBuffer, cmdBuf->Src());
+        Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
+
 		vkCmdDrawIndexed(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), indexBuffer->GetCount(), instanceCount, 0, 0, 0);
     }
 
-    uint32_t VulkanRenderer::GetAcquiredImage() const
+    void VulkanRenderer::Free(FreeFunction&& func)
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
-
-        return context.GetSwapChain()->GetAquiredImage();
+        std::scoped_lock<std::mutex> lock(s_FreeQueueMutex);
+        s_FreeQueue.push(std::move(func));
     }
 
-    uint32_t VulkanRenderer::GetCurrentFrame() const
+    void VulkanRenderer::FreeObjects()
     {
-        const VulkanContext& context = *HzCast(VulkanContext, GraphicsContext::Src());
+        if (s_FreeQueue.empty()) return;
 
-        return context.GetSwapChain()->GetCurrentFrame();
+        VulkanContext::GetDevice()->Wait(); // Wait till idle
+
+        // We repeat this, because sometimes the function calls Free() of another objects and that will be unresolved without repeating
+        while (!s_FreeQueue.empty())
+        {
+            std::queue<FreeFunction> functions = {};
+            functions.swap(s_FreeQueue);
+
+            while (!functions.empty())
+            {
+                auto func = functions.front();
+                func();
+                functions.pop();
+            }
+        }
+    }
+
+    uint32_t VulkanRenderer::GetAcquiredImage()
+    {
+        return VulkanContext::GetSwapChain()->GetAquiredImage();
+    }
+
+    uint32_t VulkanRenderer::GetCurrentFrame()
+    {
+        return VulkanContext::GetSwapChain()->GetCurrentFrame();
     }
 
     void VulkanRenderer::VerifyExectionPolicy(ExecutionPolicy& policy) // Should only be used in Debug

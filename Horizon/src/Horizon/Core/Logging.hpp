@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Horizon/Core/Core.hpp"
+
 #include <string>
 #include <string_view>
 #include <memory>
@@ -9,7 +11,6 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <Pulse/Core/Core.hpp>
-#include <Pulse/Text/Format.hpp>
 
 namespace Hz
 {
@@ -19,13 +20,13 @@ namespace Hz
 	public:
 		enum class Level : uint8_t
 		{
-			Trace = 0, Info, Warn, Error, Fatal, None = 255
+			None = 0, Trace, Info, Warn, Error, Fatal
 		};
 
 		static void Init();
 
-		template<typename ... Args>
-		static void LogMessage(Log::Level level, std::string_view fmt, const Args&... args);
+        template<typename ... Args>
+		static void LogMessage(Log::Level level, std::string_view fmt, const Args& ...args);
 
 		#ifndef HZ_CONFIG_DIST
 			#define HZ_LOG_TRACE(...)	Hz::Log::LogMessage(Hz::Log::Level::Trace, __VA_ARGS__);
@@ -44,29 +45,29 @@ namespace Hz
 		static std::shared_ptr<spdlog::logger>& GetLogger();
 
 	private:
-		static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> s_Sink;
 		static std::shared_ptr<spdlog::logger> s_Logger;
+		static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> s_ConsoleSink;
 	};
 
-	template<typename ... Args>
-	void Log::LogMessage(Log::Level level, std::string_view fmt, const Args&... args)
+    template<typename ... Args>
+	void Log::LogMessage(Log::Level level, std::string_view fmt, const Args& ...args)
 	{
 		switch (level)
 		{
 		case Level::Trace:
-			spdlog::trace(Pulse::Text::Format(fmt, args...));
+			spdlog::trace(Text::Format(fmt, args...));
 			break;
 		case Level::Info:
-			spdlog::info(Pulse::Text::Format(fmt, args...));
+			spdlog::info(Text::Format(fmt, args...));
 			break;
 		case Level::Warn:
-			spdlog::warn(Pulse::Text::Format(fmt, args...));
+			spdlog::warn(Text::Format(fmt, args...));
 			break;
 		case Level::Error:
-			spdlog::error(Pulse::Text::Format(fmt, args...));
+			spdlog::error(Text::Format(fmt, args...));
 			break;
 		case Level::Fatal:
-			spdlog::critical(Pulse::Text::Format(fmt, args...));
+			spdlog::critical(Text::Format(fmt, args...));
 			break;
 		}
 	}

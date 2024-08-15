@@ -1,28 +1,21 @@
 #pragma once
 
-#include "Horizon/Core/Memory.hpp"
+#include "Horizon/Core/Core.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
 #include "Horizon/Renderer/CommandBuffer.hpp"
 #include "Horizon/Renderer/Renderpass.hpp"
 #include "Horizon/Renderer/Buffers.hpp"
-
-#include <Pulse/Enum/Enum.hpp>
+#include "Horizon/Renderer/Image.hpp"
+// Note: I purposefully don't forward declare ^ since I want
+// the user to be able to just include the Renderer (this).
 
 #include <glm/glm.hpp>
 
-#include <queue>
 #include <functional>
-#include <type_traits>
 
 namespace Hz
 {
-
-    using namespace Pulse::Enum::Bitwise;
-
-    class VulkanRenderer;
-
-    class GraphicsContext;
 
     ///////////////////////////////////////////////////////////
     // Specifications
@@ -34,6 +27,8 @@ namespace Hz
         WaitForPrevious = 1 << 2,   // Wait for the completion of the previous (InOrder) command buffer
         NoWait = 1 << 3             // Do not wait for the previous (InOrder) command buffer
     };
+    ENABLE_BITWISE(ExecutionPolicy)
+
     enum class Queue    : uint8_t  { Graphics, Present, Compute };
 
     struct DynamicRenderState
@@ -55,13 +50,11 @@ namespace Hz
     ///////////////////////////////////////////////////////////
     // Core class
     ///////////////////////////////////////////////////////////
-    class Renderer // !TODO: ResourceFree Queue!! // TODO: VMA as header only
+    class Renderer
     {
     public:
-        using RendererType = VulkanRenderer;
-        static_assert(std::is_same_v<RendererType, VulkanRenderer>, "Unsupported renderer type selected.");
-    public:
         static void Init(const RendererSpecification& specs);
+        static bool Initialized();
         static void Destroy();
 
         // Has to be manually called by user on window resize events
@@ -86,20 +79,12 @@ namespace Hz
         static void Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount = 3, uint32_t instanceCount = 1);
         static void DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount = 1);
 
-        // Note: The 2 functions actually call back to the GraphicsContext.
         static void Free(FreeFunction&& func); // Adds to the renderfree queue
         static void FreeObjects(); // Executes the free queue
 
         static uint32_t GetAcquiredImage();
         static uint32_t GetCurrentFrame();
         static const RendererSpecification& GetSpecification();
-
-        inline static RendererType* Src() { return s_Instance;}
-
-    private:
-        static RendererType* s_Instance;
-
-        friend class GraphicsContext;
     };
 
 }
