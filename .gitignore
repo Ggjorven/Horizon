@@ -32,4 +32,5 @@
 
 # Other
 make
+**.make
 Makefile

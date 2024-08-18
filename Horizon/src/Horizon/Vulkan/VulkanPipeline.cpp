@@ -84,19 +84,32 @@ namespace Hz
 
     void VulkanPipeline::Use(Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint)
     {
-        Ref<VulkanCommandBuffer> src = commandBuffer.As<VulkanCommandBuffer>();
+        Ref<VulkanCommandBuffer> vkCmdBuf = commandBuffer.As<VulkanCommandBuffer>();
 
-		vkCmdBindPipeline(src->GetVkCommandBuffer(Renderer::GetCurrentFrame()), (VkPipelineBindPoint)bindPoint, m_Pipeline);
+		vkCmdBindPipeline(vkCmdBuf->GetVkCommandBuffer(Renderer::GetCurrentFrame()), (VkPipelineBindPoint)bindPoint, m_Pipeline);
+    }
+
+    void VulkanPipeline::PushConstant(Ref<CommandBuffer> commandBuffer, ShaderStage stage, void* data)
+    {
+        PushConstant(std::move(commandBuffer), stage, data, m_Specification.PushConstants[stage].Offset, m_Specification.PushConstants[stage].Size);
+    }
+
+    void VulkanPipeline::PushConstant(Ref<CommandBuffer> commandBuffer, ShaderStage stage, void* data, size_t offset, size_t size)
+    {
+        HZ_ASSERT((!m_Specification.PushConstants.empty()), "No push constant range(s) defined on pipeline creation.");
+
+        Ref<VulkanCommandBuffer> vkCmdBuf = commandBuffer.As<VulkanCommandBuffer>();
+        vkCmdPushConstants(vkCmdBuf->GetVkCommandBuffer(Renderer::GetCurrentFrame()), m_PipelineLayout, (VkShaderStageFlagBits)stage, static_cast<uint32_t>(offset), static_cast<uint32_t>(size), data);
     }
 
     void VulkanPipeline::DispatchCompute(Ref<CommandBuffer> commandBuffer, uint32_t width, uint32_t height, uint32_t depth)
     {
-        Ref<VulkanCommandBuffer> src = commandBuffer.As<VulkanCommandBuffer>();
+        Ref<VulkanCommandBuffer> vkCmdBuf = commandBuffer.As<VulkanCommandBuffer>();
 
-		vkCmdDispatch(src->GetVkCommandBuffer(Renderer::GetCurrentFrame()), width, height, depth);
+		vkCmdDispatch(vkCmdBuf->GetVkCommandBuffer(Renderer::GetCurrentFrame()), width, height, depth);
     }
 
-    void VulkanPipeline::CreateGraphicsPipeline(Ref<DescriptorSets> sets, Ref<Shader> shader, Ref<Renderpass> renderpass) // Renderpass may be null
+    void VulkanPipeline::CreateGraphicsPipeline(Ref<DescriptorSets> sets, Ref<Shader> shader, Ref<Renderpass> renderpass) // Renderpass may be nullptr
     {
         auto vkShader = shader.As<VulkanShader>();
 
@@ -210,10 +223,25 @@ namespace Hz
 		for (auto& pair : vkDescriptorSets->m_DescriptorLayouts)
 			descriptorLayouts.push_back(pair.second);
 
+        // Push constants // TODO: Migrate to other pipeline types as well
+        std::vector<VkPushConstantRange> pushConstants;
+        pushConstants.reserve(m_Specification.PushConstants.size());
+
+        for (auto& [stage, info] : m_Specification.PushConstants)
+        {
+            HZ_ASSERT((info.Size > 0), "Push constant range passed has size of 0.");
+
+            VkPushConstantRange& range = pushConstants.emplace_back();
+            range.stageFlags = (VkShaderStageFlagBits)stage;
+            range.offset = static_cast<uint32_t>(info.Offset);
+            range.size = static_cast<uint32_t>(info.Size);
+        }
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.pushConstantRangeCount = 0;
-		pipelineLayoutInfo.setLayoutCount = (uint32_t)descriptorLayouts.size();
+		pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
+        pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorLayouts.size());
 		pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
 
         VK_CHECK_RESULT(vkCreatePipelineLayout(VulkanContext::GetDevice()->GetVkDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
@@ -589,7 +617,7 @@ namespace Hz
 	{
 		VkVertexInputBindingDescription description = {};
 		description.binding = 0;
-		description.stride = m_Specification.Bufferlayout.GetStride();
+		description.stride = static_cast<uint32_t>(m_Specification.Bufferlayout.GetStride());
 		description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 		return description;

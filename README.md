@@ -43,7 +43,7 @@
         ./gen-make.bat
         ```
 
-### Linux
+### Linux (X11)
 
 1. Clone the repository:
     ```sh
@@ -108,7 +108,7 @@ Before you start make sure you have GLFW dependencies installed:
 - libx11, libxcursor, libxrandr, libxinerama, libxi
 
 If you don't have these installed we have created a script to help you out.
-This script works on these architectures (**Ubuntu/Debian**, **Fedora**, **CentOS/RHEL**, **Arch**).
+This script is tested on **Ubuntu/Debian** & **Linux Mint**. If you use another version of linux, you will need to use your package manger to install the packages listed above on your own.
 
 This scripts can be found in the 'scripts/linux/' folder, then run these commands:
 ```sh
@@ -144,6 +144,7 @@ Contributions are welcome! Please fork the repository and create a pull request 
   - `Pulse` [https://github.com/Ggjorven/Pulse](https://github.com/Ggjorven/Pulse.git)
   - `spdlog` [https://github.com/gabime/spdlog/](https://github.com/gabime/spdlog.git)
   - `stb` [https://github.com/nothings/stb.git](https://github.com/nothings/stb.git)
+  - `assimp` [https://github.com/assimp/assimp.git](https://github.com/assimp/assimp.git)
   - `glm` [https://github.com/icaven/glm.git](https://github.com/icaven/glm.git)
   - `vma` [https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git)
   - `premake-vscode` [https://github.com/peter1745/premake-vscode/tree/main](https://github.com/peter1745/premake-vscode.git)

@@ -28,12 +28,12 @@ namespace Hz
         template<typename ... Args>
 		static void LogMessage(Log::Level level, std::string_view fmt, const Args& ...args);
 
-		#ifndef HZ_CONFIG_DIST
-			#define HZ_LOG_TRACE(...)	Hz::Log::LogMessage(Hz::Log::Level::Trace, __VA_ARGS__);
-			#define HZ_LOG_INFO(...)	Hz::Log::LogMessage(Hz::Log::Level::Info, __VA_ARGS__);
-			#define HZ_LOG_WARN(...)	Hz::Log::LogMessage(Hz::Log::Level::Warn, __VA_ARGS__);
-			#define HZ_LOG_ERROR(...)	Hz::Log::LogMessage(Hz::Log::Level::Error, __VA_ARGS__);
-			#define HZ_LOG_FATAL(...)	Hz::Log::LogMessage(Hz::Log::Level::Fatal, __VA_ARGS__);
+		#if !defined(HZ_CONFIG_DIST)
+			#define HZ_LOG_TRACE(...)	::Hz::Log::LogMessage(Hz::Log::Level::Trace, __VA_ARGS__);
+			#define HZ_LOG_INFO(...)	::Hz::Log::LogMessage(Hz::Log::Level::Info, __VA_ARGS__);
+			#define HZ_LOG_WARN(...)	::Hz::Log::LogMessage(Hz::Log::Level::Warn, __VA_ARGS__);
+			#define HZ_LOG_ERROR(...)	::Hz::Log::LogMessage(Hz::Log::Level::Error, __VA_ARGS__);
+			#define HZ_LOG_FATAL(...)	::Hz::Log::LogMessage(Hz::Log::Level::Fatal, __VA_ARGS__);
 		#else
 			#define HZ_LOG_TRACE(...)
 			#define HZ_LOG_INFO(...)
@@ -82,12 +82,14 @@ namespace Hz
 	#endif
 
 	#ifdef HZ_CONFIG_DEBUG
+        // Note: Don't put function calls in HZ_ASSERT! They don't run in DIST
 		#define HZ_ASSERT(value, ...) if (!value) \
 			{ \
 				HZ_LOG_FATAL(__VA_ARGS__); \
 				PULSE_DEBUG_BREAK(); \
 			}
 	#elif defined(HZ_CONFIG_RELEASE)
+        // Note: Don't put function calls in HZ_ASSERT! They don't run in DIST
 		#define HZ_ASSERT(value, ...) if (!(value)) \
 			{ \
 				HZ_LOG_FATAL(__VA_ARGS__); \

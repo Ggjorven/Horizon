@@ -10,7 +10,10 @@
 namespace Hz
 {
 
+    class VulkanImage;
 	class VulkanPipeline;
+    class VulkanUniformBuffer;
+    class VulkanStorageBuffer;
 
 	class VulkanDescriptorSet : public DescriptorSet
 	{
@@ -24,11 +27,13 @@ namespace Hz
 		inline const VkDescriptorSet GetVkDescriptorSet(uint32_t index) const { return m_DescriptorSets[index]; }
 
         void Upload(const std::initializer_list<Uploadable>& elements) override;
+        void UploadAll(const std::initializer_list<Uploadable>& elements) override;
+        void QueueUpload(const std::initializer_list<Uploadable>& elements) override;
 
     private:
-        void UploadImage(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorImageInfo>& imageInfos, Ref<Image> image, Descriptor descriptor);
-        void UploadUniformBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<UniformBuffer> buffer, Descriptor descriptor);
-        void UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<StorageBuffer> buffer, Descriptor descriptor);
+        void UploadImage(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorImageInfo>& imageInfos, Ref<VulkanImage> image, Descriptor descriptor, uint32_t frame);
+        void UploadUniformBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<VulkanUniformBuffer> buffer, Descriptor descriptor, uint32_t frame);
+        void UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<VulkanStorageBuffer> buffer, Descriptor descriptor, uint32_t frame);
 
 	private:
 		uint32_t m_SetID = 0;

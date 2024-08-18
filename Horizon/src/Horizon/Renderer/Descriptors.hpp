@@ -159,7 +159,9 @@ namespace Hz
 
 		virtual void Bind(Ref<Pipeline> pipeline, Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint = PipelineBindPoint::Graphics, const std::vector<uint32_t>& dynamicOffsets = { }) = 0;
 
-        virtual void Upload(const std::initializer_list<Uploadable>& elements) = 0;
+        virtual void Upload(const std::initializer_list<Uploadable>& elements) = 0; // Uploads to the current frame descriptorset.
+        virtual void UploadAll(const std::initializer_list<Uploadable>& elements) = 0; // Uploads to all frames in flight immediately.
+        virtual void QueueUpload(const std::initializer_list<Uploadable>& elements) = 0; // Queues the upload for all frames in flight.
     };
 
 	class DescriptorSets : public RefCounted

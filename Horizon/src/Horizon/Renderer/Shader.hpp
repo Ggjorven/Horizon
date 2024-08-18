@@ -25,7 +25,7 @@ namespace Hz
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	enum class ShadingLanguage
     {
-        None = 0, GLSL, HSLS /*Not supported atm.*/, SPIRV
+        None = 0, GLSL, HSLS, SPIRV
     };
 
     struct ShaderSpecification
@@ -41,7 +41,8 @@ namespace Hz
     class ShaderCompiler
     {
     public:
-        // Compiles GLSL/HLSL(TODO) to SPIR-V which can be remapped to any shading language
+        // Compiles GLSL to SPIR-V which can be remapped to any shading language
+        // Note: At some point add HLSL support.
         template<ShadingLanguage Language = ShadingLanguage::GLSL>
         static std::vector<char> Compile(ShaderStage stage, const std::string& code)
         {
@@ -52,7 +53,7 @@ namespace Hz
             return {};
         }
 
-        // TODO: SPIR-V Cross
+        // Note: At some point add SPIR-V Cross to cross compile languages.
 
     private:
         static std::vector<char> CompileGLSL(ShaderStage stage, const std::string& code);

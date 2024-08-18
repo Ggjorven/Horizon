@@ -24,6 +24,9 @@ namespace Hz
 
 		void Use(Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint) override;
 
+        void PushConstant(Ref<CommandBuffer> commandBuffer, ShaderStage stage, void* data) override;
+        void PushConstant(Ref<CommandBuffer> commandBuffer, ShaderStage stage, void* data, size_t offset, size_t size) override;
+
         void DispatchCompute(Ref<CommandBuffer> commandBuffer, uint32_t width, uint32_t height, uint32_t depth) override;
 
 		inline const PipelineSpecification& GetSpecification() const override { return m_Specification; };

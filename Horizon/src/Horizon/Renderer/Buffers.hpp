@@ -27,7 +27,7 @@ namespace Hz
 		std::string Name;
 		uint32_t Location;
 		DataType Type;
-		uint32_t Size;
+		size_t Size;
 		size_t Offset;
 
     public:
@@ -45,7 +45,7 @@ namespace Hz
 		BufferLayout(const std::initializer_list<BufferElement>& elements);
 		~BufferLayout() = default;
 
-		inline uint32_t GetStride() const { return m_Stride; }
+		inline size_t GetStride() const { return m_Stride; }
 		inline const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
 		inline std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
@@ -58,7 +58,7 @@ namespace Hz
 
 	private:
 		std::vector<BufferElement> m_Elements = { };
-		uint32_t m_Stride = 0;
+		size_t m_Stride = 0;
 	};
 
     enum class BufferMemoryUsage

@@ -5,6 +5,7 @@
 #include "Horizon/Renderer/RendererSpecification.hpp"
 #include "Horizon/Renderer/CommandBuffer.hpp"
 #include "Horizon/Renderer/Renderpass.hpp"
+#include "Horizon/Renderer/Pipeline.hpp"
 #include "Horizon/Renderer/Buffers.hpp"
 #include "Horizon/Renderer/Image.hpp"
 // Note: I purposefully don't forward declare ^ since I want
@@ -73,8 +74,8 @@ namespace Hz
         static void Begin(Ref<Renderpass> renderpass);
         static void End(Ref<CommandBuffer> cmdBuf);
         static void End(Ref<Renderpass> renderpass);
-        static void Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy = ExecutionPolicy::InOrder | ExecutionPolicy::WaitForPrevious, Queue queue = Queue::Graphics, const std::vector<Ref<CommandBuffer>>& waitOn = {});
-        static void Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy = ExecutionPolicy::InOrder | ExecutionPolicy::WaitForPrevious, Queue queue = Queue::Graphics, const std::vector<Ref<CommandBuffer>>& waitOn = {});
+        static void Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy = ExecutionPolicy::InOrder | ExecutionPolicy::WaitForPrevious, Queue queue = Queue::Graphics, PipelineStage waitStage = PipelineStage::ColourAttachmentOutput, const std::vector<Ref<CommandBuffer>>& waitOn = {});
+        static void Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy = ExecutionPolicy::InOrder | ExecutionPolicy::WaitForPrevious, Queue queue = Queue::Graphics, PipelineStage waitStage = PipelineStage::ColourAttachmentOutput, const std::vector<Ref<CommandBuffer>>& waitOn = {});
 
         static void Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount = 3, uint32_t instanceCount = 1);
         static void DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount = 1);

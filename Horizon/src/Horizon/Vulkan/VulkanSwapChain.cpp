@@ -32,7 +32,7 @@ namespace Hz
 
 			VkCommandPoolCreateInfo poolInfo = {};
 			poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+			poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; // Allows us to reset the command buffer and reuse it.
 			poolInfo.queueFamilyIndex = queueFamilyIndices.GraphicsFamily.value();
 
 			VK_CHECK_RESULT(vkCreateCommandPool(VulkanContext::GetDevice()->GetVkDevice(), &poolInfo, nullptr, &m_CommandPool));

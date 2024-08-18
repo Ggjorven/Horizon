@@ -36,6 +36,7 @@ project "Horizon"
 		"%{Dependencies.glfw.IncludeDir}",
 		"%{Dependencies.glm.IncludeDir}",
 		"%{Dependencies.stb.IncludeDir}",
+		"%{Dependencies.assimp.IncludeDir}",
 		"%{Dependencies.Pulse.IncludeDir}",
 		"%{Dependencies.Tracy.IncludeDir}",
 	}
@@ -43,6 +44,7 @@ project "Horizon"
 	links
 	{
 		"%{Dependencies.glfw.LibName}",
+		"%{Dependencies.assimp.LibName}",
 		"%{Dependencies.Tracy.LibName}",
 		"%{Dependencies.Pulse.LibName}",
 	}
@@ -51,6 +53,7 @@ project "Horizon"
 		defines "HZ_PLATFORM_WINDOWS"
 		systemversion "latest"
 		staticruntime "on"
+		editandcontinue "off"
 
         defines
         {

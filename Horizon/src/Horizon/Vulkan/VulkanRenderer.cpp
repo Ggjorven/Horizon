@@ -18,7 +18,6 @@
 #include "Horizon/Vulkan/VulkanImage.hpp"
 
 #include <Pulse/Core/Defines.hpp>
-#include <Pulse/Enum/Enum.hpp>
 
 namespace Hz
 {
@@ -259,7 +258,7 @@ namespace Hz
         End(renderpass->GetCommandBuffer());
     }
 
-    void VulkanRenderer::Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
+    void VulkanRenderer::Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
         #if defined(HZ_CONFIG_DEBUG)
             VerifyExectionPolicy(policy);
@@ -294,7 +293,7 @@ namespace Hz
 				semaphores.push_back(semaphore);
 		}
 
-		std::vector<VkPipelineStageFlags> waitStages(semaphores.size(), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT); // TODO: Make customizable?
+		std::vector<VkPipelineStageFlags> waitStages(semaphores.size(), (VkPipelineStageFlagBits)waitStage);
 
 		submitInfo.waitSemaphoreCount = (uint32_t)semaphores.size();
 		submitInfo.pWaitSemaphores = semaphores.data();
@@ -329,13 +328,12 @@ namespace Hz
             break;
         }
 
-
 		s_Data->Manager.Add(vkCmdBuf, policy);
     }
 
-    void VulkanRenderer::Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
+    void VulkanRenderer::Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
-        Submit(renderpass->GetCommandBuffer(), policy, queue, waitOn);
+        Submit(renderpass->GetCommandBuffer(), policy, queue, waitStage, waitOn);
     }
 
     void VulkanRenderer::Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount)

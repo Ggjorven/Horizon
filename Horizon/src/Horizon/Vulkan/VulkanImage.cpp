@@ -5,11 +5,9 @@
 
 #include "Horizon/Renderer/Renderer.hpp"
 #include "Horizon/Renderer/GraphicsContext.hpp"
-#include "Horizon/Renderer/Descriptors.hpp"
 
 #include "Horizon/Vulkan/VulkanUtils.hpp"
 #include "Horizon/Vulkan/VulkanContext.hpp"
-#include "Horizon/Vulkan/VulkanDescriptors.hpp"
 #include "Horizon/Vulkan/VulkanCommandBuffer.hpp"
 
 #include <Pulse/Enum/Enum.hpp>
@@ -347,7 +345,7 @@ namespace Hz
 		// Check if image format supports linear blitting
 		VkFormatProperties formatProperties;
 		vkGetPhysicalDeviceFormatProperties(VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice(), imageFormat, &formatProperties);
-        HZ_VERIFY(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT, "Texture image format does not support linear blitting!");
+        HZ_VERIFY((formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT), "Texture image format does not support linear blitting!");
 
 		VulkanCommand command = VulkanCommand(true);
 

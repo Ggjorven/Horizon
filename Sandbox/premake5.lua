@@ -6,7 +6,7 @@ project "Sandbox"
 
 	architecture "x86_64"
 
-	-- debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+	debugdir ("%{wks.location}")
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -29,6 +29,7 @@ project "Sandbox"
 		"%{Dependencies.glfw.IncludeDir}",
 		"%{Dependencies.glm.IncludeDir}",
 		"%{Dependencies.stb.IncludeDir}",
+		"%{Dependencies.assimp.IncludeDir}",
 		"%{Dependencies.Pulse.IncludeDir}",
 		"%{Dependencies.Tracy.IncludeDir}",
 	}
@@ -50,6 +51,7 @@ project "Sandbox"
 		defines "HZ_PLATFORM_WINDOWS"
 		systemversion "latest"
 		staticruntime "on"
+		editandcontinue "off"
 
         defines
         {
@@ -75,6 +77,7 @@ project "Sandbox"
 		links
 		{
 			"%{Dependencies.glfw.LibName}",
+			"%{Dependencies.assimp.LibName}",
 			"%{Dependencies.Tracy.LibName}",
 			"%{Dependencies.Pulse.LibName}",
 

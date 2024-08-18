@@ -85,14 +85,14 @@ namespace Hz
         RendererType::End(renderpass);
     }
 
-    void Renderer::Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
+    void Renderer::Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
-        RendererType::Submit(cmdBuf, policy, queue, waitOn);
+        RendererType::Submit(cmdBuf, policy, queue, waitStage, waitOn);
     }
 
-    void Renderer::Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, const std::vector<Ref<CommandBuffer>>& waitOn)
+    void Renderer::Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
-        RendererType::Submit(renderpass, policy, queue, waitOn);
+        RendererType::Submit(renderpass, policy, queue, waitStage, waitOn);
     }
 
     void Renderer::Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount)

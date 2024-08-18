@@ -4,14 +4,6 @@
 
 #include <vector>
 
-// Position (vec2) and Color (vec3)
-const std::vector<float> vertexData = {
-    // Positions        // Colors
-    0.0f,  0.5f,        1.0f, 0.0f, 0.0f, // Vertex 1: Top vertex, Red
-    -0.5f, -0.5f,       0.0f, 1.0f, 0.0f, // Vertex 2: Bottom-left vertex, Green
-    0.5f, -0.5f,        0.0f, 0.0f, 1.0f  // Vertex 3: Bottom-right vertex, Blue
-};
-
 CustomApp::CustomApp()
 {
     WindowSpecification windowSpecs = { 1280, 720, "Window", [this](Event& e){ EventCallback(e); }};
@@ -25,46 +17,32 @@ CustomApp::CustomApp()
         .FinalColourImageLayout = ImageLayout::PresentSrcKHR
     });
 
-    m_DescriptorSets = DescriptorSets::Create({ });
+    m_DescriptorSets = DescriptorSets::Create({
+        DescriptorSetGroup(1, DescriptorSetLayout(0, {
+            { DescriptorType::CombinedImageSampler, 1, "u_Albedo", ShaderStage::Fragment }
+        }))
+    });
 
     Ref<Shader> shader = Shader::Create({
         .ShaderCode = {
-            { ShaderStage::Vertex, ShaderCompiler::Compile<ShadingLanguage::GLSL>(ShaderStage::Vertex, R"(
-#version 460
-
-layout(location = 0) in vec2 inPosition; // Input vertex position
-layout(location = 1) in vec3 inColor;    // Input vertex color
-
-layout(location = 0) out vec3 fragColor; // Output color to fragment shader
-
-void main() {
-    gl_Position = vec4(inPosition, 0.0, 1.0); // Transform vertex position
-    fragColor = inColor;                      // Pass color to fragment shader
-}
-            )") },
-            { ShaderStage::Fragment, ShaderCompiler::Compile<ShadingLanguage::GLSL>(ShaderStage::Fragment, R"(
-#version 460
-
-layout(location = 0) in vec3 fragColor; // Input color from vertex shader
-
-layout(location = 0) out vec4 outColor; // Output color to framebuffer
-
-void main() {
-    outColor = vec4(fragColor, 1.0); // Set the output color (with full opacity)
-}
-            )") },
+            { ShaderStage::Vertex, ShaderCompiler::Compile(ShaderStage::Vertex, Shader::ReadGLSL("Sandbox/temp/shader.vert.glsl")) },
+            { ShaderStage::Fragment, ShaderCompiler::Compile(ShaderStage::Fragment, Shader::ReadGLSL("Sandbox/temp/shader.frag.glsl")) }
         }
     });
 
-    m_VertexBuffer = VertexBuffer::Create({ .Usage = BufferMemoryUsage::GPU }, (void*)vertexData.data(), sizeof(vertexData[0]) * vertexData.size());
-
     m_Pipeline = Pipeline::Create({
-        .Bufferlayout = BufferLayout({
-            { DataType::Float2, 0, "inPosition" },
-            { DataType::Float3, 1, "inColor" },
-        }),
+        .Bufferlayout = MeshVertex::GetLayout(),
         .Cullingmode = CullingMode::None,
     }, m_DescriptorSets, shader, m_Renderpass);
+
+    m_Mesh = Mesh::Create("Sandbox/temp/viking_room.obj");
+
+    ImageSpecification specs = { "Sandbox/temp/viking_room.png" };
+    specs.MipMaps = false;
+    m_Texture = Image::Create(specs);
+
+    //auto set = m_DescriptorSets->GetSets(0)[0];
+    //set->UploadAll({ Uploadable(m_Texture, m_DescriptorSets->GetLayout(0).GetDescriptorByName("u_Albedo")) });
 }
 
 CustomApp::~CustomApp()
@@ -72,7 +50,9 @@ CustomApp::~CustomApp()
     m_Pipeline.Reset();
     m_Renderpass.Reset();
     m_DescriptorSets.Reset();
-    m_VertexBuffer.Reset();
+
+    m_Mesh.Reset();
+    m_Texture.Reset();
 }
 
 void CustomApp::Run()
@@ -90,10 +70,16 @@ void CustomApp::Run()
 
         Renderer::Begin(m_Renderpass);
 
-        m_Pipeline->Use(m_Renderpass->GetCommandBuffer());
-        m_VertexBuffer->Bind(m_Renderpass->GetCommandBuffer());
+        auto& set = m_DescriptorSets->GetSets(0)[0];
+        set->Upload({ Uploadable(m_Texture, m_DescriptorSets->GetLayout(0).GetDescriptorByName("u_Albedo")) });
 
-        Renderer::Draw(m_Renderpass->GetCommandBuffer(), 3);
+        m_Pipeline->Use(m_Renderpass->GetCommandBuffer());
+        m_Mesh->GetVertexBuffer()->Bind(m_Renderpass->GetCommandBuffer());
+        m_Mesh->GetIndexBuffer()->Bind(m_Renderpass->GetCommandBuffer());
+
+        set->Bind(m_Pipeline, m_Renderpass->GetCommandBuffer());
+
+        Renderer::DrawIndexed(m_Renderpass->GetCommandBuffer(), m_Mesh->GetIndexBuffer());
 
         Renderer::End(m_Renderpass);
         Renderer::Submit(m_Renderpass);

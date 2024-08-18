@@ -10,6 +10,9 @@
 #include <Horizon/Renderer/Pipeline.hpp>
 #include <Horizon/Renderer/Renderpass.hpp>
 #include <Horizon/Renderer/Descriptors.hpp>
+#include <Horizon/Renderer/Image.hpp>
+
+#include "Temp/Mesh.hpp" // TODO: Remove
 
 #include <Pulse/Time/Timer.hpp>
 
@@ -34,5 +37,7 @@ private:
     Ref<Pipeline> m_Pipeline = nullptr;
     Ref<Renderpass> m_Renderpass = nullptr;
     Ref<DescriptorSets> m_DescriptorSets = nullptr;
-    Ref<VertexBuffer> m_VertexBuffer = nullptr;
+
+    Ref<Mesh> m_Mesh = nullptr;
+    Ref<Image> m_Texture = nullptr;
 };

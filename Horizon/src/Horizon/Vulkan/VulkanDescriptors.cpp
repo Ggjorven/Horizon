@@ -35,10 +35,12 @@ namespace Hz
     void VulkanDescriptorSet::Upload(const std::initializer_list<Uploadable>& elements)
     {
         std::vector<VkWriteDescriptorSet> writes;
-        writes.reserve(elements.size() * (size_t)Renderer::GetSpecification().Buffers);
+        writes.reserve(elements.size());
 
         std::vector<VkDescriptorImageInfo> imageInfos = {};
         std::vector<VkDescriptorBufferInfo> bufferInfos = {};
+
+        uint32_t frame = Renderer::GetCurrentFrame();
 
         for (auto& [uploadable, descriptor] : elements)
         {
@@ -46,82 +48,107 @@ namespace Hz
             {
                 using T = Pulse::Types::Clean<decltype(arg)>;
 
-                if (std::is_same_v<T, Ref<Image>>)                  UploadImage(writes, imageInfos, arg, descriptor);
-                else if (std::is_same_v<T, Ref<UniformBuffer>>)     UploadUniformBuffer(writes, bufferInfos, arg, descriptor);
-                else if (std::is_same_v<T, Ref<StorageBuffer>>)     UploadStorageBuffer(writes, bufferInfos, arg, descriptor);
+                if constexpr (std::is_same_v<T, Ref<Image>>)                  UploadImage(writes, imageInfos, arg, descriptor, frame);
+                else if constexpr (std::is_same_v<T, Ref<UniformBuffer>>)     UploadUniformBuffer(writes, bufferInfos, arg, descriptor, frame);
+                else if constexpr (std::is_same_v<T, Ref<StorageBuffer>>)     UploadStorageBuffer(writes, bufferInfos, arg, descriptor, frame);
             }, uploadable);
         }
 
         vkUpdateDescriptorSets(VulkanContext::GetDevice()->GetVkDevice(), static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
     }
 
-    void VulkanDescriptorSet::UploadImage(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorImageInfo>& imageInfos, Ref<Image> image, Descriptor descriptor)
+    void VulkanDescriptorSet::UploadAll(const std::initializer_list<Uploadable>& elements)
     {
-        Ref<VulkanImage> src = image.As<VulkanImage>();
+        const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetSpecification().Buffers);
 
-		const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
-		for (size_t i = 0; i < framesInFlight; i++)
-		{
-			VkDescriptorImageInfo& imageInfo = imageInfos.emplace_back();
-			imageInfo.imageLayout = (VkImageLayout)src->m_Specification.Layout;
-			imageInfo.imageView = src->m_ImageView;
-			imageInfo.sampler = src->m_Sampler;
+        std::vector<std::vector<VkWriteDescriptorSet>> writes((size_t)framesInFlight);
+        for (auto& write : writes) write.reserve(elements.size());
 
-			VkWriteDescriptorSet& descriptorWrite = writes.emplace_back();
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = m_DescriptorSets[i];
-			descriptorWrite.dstBinding = descriptor.Binding;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = (VkDescriptorType)descriptor.Type;
-			descriptorWrite.descriptorCount = descriptor.Count;
-			descriptorWrite.pImageInfo = &imageInfo;
-		}
+        std::vector<std::vector<VkDescriptorImageInfo>> imageInfos((size_t)framesInFlight);
+        std::vector<std::vector<VkDescriptorBufferInfo>> bufferInfos((size_t)framesInFlight);
+
+        for (auto& [uploadable, descriptor] : elements)
+        {
+            std::visit([&](auto&& arg)
+            {
+                using T = Pulse::Types::Clean<decltype(arg)>;
+
+                if constexpr (std::is_same_v<T, Ref<Image>>)
+                {
+                    for (uint32_t frame = 0; frame < framesInFlight; frame++)
+                        UploadImage(writes[frame], imageInfos[frame], arg, descriptor, frame);
+                }
+                else if constexpr (std::is_same_v<T, Ref<UniformBuffer>>)
+                {
+                    for (uint32_t frame = 0; frame < framesInFlight; frame++)
+                        UploadUniformBuffer(writes[frame], bufferInfos[frame], arg, descriptor, frame);
+                }
+                else if constexpr (std::is_same_v<T, Ref<StorageBuffer>>)
+                {
+                    for (uint32_t frame = 0; frame < framesInFlight; frame++)
+                        UploadStorageBuffer(writes[frame], bufferInfos[frame], arg, descriptor, frame);
+                }
+            }, uploadable);
+        }
+
+        for (auto& write : writes)
+            vkUpdateDescriptorSets(VulkanContext::GetDevice()->GetVkDevice(), static_cast<uint32_t>(write.size()), write.data(), 0, nullptr);
     }
 
-    void VulkanDescriptorSet::UploadUniformBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<UniformBuffer> buffer, Descriptor descriptor)
+    void VulkanDescriptorSet::QueueUpload(const std::initializer_list<Uploadable> &elements)
     {
-        Ref<VulkanUniformBuffer> src = buffer.As<VulkanUniformBuffer>();
-
-		const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
-		for (size_t i = 0; i < framesInFlight; i++)
-		{
-			VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
-			bufferInfo.buffer = src->m_Buffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = src->m_Size;
-
-			VkWriteDescriptorSet& descriptorWrite = writes.emplace_back();
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = m_DescriptorSets[i];
-			descriptorWrite.dstBinding = descriptor.Binding;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrite.descriptorCount = descriptor.Count;
-			descriptorWrite.pBufferInfo = &bufferInfo;
-		}
+        HZ_ASSERT(0, "TODO: Implement -> QueueUpload()");
     }
 
-    void VulkanDescriptorSet::UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<StorageBuffer> buffer, Descriptor descriptor)
+    void VulkanDescriptorSet::UploadImage(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorImageInfo>& imageInfos, Ref<VulkanImage> image, Descriptor descriptor, uint32_t frame)
     {
-        Ref<VulkanStorageBuffer> src = buffer.As<VulkanStorageBuffer>();
+        VkDescriptorImageInfo& imageInfo = imageInfos.emplace_back();
+        imageInfo.imageLayout = (VkImageLayout)image->m_Specification.Layout;
+        imageInfo.imageView = image->m_ImageView;
+        imageInfo.sampler = image->m_Sampler;
 
-		const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
-		for (size_t i = 0; i < framesInFlight; i++)
-		{
-			VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
-			bufferInfo.buffer = src->m_Buffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = src->m_Size;
+        VkWriteDescriptorSet& descriptorWrite = writes.emplace_back();
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = m_DescriptorSets[frame];
+        descriptorWrite.dstBinding = descriptor.Binding;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = (VkDescriptorType)descriptor.Type;
+        descriptorWrite.descriptorCount = descriptor.Count;
+        descriptorWrite.pImageInfo = &imageInfo;
+    }
 
-			VkWriteDescriptorSet& descriptorWrite = writes.emplace_back();
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = m_DescriptorSets[i];
-			descriptorWrite.dstBinding = descriptor.Binding;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			descriptorWrite.descriptorCount = descriptor.Count;
-			descriptorWrite.pBufferInfo = &bufferInfo;
-		}
+    void VulkanDescriptorSet::UploadUniformBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<VulkanUniformBuffer> buffer, Descriptor descriptor, uint32_t frame)
+    {
+        VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
+        bufferInfo.buffer = buffer->m_Buffers[frame];
+        bufferInfo.offset = 0;
+        bufferInfo.range = buffer->m_Size;
+
+        VkWriteDescriptorSet& descriptorWrite = writes.emplace_back();
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = m_DescriptorSets[frame];
+        descriptorWrite.dstBinding = descriptor.Binding;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrite.descriptorCount = descriptor.Count;
+        descriptorWrite.pBufferInfo = &bufferInfo;
+    }
+
+    void VulkanDescriptorSet::UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<VulkanStorageBuffer> buffer, Descriptor descriptor, uint32_t frame)
+    {
+        VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
+        bufferInfo.buffer = buffer->m_Buffers[frame];
+        bufferInfo.offset = 0;
+        bufferInfo.range = buffer->m_Size;
+
+        VkWriteDescriptorSet& descriptorWrite = writes.emplace_back();
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = m_DescriptorSets[frame];
+        descriptorWrite.dstBinding = descriptor.Binding;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        descriptorWrite.descriptorCount = descriptor.Count;
+        descriptorWrite.pBufferInfo = &bufferInfo;
     }
 
     VulkanDescriptorSets::VulkanDescriptorSets(const std::initializer_list<DescriptorSetGroup>& specs)

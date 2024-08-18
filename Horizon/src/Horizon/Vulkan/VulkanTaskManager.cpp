@@ -72,7 +72,7 @@ namespace Hz
     {
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
-        for (size_t frame = 0; frame < (size_t)Renderer::GetSpecification().Buffers; frame++)
+        for (uint32_t frame = 0; frame < (uint32_t)Renderer::GetSpecification().Buffers; frame++)
             Remove(semaphore, frame);
     }
 
@@ -97,7 +97,7 @@ namespace Hz
     {
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
-        for (size_t frame = 0; frame < (size_t)Renderer::GetSpecification().Buffers; frame++)
+        for (uint32_t frame = 0; frame < (uint32_t)Renderer::GetSpecification().Buffers; frame++)
             Remove(fence, frame);
     }
 

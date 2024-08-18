@@ -78,6 +78,7 @@ bool ValidationLayersSupported()
 namespace Hz
 {
 
+    // For extreme verbosity add extension: "VK_LAYER_LUNARG_api_dump"
     const std::vector<const char*> VulkanContext::s_RequestedValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 	const std::vector<const char*> VulkanContext::s_RequestedDeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
@@ -122,9 +123,9 @@ namespace Hz
 		///////////////////////////////////////////////////////////
 		VkApplicationInfo appInfo = {};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "CherryTree Application";
+		appInfo.pApplicationName = "Horizon Application";
 		appInfo.applicationVersion = VK_MAKE_API_VERSION(0, Version.first, Version.second, 0);
-		appInfo.pEngineName = "CherryTree Engine";
+		appInfo.pEngineName = "Horizon Engine";
 		appInfo.engineVersion = VK_MAKE_API_VERSION(0, Version.first, Version.second, 0);
 		appInfo.apiVersion = VK_MAKE_API_VERSION(0, Version.first, Version.second, 0);
 

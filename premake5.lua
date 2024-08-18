@@ -58,6 +58,11 @@ Dependencies =
 	{
 		IncludeDir = "%{wks.location}/vendor/stb"
 	},
+    assimp =
+	{
+        LibName = "Assimp",
+		IncludeDir = "%{wks.location}/vendor/assimp/include"
+	},
 	Pulse =
 	{
 		LibName = "Pulse",
@@ -94,6 +99,7 @@ workspace "Horizon"
 
 group "Dependencies"
 	include "vendor/glfw"
+    include "vendor/assimp"
     include "vendor/tracy"
 	include "vendor/Pulse/Pulse"
 group ""
