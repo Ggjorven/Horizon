@@ -3,6 +3,7 @@
 #include <Horizon/Core/Input/KeyCodes.hpp>
 #include <Horizon/Core/Input/MouseCodes.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 
 namespace Hz
@@ -12,13 +13,13 @@ namespace Hz
 	class Input
 	{
 	public:
-		bool IsKeyPressed(Key keycode);
-		bool IsMousePressed(MouseButton button);
+		static bool IsKeyPressed(Key keycode);
+		static bool IsMousePressed(MouseButton button);
 
-		glm::vec2 GetCursorPosition();
-		void SetCursorPosition(glm::vec2 position);
+		static glm::vec2 GetCursorPosition();
+		static void SetCursorPosition(glm::vec2 position);
 
-		void SetCursorMode(CursorMode mode);
+		static void SetCursorMode(CursorMode mode);
 	};
 
 }

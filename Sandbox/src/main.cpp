@@ -1,9 +1,9 @@
-#include "CustomApp.hpp"
+#include "Example/ExampleApp.hpp"
 
 int main(int argc, char* argv[])
 {
     {
-        CustomApp app = {};
+        ExampleApp app = {};
         app.Run();
     }
 

@@ -104,7 +104,7 @@ namespace Hz
 		BufferLayout Bufferlayout = {};
 
 		PolygonMode Polygonmode = PolygonMode::Fill;
-		CullingMode Cullingmode = CullingMode::Front;
+		CullingMode Cullingmode = CullingMode::Front; // Note: Before blaming the culling mode, make sure you have depth in your renderpass ;)
 
 		float LineWidth = 1.0f;
 		bool Blending = false;

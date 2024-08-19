@@ -51,7 +51,7 @@ namespace Hz
 		LoadOperation DepthLoadOp = LoadOperation::Clear;
         StoreOperation DepthStoreOp = StoreOperation::Store;
 		ImageLayout PreviousDepthImageLayout = ImageLayout::Undefined;
-		ImageLayout FinalDepthImageLayout = ImageLayout::Depth;
+		ImageLayout FinalDepthImageLayout = ImageLayout::DepthStencil;
 	};
 
     ///////////////////////////////////////////////////////////

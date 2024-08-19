@@ -1,4 +1,5 @@
-#include "Mesh.hpp"
+#include "hzpch.h"
+#include "StaticMesh.hpp"
 
 #include "Horizon/Core/Logging.hpp"
 
@@ -11,22 +12,20 @@
 namespace Hz
 {
 
-	static void LoadModel(const std::filesystem::path& path, std::vector<MeshVertex>& vertices, std::vector<uint32_t>& indices);
-	static void ProcessNode(aiNode* node, const aiScene* scene, std::vector<MeshVertex>& vertices, std::vector<uint32_t>& indices);
-	static void ProcessMesh(aiMesh* mesh, const aiScene* scene, std::vector<MeshVertex>& vertices, std::vector<uint32_t>& indices);
+	static void LoadModel(const std::filesystem::path& path, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices);
+	static void ProcessNode(aiNode* node, const aiScene* scene, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices);
+	static void ProcessMesh(aiMesh* mesh, const aiScene* scene, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices);
 
-	BufferLayout MeshVertex::GetLayout()
+	BufferLayout StaticMeshVertex::GetLayout()
 	{
-		static BufferLayout layout = {
+		return {
 			BufferElement(DataType::Float3, 0, "a_Position"),
 			BufferElement(DataType::Float2, 1, "a_TexCoord"),
 			BufferElement(DataType::Float3, 2, "a_Normal")
 		};
-
-		return layout;
 	}
 
-	Mesh::Mesh(const std::filesystem::path& path)
+	StaticMesh::StaticMesh(const std::filesystem::path& path)
 	{
 		if (!std::filesystem::exists(path))
 		{
@@ -34,7 +33,7 @@ namespace Hz
 			return;
 		}
 
-		std::vector<MeshVertex> vertices = { };
+		std::vector<StaticMeshVertex> vertices = { };
 		std::vector<uint32_t> indices = { };
 
 		LoadModel(path, vertices, indices);
@@ -43,17 +42,17 @@ namespace Hz
 		m_IndexBuffer = IndexBuffer::Create({}, indices.data(), (uint32_t)indices.size());
 	}
 
-	Ref<Mesh> Mesh::Create(const std::filesystem::path& path)
+	Ref<StaticMesh> StaticMesh::Create(const std::filesystem::path& path)
 	{
-		return Ref<Mesh>::Create(path);
+		return Ref<StaticMesh>::Create(path);
 	}
 
-	static void LoadModel(const std::filesystem::path& path, std::vector<MeshVertex>& vertices, std::vector<uint32_t>& indices)
+	static void LoadModel(const std::filesystem::path& path, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices)
 	{
 		Assimp::Importer importer = {};
 
 		uint32_t flags = aiProcess_Triangulate | aiProcess_CalcTangentSpace;
-		if (RendererSpecification::API == RenderingAPI::Vulkan)
+		if constexpr (RendererSpecification::API == RenderingAPI::Vulkan)
 			flags |= aiProcess_FlipUVs;
 
 		const aiScene* scene = importer.ReadFile(path.string(), flags);
@@ -66,7 +65,7 @@ namespace Hz
 		ProcessNode(scene->mRootNode, scene, vertices, indices);
 	}
 
-	static void ProcessNode(aiNode* node, const aiScene* scene, std::vector<MeshVertex>& vertices, std::vector<uint32_t>& indices)
+	static void ProcessNode(aiNode* node, const aiScene* scene, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices)
 	{
 		// Process all the node's meshes
 		for (uint32_t i = 0; i < node->mNumMeshes; i++)
@@ -80,11 +79,11 @@ namespace Hz
 			ProcessNode(node->mChildren[i], scene, vertices, indices);
 	}
 
-	static void ProcessMesh(aiMesh* mesh, const aiScene* scene, std::vector<MeshVertex>& vertices, std::vector<uint32_t>& indices)
+	static void ProcessMesh(aiMesh* mesh, const aiScene* scene, std::vector<StaticMeshVertex>& vertices, std::vector<uint32_t>& indices)
 	{
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 		{
-			MeshVertex vertex = {};
+			StaticMeshVertex vertex = {};
 			glm::vec3 vector(0.0f);
 
 			// Position
@@ -124,5 +123,6 @@ namespace Hz
 				indices.push_back(face.mIndices[j]);
 		}
 	}
+
 
 }

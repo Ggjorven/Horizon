@@ -37,7 +37,7 @@ namespace Hz
 		return VK_FORMAT_UNDEFINED;
 	}
 
-    VulkanVertexBuffer::VulkanVertexBuffer(const BufferSpecification &specs, void *data, size_t size)
+    VulkanVertexBuffer::VulkanVertexBuffer(const BufferSpecification& specs, void* data, size_t size)
         : m_BufferSize(size)
     {
         m_Allocation = VkUtils::Allocator::AllocateBuffer(m_BufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
@@ -126,21 +126,28 @@ namespace Hz
     }
 
     VulkanUniformBuffer::VulkanUniformBuffer(const BufferSpecification& specs, size_t dataSize)
+        : m_Size(dataSize)
     {
+        #if defined(HZ_CONFIG_DEBUG)
+        if (specs.Usage == BufferMemoryUsage::GPU)
+        {
+            HZ_LOG_WARN("Creating a UniformBuffer solely on the GPU. This means SetData() cannot be used. Was this intented? If not, use: CPUToGPU.");
+        }
+        #endif
+
         const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
 		m_Buffers.resize(framesInFlight);
 		m_Allocations.resize(framesInFlight);
 
 		for (size_t i = 0; i < framesInFlight; i++)
-			m_Allocations[i] = VkUtils::Allocator::AllocateBuffer((VkDeviceSize)dataSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, (VmaMemoryUsage)specs.Usage, m_Buffers[i]);
+			m_Allocations[i] = VkUtils::Allocator::AllocateBuffer((VkDeviceSize)dataSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, (VmaMemoryUsage)specs.Usage, m_Buffers[i], VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 	}
 
     VulkanUniformBuffer::~VulkanUniformBuffer()
     {
         Renderer::Free([buffers = m_Buffers, allocations = m_Allocations]()
         {
-            const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
-            for (size_t i = 0; i < framesInFlight; i++)
+            for (size_t i = 0; i < buffers.size(); i++)
             {
                 if (buffers[i] != VK_NULL_HANDLE)
                     VkUtils::Allocator::DestroyBuffer(buffers[i], allocations[i]);
@@ -163,7 +170,15 @@ namespace Hz
     }
 
     VulkanStorageBuffer::VulkanStorageBuffer(const BufferSpecification& specs, size_t dataSize)
+        : m_Size(dataSize)
     {
+        #if defined(HZ_CONFIG_DEBUG)
+        if (specs.Usage == BufferMemoryUsage::GPU)
+        {
+            HZ_LOG_WARN("Creating a StorageBuffer solely on the GPU. This means SetData() cannot be used. Was this intented? If not, use: CPUToGPU.");
+        }
+        #endif
+
         const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
 		m_Buffers.resize(framesInFlight);
 		m_Allocations.resize(framesInFlight);
@@ -176,8 +191,7 @@ namespace Hz
     {
         Renderer::Free([buffers = m_Buffers, allocations = m_Allocations]()
         {
-            const size_t framesInFlight = (size_t)Renderer::GetSpecification().Buffers;
-            for (size_t i = 0; i < framesInFlight; i++)
+            for (size_t i = 0; i < buffers.size(); i++)
             {
                 if (buffers[i] != VK_NULL_HANDLE)
                     VkUtils::Allocator::DestroyBuffer(buffers[i], allocations[i]);
