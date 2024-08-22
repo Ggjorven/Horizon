@@ -34,3 +34,5 @@
 make
 **.make
 Makefile
+
+.DS_Store
