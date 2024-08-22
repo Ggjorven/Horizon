@@ -47,6 +47,7 @@ project "Tracy"
 		}
 
 	filter "system:linux"
+		systemversion "latest"
 		staticruntime "On"
 
 		files
@@ -58,6 +59,28 @@ project "Tracy"
 			"tracy/public/libbacktrace/elf.cpp",
 			"tracy/public/libbacktrace/dwarf.cpp",
 		}
+
+	filter "system:macosx"
+		systemversion "latest"
+		staticruntime "On"
+
+		files
+		{
+			"tracy/public/libbacktrace/posix.cpp",
+			"tracy/public/libbacktrace/mmapio.cpp",
+			"tracy/public/libbacktrace/macho.cpp",
+			"tracy/public/libbacktrace/fileline.cpp",
+			"tracy/public/libbacktrace/elf.cpp",
+			"tracy/public/libbacktrace/dwarf.cpp",
+		}
+
+		-- Note: If we don't add the header files to the sysincluddirs
+		-- we can't use <angled> brackets to include files.
+		sysincludedirs
+		{
+			"tracy/public/"
+		}
+
 
 	filter "configurations:Debug"
 		runtime "Debug"

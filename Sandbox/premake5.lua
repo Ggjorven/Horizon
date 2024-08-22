@@ -96,6 +96,26 @@ project "Sandbox"
 			"%{Dependencies.Vulkan.MacOS.IncludeDir}",
 		}
 
+		-- Note: If we don't add the header files to the sysincluddirs
+		-- we can't use <angled> brackets to include files.
+		sysincludedirs
+		{
+			"src",
+			"%{wks.location}/vendor",
+	
+			"%{wks.location}/Horizon/src",
+	
+			"%{Dependencies.spdlog.IncludeDir}",
+			"%{Dependencies.glfw.IncludeDir}",
+			"%{Dependencies.glm.IncludeDir}",
+			"%{Dependencies.stb.IncludeDir}",
+			"%{Dependencies.assimp.IncludeDir}",
+			"%{Dependencies.Pulse.IncludeDir}",
+			"%{Dependencies.Tracy.IncludeDir}",
+
+			"%{Dependencies.Vulkan.MacOS.IncludeDir}",
+		}
+
 	filter "configurations:Debug"
 		defines "HZ_CONFIG_DEBUG"
 		runtime "Debug"

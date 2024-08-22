@@ -9,6 +9,7 @@ project "Horizon"
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+	-- Note: VS2022/Make only need the pchheader filename
 	pchheader "hzpch.h"
 	pchsource "src/Horizon/hzpch.cpp"
 
@@ -97,6 +98,9 @@ project "Horizon"
 		systemversion "latest"
 		staticruntime "on"
 
+		-- Note: XCode only needs the full pchheader path
+		pchheader "src/Horizon/hzpch.h"
+
 		includedirs
 		{
 			"%{Dependencies.Vulkan.MacOS.IncludeDir}"
@@ -108,6 +112,24 @@ project "Horizon"
             "%{Dependencies.Vulkan.MacOS.LibDir}/%{Dependencies.ShaderC.LibName}",
 
             -- TODO: Check for any other links needed
+		}
+
+		-- Note: If we don't add the header files to the sysincluddirs
+		-- we can't use <angled> brackets to include files.
+		sysincludedirs
+		{
+			"src",
+			"src/Horizon",
+
+			"%{Dependencies.spdlog.IncludeDir}",
+			"%{Dependencies.glfw.IncludeDir}",
+			"%{Dependencies.glm.IncludeDir}",
+			"%{Dependencies.stb.IncludeDir}",
+			"%{Dependencies.assimp.IncludeDir}",
+			"%{Dependencies.Pulse.IncludeDir}",
+			"%{Dependencies.Tracy.IncludeDir}",
+
+			"%{Dependencies.Vulkan.MacOS.IncludeDir}",
 		}
 
 	filter "configurations:Debug"
