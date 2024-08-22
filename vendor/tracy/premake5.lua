@@ -61,7 +61,7 @@ project "Tracy"
 		}
 
 	filter "system:macosx"
-		systemversion "latest"
+		systemversion "14.5"
 		staticruntime "On"
 
 		files

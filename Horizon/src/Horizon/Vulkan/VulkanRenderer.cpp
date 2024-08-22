@@ -267,7 +267,6 @@ namespace Hz
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
 		uint32_t currentFrame = GetCurrentFrame();
-		auto device = VulkanContext::GetDevice()->GetVkDevice();
 		VkCommandBuffer commandBuffer = vkCmdBuf->m_CommandBuffers[currentFrame];
 
 		VkSubmitInfo submitInfo = {};

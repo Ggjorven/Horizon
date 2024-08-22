@@ -42,9 +42,9 @@ namespace Hz
 
         uint32_t frame = Renderer::GetCurrentFrame();
 
-        for (auto& [uploadable, descriptor] : elements)
+        for (const auto& [uploadable, descriptor] : elements)
         {
-            std::visit([&](auto&& arg)
+            std::visit([&, descriptor](auto&& arg)
             {
                 using T = Pulse::Types::Clean<decltype(arg)>;
 
@@ -67,9 +67,9 @@ namespace Hz
         std::vector<std::vector<VkDescriptorImageInfo>> imageInfos((size_t)framesInFlight);
         std::vector<std::vector<VkDescriptorBufferInfo>> bufferInfos((size_t)framesInFlight);
 
-        for (auto& [uploadable, descriptor] : elements)
+        for (const auto& [uploadable, descriptor] : elements)
         {
-            std::visit([&](auto&& arg)
+            std::visit([&, descriptor](auto&& arg)
             {
                 using T = Pulse::Types::Clean<decltype(arg)>;
 
