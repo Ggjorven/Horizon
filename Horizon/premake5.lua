@@ -95,7 +95,7 @@ project "Horizon"
     -- TODO: Properly implement MacOS
     filter "system:macosx"
 		defines "HZ_PLATFORM_MACOS"
-		systemversion "latest"
+		systemversion "14.5"
 		staticruntime "on"
 
 		-- Note: XCode only needs the full pchheader path
@@ -114,9 +114,9 @@ project "Horizon"
             -- TODO: Check for any other links needed
 		}
 
-		-- Note: If we don't add the header files to the sysincluddirs
+		-- Note: If we don't add the header files to the externalincludedirs
 		-- we can't use <angled> brackets to include files.
-		sysincludedirs
+		externalincludedirs
 		{
 			"src",
 			"src/Horizon",
