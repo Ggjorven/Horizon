@@ -85,7 +85,6 @@ project "Sandbox"
             "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.LibName}",
 		}
 
-    -- TODO: Properly implement MacOS
     filter "system:macosx"
 		defines "HZ_PLATFORM_MACOS"
 		systemversion "14.5"
@@ -95,6 +94,36 @@ project "Sandbox"
 		{
 			"%{Dependencies.Vulkan.MacOS.IncludeDir}",
 		}
+
+		libdirs
+		{
+			"%{Dependencies.Vulkan.MacOS.LibDir}",
+			"%{Dependencies.Vulkan.MacOS.LibDir2}",
+		}
+
+		links
+		{
+			"%{Dependencies.Vulkan.MacOS.LibName}",
+			"%{Dependencies.ShaderC.MacOS.LibName}",
+
+			"AppKit.framework",
+			"IOKit.framework",
+			"CoreGraphics.framework",
+			"CoreFoundations.framework",
+		}
+
+		postbuildcommands
+		{
+			'{COPYFILE} "%{Dependencies.Vulkan.MacOS.DynamicLib}" "%{cfg.targetdir}"'
+		}
+
+		-- embed
+		-- {
+		-- 	"AppKit.framework",
+		-- 	"IOKit.framework",
+		-- 	"CoreGraphics.framework",
+		-- 	"CoreFoundations.framework",
+		-- }
 
 		-- Note: If we don't add the header files to the externalincludedirs
 		-- we can't use <angled> brackets to include files.

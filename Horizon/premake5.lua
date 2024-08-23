@@ -69,9 +69,7 @@ project "Horizon"
 		links
 		{
 			"%{Dependencies.Vulkan.Windows.LibDir}/%{Dependencies.Vulkan.Windows.LibName}",
-			"%{Dependencies.Vulkan.Windows.LibDir}/%{Dependencies.ShaderC.LibName}",
-
-			"opengl32"
+			"%{Dependencies.Vulkan.Windows.LibDir}/%{Dependencies.ShaderC.Windows.LibName}",
 		}
 
 	filter "system:linux"
@@ -87,12 +85,11 @@ project "Horizon"
 		links
 		{
 			"%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.Vulkan.Linux.LibName}",
-            "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.LibName}",
+            "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.Linux.LibName}",
 
 			"Xrandr", "Xi", "GLU", "GL", "X11", "dl", "pthread", "stdc++fs"
 		}
 
-    -- TODO: Properly implement MacOS
     filter "system:macosx"
 		defines "HZ_PLATFORM_MACOS"
 		systemversion "14.5"
@@ -104,14 +101,6 @@ project "Horizon"
 		includedirs
 		{
 			"%{Dependencies.Vulkan.MacOS.IncludeDir}"
-		}
-
-		links
-		{
-			"%{Dependencies.Vulkan.MacOS.LibDir}/%{Dependencies.Vulkan.MacOS.LibName}",
-            "%{Dependencies.Vulkan.MacOS.LibDir}/%{Dependencies.ShaderC.LibName}",
-
-            -- TODO: Check for any other links needed
 		}
 
 		-- Note: If we don't add the header files to the externalincludedirs

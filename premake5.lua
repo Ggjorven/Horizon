@@ -22,22 +22,29 @@ Dependencies =
 			IncludeDir = "%{VULKAN_SDK}/include/",
 			LibDir = "%{VULKAN_SDK}/lib/"
 		},
-        MacOS = -- TODO: Implement -- Note: We expect VULKAN_SDK to be /Users/XXX/VulkanSDK/XVersionX/ (macOS or iOS)
+        MacOS = -- Note: We expect VULKAN_SDK to be /Users/XXX/VulkanSDK/XVersionX/ (macOS or iOS)
 		{
-			LibName = "vulkan",
+			LibName = "MoltenVK",
 			IncludeDir = "%{VULKAN_SDK}/../macOS/include/",
-			LibDir = "%{VULKAN_SDK}/../macOS/lib/"
+			LibDir = "%{VULKAN_SDK}/../macOS/lib/",
+			LibDir2 = "%{VULKAN_SDK}/../macOS/lib/MoltenVK.xcframework/macos-arm64_x86_64/",
+			DynamicLib = "%{VULKAN_SDK}/../macOS/lib/libMoltenVK.dylib",
 		},
-        iOS = -- Not supported -- Note: We expect VULKAN_SDK to be /Users/XXX/VulkanSDK/XVersionX/ (macOS or iOS)
+        iOS = -- (Not supported) -- Note: We expect VULKAN_SDK to be /Users/XXX/VulkanSDK/XVersionX/ (macOS or iOS)
 		{
-			LibName = "vulkan",
+			LibName = "MoltenVK",
 			IncludeDir = "%{VULKAN_SDK}/../iOS/include/",
-			LibDir = "%{VULKAN_SDK}/../iOS/lib/"
+			LibDir = "%{VULKAN_SDK}/../iOS/lib/",
+			LibDir2 = "%{VULKAN_SDK}/../macOS/lib/MoltenVK.xcframework/macos-arm64_x86_64/",
+			DynamicLib = "%{VULKAN_SDK}/../macOS/lib/libMoltenVK.dylib",
 		}
 	},
 	ShaderC =
 	{
-		LibName = "shaderc_shared"
+		Windows = { LibName = "shaderc_shared" }
+		Linux = { LibName = "shaderc_shared" }
+		MacOS = { LibName = "shaderc_combined" }
+		iOS = { LibName = "shaderc_combined" }
 	},
 
 	-- All other Third-Party libraries
