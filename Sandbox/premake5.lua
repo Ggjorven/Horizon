@@ -109,7 +109,7 @@ project "Sandbox"
 			"AppKit.framework",
 			"IOKit.framework",
 			"CoreGraphics.framework",
-			"CoreFoundations.framework",
+			"CoreFoundation.framework",
 		}
 
 		postbuildcommands
@@ -122,7 +122,7 @@ project "Sandbox"
 		-- 	"AppKit.framework",
 		-- 	"IOKit.framework",
 		-- 	"CoreGraphics.framework",
-		-- 	"CoreFoundations.framework",
+		-- 	"CoreFoundation.framework",
 		-- }
 
 		-- Note: If we don't add the header files to the externalincludedirs
