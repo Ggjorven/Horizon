@@ -41,10 +41,10 @@ Dependencies =
 	},
 	ShaderC =
 	{
-		Windows = { LibName = "shaderc_shared" }
-		Linux = { LibName = "shaderc_shared" }
-		MacOS = { LibName = "shaderc_combined" }
-		iOS = { LibName = "shaderc_combined" }
+		Windows = { LibName = "shaderc_shared" },
+		Linux = { LibName = "shaderc_shared" },
+		MacOS = { LibName = "shaderc_combined" },
+		iOS = { LibName = "shaderc_combined" },
 	},
 
 	-- All other Third-Party libraries
