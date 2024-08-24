@@ -4,6 +4,7 @@ require("vendor/premake-vscode/vscode")
 -- Dependencies
 ------------------------------------------------------------------------------
 VULKAN_SDK = os.getenv("VULKAN_SDK")
+VULKAN_VERSION = VULKAN_SDK:match("(%d+%.%d+%.%d+%.%d+)")
 
 Dependencies =
 {
@@ -24,19 +25,15 @@ Dependencies =
 		},
         MacOS = -- Note: We expect VULKAN_SDK to be /Users/XXX/VulkanSDK/XVersionX/ (macOS or iOS)
 		{
-			LibName = "MoltenVK",
+			LibName = "vulkan.%{VULKAN_VERSION}", -- Note: Is dynamic (Example: libvulkan1.3.290.0.dylib)
 			IncludeDir = "%{VULKAN_SDK}/../macOS/include/",
 			LibDir = "%{VULKAN_SDK}/../macOS/lib/",
-			LibDir2 = "%{VULKAN_SDK}/../macOS/lib/MoltenVK.xcframework/macos-arm64_x86_64/",
-			DynamicLib = "%{VULKAN_SDK}/../macOS/lib/libMoltenVK.dylib",
 		},
         iOS = -- (Not supported) -- Note: We expect VULKAN_SDK to be /Users/XXX/VulkanSDK/XVersionX/ (macOS or iOS)
 		{
-			LibName = "MoltenVK",
-			IncludeDir = "%{VULKAN_SDK}/../iOS/include/",
-			LibDir = "%{VULKAN_SDK}/../iOS/lib/",
-			LibDir2 = "%{VULKAN_SDK}/../macOS/lib/MoltenVK.xcframework/macos-arm64_x86_64/",
-			DynamicLib = "%{VULKAN_SDK}/../macOS/lib/libMoltenVK.dylib",
+			LibName = "vulkan.%{VULKAN_VERSION}", -- Note: Is dynamic (Example: libvulkan1.3.290.0.dylib)
+			IncludeDir = "%{VULKAN_SDK}/../macOS/include/",
+			LibDir = "%{VULKAN_SDK}/../macOS/lib/",
 		}
 	},
 	ShaderC =

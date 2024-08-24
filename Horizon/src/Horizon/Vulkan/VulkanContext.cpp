@@ -134,7 +134,7 @@ namespace Hz
         #elif defined(HZ_PLATFORM_LINUX)
             #define VK_KHR_SURFACE_TYPE_NAME "VK_KHR_xcb_surface"
         #elif defined(HZ_PLATFORM_MACOS)
-            #define VK_KHR_SURFACE_TYPE_NAME "VK_KHR_metal_surface"
+            #define VK_KHR_SURFACE_TYPE_NAME "VK_EXT_metal_surface"
         #else
             #error "Unsupported platform"
         #endif

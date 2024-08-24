@@ -98,7 +98,6 @@ project "Sandbox"
 		libdirs
 		{
 			"%{Dependencies.Vulkan.MacOS.LibDir}",
-			"%{Dependencies.Vulkan.MacOS.LibDir2}",
 		}
 
 		links
@@ -114,7 +113,8 @@ project "Sandbox"
 
 		postbuildcommands
 		{
-			'{COPYFILE} "%{Dependencies.Vulkan.MacOS.DynamicLib}" "%{cfg.targetdir}"'
+			'{COPYFILE} "%{Dependencies.Vulkan.MacOS.LibDir}/libvulkan.1.dylib" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{Dependencies.Vulkan.MacOS.LibDir}/lib%{Dependencies.Vulkan.MacOS.LibName}.dylib" "%{cfg.targetdir}"',
 		}
 
 		-- embed
