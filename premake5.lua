@@ -4,7 +4,7 @@ require("vendor/premake-vscode/vscode")
 -- Dependencies
 ------------------------------------------------------------------------------
 VULKAN_SDK = os.getenv("VULKAN_SDK")
-VULKAN_VERSION = VULKAN_SDK:match("(%d+%.%d+%.%d+%.%d+)")
+VULKAN_VERSION = VULKAN_SDK:match("(%d+%.%d+%.%d+)") -- Example: 1.3.290 (without the 0)
 
 Dependencies =
 {
@@ -23,15 +23,21 @@ Dependencies =
 			IncludeDir = "%{VULKAN_SDK}/include/",
 			LibDir = "%{VULKAN_SDK}/lib/"
 		},
-        MacOS = -- Note: We expect VULKAN_SDK to be /Users/XXX/VulkanSDK/XVersionX/ (macOS or iOS)
+        MacOS = 	-- Note: Vulkan on MacOS is currently dynamic. (Example: libvulkan1.3.290.dylib)
 		{
-			LibName = "vulkan.%{VULKAN_VERSION}", -- Note: Is dynamic (Example: libvulkan1.3.290.0.dylib)
+			LibName = "vulkan.%{VULKAN_VERSION}",
 			IncludeDir = "%{VULKAN_SDK}/../macOS/include/",
 			LibDir = "%{VULKAN_SDK}/../macOS/lib/",
 		},
-        iOS = -- (Not supported) -- Note: We expect VULKAN_SDK to be /Users/XXX/VulkanSDK/XVersionX/ (macOS or iOS)
+		Android = 	-- Unsupported.
 		{
-			LibName = "vulkan.%{VULKAN_VERSION}", -- Note: Is dynamic (Example: libvulkan1.3.290.0.dylib)
+			LibName = "vulkan-1",
+			IncludeDir = "%{VULKAN_SDK}/Include/",
+			LibDir = "%{VULKAN_SDK}/Lib/"
+		},
+        iOS = 		-- Unsupported.
+		{
+			LibName = "vulkan.%{VULKAN_VERSION}", 
 			IncludeDir = "%{VULKAN_SDK}/../macOS/include/",
 			LibDir = "%{VULKAN_SDK}/../macOS/lib/",
 		}

@@ -84,7 +84,6 @@ namespace Hz
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 		{
 			StaticMeshVertex vertex = {};
-			glm::vec3 vector(0.0f);
 
 			// Position
 			vertex.Position.x = mesh->mVertices[i].x;

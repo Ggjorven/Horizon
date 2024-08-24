@@ -69,6 +69,9 @@ namespace Hz
 		case Level::Fatal:
 			spdlog::critical(Text::Format(fmt, args...));
 			break;
+
+		default:
+			break;
 		}
 	}
 

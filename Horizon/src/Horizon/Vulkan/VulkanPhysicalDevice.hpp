@@ -56,6 +56,8 @@ namespace Hz
 		bool ExtensionsSupported(const VkPhysicalDevice device);
 		VkFormat GetDepthFormat();
 
+		bool FeaturesSupported(const VkPhysicalDeviceFeatures& requested, const VkPhysicalDeviceFeatures& found);
+
 	private:
 		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 

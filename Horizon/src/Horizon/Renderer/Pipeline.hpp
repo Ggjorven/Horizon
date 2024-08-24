@@ -106,7 +106,7 @@ namespace Hz
 		PolygonMode Polygonmode = PolygonMode::Fill;
 		CullingMode Cullingmode = CullingMode::Front; // Note: Before blaming the culling mode, make sure you have depth in your renderpass ;)
 
-		float LineWidth = 1.0f;
+		float LineWidth = 1.0f; // Note: Don't use, since for compatibility reasons we have disabled PhysicalDeviceFeature: WideLines.
 		bool Blending = false;
 
         // Raytracing KHR

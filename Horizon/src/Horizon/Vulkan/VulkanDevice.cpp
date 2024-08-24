@@ -30,16 +30,11 @@ namespace Hz
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
-		VkPhysicalDeviceFeatures deviceFeatures = {};
-		deviceFeatures.samplerAnisotropy = VK_TRUE;
-		deviceFeatures.fillModeNonSolid = VK_TRUE;
-		deviceFeatures.wideLines = VK_TRUE;
-
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = queueCreateInfos.data();
-		createInfo.pEnabledFeatures = &deviceFeatures;
+		createInfo.pEnabledFeatures = &VulkanContext::s_RequestedDeviceFeatures;
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(VulkanContext::s_RequestedDeviceExtensions.size());
 		createInfo.ppEnabledExtensionNames = VulkanContext::s_RequestedDeviceExtensions.data();
 
