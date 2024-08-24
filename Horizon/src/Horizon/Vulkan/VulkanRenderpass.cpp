@@ -32,8 +32,13 @@ namespace Hz
 
     void VulkanRenderpass::Resize(uint32_t width, uint32_t height)
     {
-        for (auto& framebuffer : m_Framebuffers)
-            vkDestroyFramebuffer(VulkanContext::GetDevice()->GetVkDevice(), framebuffer, nullptr);
+        Renderer::Free([frameBuffers = m_Framebuffers]() 
+        {
+            auto device = VulkanContext::GetDevice()->GetVkDevice();
+
+            for (auto& framebuffer : frameBuffers)
+                vkDestroyFramebuffer(device, framebuffer, nullptr);
+        });
 
         CreateFramebuffers(width, height);
     }

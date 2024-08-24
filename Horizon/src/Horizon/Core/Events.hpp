@@ -63,15 +63,15 @@ namespace Hz
 	{
 	public:
 		EventHandler(Event& e)
-			: m_event(e) {}
+			: m_Event(e) {}
 		~EventHandler() = default;
 
 		template<typename TEvent, typename F>
 		inline bool Handle(const F& func) requires Pulse::Types::Concepts::InheritsFrom<Event, TEvent>
 		{
-			if (m_event.GetEventType() == TEvent::GetStaticType())
+			if (m_Event.GetEventType() == TEvent::GetStaticType())
 			{
-				m_event.Handled = func(static_cast<TEvent&>(m_event));
+				m_Event.Handled = func(static_cast<TEvent&>(m_Event));
 				return true;
 			}
 
@@ -79,7 +79,7 @@ namespace Hz
 		}
 
 	private:
-		Event& m_event;
+		Event& m_Event;
 	};
 
 

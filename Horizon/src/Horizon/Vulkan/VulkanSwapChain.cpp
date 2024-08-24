@@ -178,8 +178,6 @@ namespace Hz
 		auto oldSwapchain = m_SwapChain;
 		VK_CHECK_RESULT(vkCreateSwapchainKHR(device, &swapchainCI, nullptr, &m_SwapChain));
 
-        m_Images.clear(); // Destroys imageviews
-
 		if (oldSwapchain)
 			vkDestroySwapchainKHR(device, oldSwapchain, nullptr); // Destroys images?
 
@@ -231,7 +229,10 @@ namespace Hz
                 Ref<VulkanImage> src = m_Images[i].As<VulkanImage>();
 
                 // Destroy old image view
-                vkDestroyImageView(device, src->m_ImageView, nullptr);
+				Renderer::Free([device = device, imageView = src->m_ImageView]()
+				{
+					vkDestroyImageView(device, imageView, nullptr);
+				});
 
                 // Set new data
                 src->m_Specification = specs;

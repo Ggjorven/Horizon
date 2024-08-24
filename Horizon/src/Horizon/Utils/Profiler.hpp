@@ -10,7 +10,7 @@
 #define HZ_ENABLE_PROFILING 1
 #define HZ_MEM_PROFILING 0
 
-#if !defined(HZ_DIST) && HZ_ENABLE_PROFILING && !defined(HZ_PLATFORM_MACOS) // TODO: Fix MacOS profiling.
+#if !defined(HZ_DIST) && HZ_ENABLE_PROFILING
 
 #define HZ_MARK_FRAME() FrameMark
 #define HZ_PROFILE_SCOPE(name) ZoneScopedN(name)

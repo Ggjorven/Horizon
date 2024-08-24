@@ -70,6 +70,7 @@ project "Tracy"
 			"tracy/public/libbacktrace/mmapio.cpp",
 			"tracy/public/libbacktrace/macho.cpp",
 			"tracy/public/libbacktrace/fileline.cpp",
+			"tracy/public/libbacktrace/dwarf.cpp",
 		}
 
 		-- Note: If we don't add the header files to the externalincludedirs
