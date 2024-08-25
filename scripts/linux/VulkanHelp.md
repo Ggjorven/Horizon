@@ -1,6 +1,6 @@
 ## Install vulkan drivers
 
-1. Use a package driver to install vulkan driver, Example:
+1. Use a package manager to install vulkan driver, Example:
     ```sh
     sudo apt-get install vulkan-tools
     ```

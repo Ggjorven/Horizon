@@ -2,4 +2,4 @@
 
 cd ../..
 
-premake5 gmake2
+premake5 gmake2 os=linux

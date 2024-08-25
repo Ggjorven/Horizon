@@ -38,7 +38,7 @@ namespace Hz
 
 	VulkanPhysicalDevice::~VulkanPhysicalDevice()
 	{
-		// Note(Jorben): Since a Physical Device is not something we created there is nothing to destroy
+		// Note:  Since a Physical Device is not something we created there is nothing to destroy
 	}
 
 	QueueFamilyIndices QueueFamilyIndices::Find(const VkSurfaceKHR surface, const VkPhysicalDevice device)
@@ -137,7 +137,7 @@ namespace Hz
 		for (const auto& extension : availableExtensions)
 			requiredExtensions.erase(extension.extensionName);
 
-		// Note(Jorben): It's empty if all the required extensions are available
+		// Note:  It's empty if all the required extensions are available
 		return requiredExtensions.empty();
 	}
 

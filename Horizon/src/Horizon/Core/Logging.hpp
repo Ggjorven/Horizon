@@ -49,6 +49,7 @@ namespace Hz
 		static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> s_ConsoleSink;
 	};
 
+#if defined(HZ_DESKTOP_ENVIRONMENT) // Desktop logging
     template<typename ... Args>
 	void Log::LogMessage(Log::Level level, std::string_view fmt, const Args& ...args)
 	{
@@ -74,6 +75,8 @@ namespace Hz
 			break;
 		}
 	}
+// TODO: Android & iOS logging.
+#endif
 
 	#ifndef HZ_CONFIG_DIST
 		#define HZ_VERIFY(value, ...) if (!value) \

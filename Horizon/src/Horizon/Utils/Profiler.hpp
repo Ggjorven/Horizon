@@ -6,7 +6,7 @@
 #include <new>
 #include <cstdlib>
 
-// Note: Profiling leaks memory (on windows), so don't keep on during any real tests. // TODO: Check if it's still that way
+// Note: Profiling leaks memory (on windows), so don't keep on during any tests, since it will skew results.
 #define HZ_ENABLE_PROFILING 1
 #define HZ_MEM_PROFILING 0
 
