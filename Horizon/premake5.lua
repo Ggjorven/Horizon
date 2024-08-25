@@ -1,3 +1,5 @@
+MacOSVersion = MacOSVersion or "14.5"
+
 project "Horizon"
 	kind "StaticLib"
 	language "C++"
@@ -92,7 +94,7 @@ project "Horizon"
 
     filter "system:macosx"
 		defines "HZ_PLATFORM_MACOS"
-		systemversion "14.5"
+		systemversion "%{MacOSVersion}"
 		staticruntime "on"
 
 		-- Note: XCode only needs the full pchheader path

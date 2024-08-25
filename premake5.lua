@@ -6,6 +6,8 @@ require("vendor/premake-vscode/vscode")
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 VULKAN_VERSION = VULKAN_SDK:match("(%d+%.%d+%.%d+)") -- Example: 1.3.290 (without the 0)
 
+MacOSVersion = "14.5"
+
 Dependencies =
 {
 	-- Vulkan Related
@@ -81,7 +83,7 @@ Dependencies =
     Tracy =
     {
         LibName = "Tracy",
-		IncludeDir = "%{wks.location}/vendor/tracy/tracy/public"
+		IncludeDir = "%{wks.location}/vendor/tracy/public"
     }
 }
 ------------------------------------------------------------------------------

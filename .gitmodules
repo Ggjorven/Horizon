@@ -13,9 +13,6 @@
 [submodule "vendor/stb"]
 	path = vendor/stb
 	url = https://github.com/nothings/stb.git
-[submodule "vendor/tracy/tracy"]
-	path = vendor/tracy/tracy
-	url = https://github.com/Ggjorven/tracy.git
 [submodule "vendor/assimp"]
 	path = vendor/assimp
 	url = https://github.com/Ggjorven/Assimp.git

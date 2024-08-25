@@ -1,3 +1,5 @@
+MacOSVersion = MacOSVersion or "14.5"
+
 project "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
@@ -87,7 +89,7 @@ project "Sandbox"
 
     filter "system:macosx"
 		defines "HZ_PLATFORM_MACOS"
-		systemversion "14.5"
+		systemversion "%{MacOSVersion}"
 		staticruntime "on"
 
 		includedirs
@@ -116,14 +118,6 @@ project "Sandbox"
 			'{COPYFILE} "%{Dependencies.Vulkan.MacOS.LibDir}/libvulkan.1.dylib" "%{cfg.targetdir}"',
 			'{COPYFILE} "%{Dependencies.Vulkan.MacOS.LibDir}/lib%{Dependencies.Vulkan.MacOS.LibName}.dylib" "%{cfg.targetdir}"',
 		}
-
-		-- embed
-		-- {
-		-- 	"AppKit.framework",
-		-- 	"IOKit.framework",
-		-- 	"CoreGraphics.framework",
-		-- 	"CoreFoundation.framework",
-		-- }
 
 		-- Note: If we don't add the header files to the externalincludedirs
 		-- we can't use <angled> brackets to include files.
