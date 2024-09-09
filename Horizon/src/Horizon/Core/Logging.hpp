@@ -49,6 +49,7 @@ namespace Hz
 		static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> s_ConsoleSink;
 	};
 
+#if defined(HZ_DESKTOP_ENVIRONMENT)
     template<typename ... Args>
 	void Log::LogMessage(Log::Level level, std::string_view fmt, const Args& ...args)
 	{
@@ -71,9 +72,12 @@ namespace Hz
 			break;
 		}
 	}
+#elif defined(HZ_PLATFORM_ANDROID)
+	// TODO: ...
+#endif
 
 	#ifndef HZ_CONFIG_DIST
-		#define HZ_VERIFY(value, ...) if (!value) \
+		#define HZ_VERIFY(value, ...) if (!(value)) \
 			{ \
 				HZ_LOG_FATAL(__VA_ARGS__); \
 			}
@@ -83,7 +87,7 @@ namespace Hz
 
 	#ifdef HZ_CONFIG_DEBUG
         // Note: Don't put function calls in HZ_ASSERT! They don't run in DIST
-		#define HZ_ASSERT(value, ...) if (!value) \
+		#define HZ_ASSERT(value, ...) if (!(value)) \
 			{ \
 				HZ_LOG_FATAL(__VA_ARGS__); \
 				PULSE_DEBUG_BREAK(); \

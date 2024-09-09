@@ -14,8 +14,8 @@
 namespace Hz
 {
 
-    static bool s_GLFWInitialized = false;
-    static WeakRef<Window> s_Window = nullptr;
+	static bool s_GLFWInitialized = false;
+	static WeakRef<Window> s_Window = nullptr;
 
 	static void GLFWErrorCallBack(int errorCode, const char* description)
 	{
@@ -31,8 +31,8 @@ namespace Hz
 
 		if (!s_GLFWInitialized)
 		{
-            int result = glfwInit();
-            HZ_ASSERT((result), "[GLFW] glfwInit() failed!");
+			int result = glfwInit();
+			HZ_ASSERT((result), "[GLFW] glfwInit() failed!");
 
 			s_GLFWInitialized = true;
 			glfwSetErrorCallback(GLFWErrorCallBack);
@@ -45,100 +45,100 @@ namespace Hz
 
 		GraphicsContext::Init(m_Window, windowSpecs.Width, windowSpecs.Height, rendererSpecs.VSync, (uint8_t)rendererSpecs.Buffers);
 
-        GLFWwindow* window = static_cast<GLFWwindow*>(m_Window);
+		GLFWwindow* window = static_cast<GLFWwindow*>(m_Window);
 		glfwSetWindowUserPointer(window, (void*)&m_Specification); //So we can access/get to the data in lambda functions
 
 		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height)
-		{
-			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
-			data.Width = width;
-			data.Height = height;
+			{
+				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+				data.Width = width;
+				data.Height = height;
 
-			WindowResizeEvent event = WindowResizeEvent(width, height);
-			data.EventCallback(event);
-		});
+				WindowResizeEvent event = WindowResizeEvent(width, height);
+				data.EventCallback(event);
+			});
 
 		glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
-		{
-			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+			{
+				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
-			WindowCloseEvent event = WindowCloseEvent();
-			data.EventCallback(event);
-		});
+				WindowCloseEvent event = WindowCloseEvent();
+				data.EventCallback(event);
+			});
 
 		glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
-		{
-			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+			{
+				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
-			switch (action)
-			{
-			case GLFW_PRESS:
-			{
-				KeyPressedEvent event = KeyPressedEvent(key, 0);
-				data.EventCallback(event);
-				break;
-			}
-			case GLFW_RELEASE:
-			{
-				KeyReleasedEvent event = KeyReleasedEvent(key);
-				data.EventCallback(event);
-				break;
-			}
-			case GLFW_REPEAT:
-			{
-				KeyPressedEvent event = KeyPressedEvent(key, 1);
-				data.EventCallback(event);
-				break;
-			}
-			}
-		});
+				switch (action)
+				{
+				case GLFW_PRESS:
+				{
+					KeyPressedEvent event = KeyPressedEvent(key, 0);
+					data.EventCallback(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					KeyReleasedEvent event = KeyReleasedEvent(key);
+					data.EventCallback(event);
+					break;
+				}
+				case GLFW_REPEAT:
+				{
+					KeyPressedEvent event = KeyPressedEvent(key, 1);
+					data.EventCallback(event);
+					break;
+				}
+				}
+			});
 
 		glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int keycode)
-		{
-			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+			{
+				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
-			KeyTypedEvent event = KeyTypedEvent(keycode);
-			data.EventCallback(event);
-		});
+				KeyTypedEvent event = KeyTypedEvent(keycode);
+				data.EventCallback(event);
+			});
 
 		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods)
-		{
-			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+			{
+				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
-			switch (action)
-			{
-			case GLFW_PRESS:
-			{
-				MouseButtonPressedEvent event = MouseButtonPressedEvent(button);
-				data.EventCallback(event);
-				break;
-			}
-			case GLFW_RELEASE:
-			{
-				MouseButtonReleasedEvent event = MouseButtonReleasedEvent(button);
-				data.EventCallback(event);
-				break;
-			}
-			}
-		});
+				switch (action)
+				{
+				case GLFW_PRESS:
+				{
+					MouseButtonPressedEvent event = MouseButtonPressedEvent(button);
+					data.EventCallback(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					MouseButtonReleasedEvent event = MouseButtonReleasedEvent(button);
+					data.EventCallback(event);
+					break;
+				}
+				}
+			});
 
 		glfwSetScrollCallback(window, [](GLFWwindow* window, double xOffset, double yOffset)
-		{
-			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+			{
+				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
-			MouseScrolledEvent event = MouseScrolledEvent((float)xOffset, (float)yOffset);
-			data.EventCallback(event);
-		});
+				MouseScrolledEvent event = MouseScrolledEvent((float)xOffset, (float)yOffset);
+				data.EventCallback(event);
+			});
 
 		glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xPos, double yPos)
-		{
-			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+			{
+				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
-			MouseMovedEvent event = MouseMovedEvent((float)xPos, (float)yPos);
-			data.EventCallback(event);
-		});
+				MouseMovedEvent event = MouseMovedEvent((float)xPos, (float)yPos);
+				data.EventCallback(event);
+			});
 
-        Renderer::Init(rendererSpecs);
+		Renderer::Init(rendererSpecs);
 	}
 
 	Window::~Window()
@@ -149,14 +149,14 @@ namespace Hz
 
 	void Window::PollEvents()
 	{
-        HZ_MARK_FRAME();
+		HZ_MARK_FRAME();
 		glfwPollEvents();
 	}
 
 	void Window::SwapBuffers()
 	{
-        HZ_PROFILE_SCOPE("SwapBuffers");
-        Renderer::Present();
+		HZ_PROFILE_SCOPE("SwapBuffers");
+		Renderer::Present();
 	}
 
 	void Window::Close()
@@ -168,15 +168,15 @@ namespace Hz
 	{
 		m_Closed = true;
 
-        Renderer::Destroy();
+		Renderer::Destroy();
 
 		GraphicsContext::Destroy();
 
 		glfwDestroyWindow(static_cast<GLFWwindow*>(m_Window));
 		m_Window = nullptr;
 
-        glfwTerminate();
-        s_GLFWInitialized = false;
+		glfwTerminate();
+		s_GLFWInitialized = false;
 	}
 
 	void Window::SetVSync(bool vsync)
@@ -198,18 +198,18 @@ namespace Hz
 		return std::pair<float, float>((float)xPos, (float)yPos);
 	}
 
-    Window& Window::Get()
-    {
-        HZ_ASSERT((s_Window.IsValid()), "Tried to get window which doesn't exist.");
-        return *s_Window.GetRef();
-    }
+	Window& Window::Get()
+	{
+		HZ_ASSERT((s_Window.IsValid()), "Tried to get window which doesn't exist.");
+		return *s_Window.GetRef();
+	}
 
-    Ref<Window> Window::Create(const WindowSpecification windowSpecs, const RendererSpecification rendererSpecs)
-    {
-        Ref<Window> window = Ref<Window>::Create(windowSpecs, rendererSpecs);
-        s_Window = window;
-        return window;
-    }
+	Ref<Window> Window::Create(const WindowSpecification windowSpecs, const RendererSpecification rendererSpecs)
+	{
+		Ref<Window> window = Ref<Window>::Create(windowSpecs, rendererSpecs);
+		s_Window = window;
+		return window;
+	}
 
 }
 #endif

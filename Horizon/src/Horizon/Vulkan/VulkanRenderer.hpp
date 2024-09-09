@@ -49,6 +49,11 @@ namespace Hz
         inline static VulkanTaskManager& GetTaskManager() { return s_Data->Manager; }
         inline static const RendererSpecification& GetSpecification() { return s_Data->Specification; }
 
+        #if defined(HZ_MOBILE_ENVIRONMENT)
+            inline static constinit const uint32_t MobileRotationLatency = 30u; // Static rotation latency
+            inline static uint32_t& GetMobileLatency() { return s_Data->MobileRotationDelay; }
+        #endif  
+
     private:
         static void VerifyExectionPolicy(ExecutionPolicy& policy);
 
@@ -61,6 +66,10 @@ namespace Hz
             RendererSpecification Specification = {};
 
             VulkanTaskManager Manager = {};
+
+            #if defined(HZ_MOBILE_ENVIRONMENT)
+                uint32_t MobileRotationDelay = MobileRotationLatency; // The used version within code.
+            #endif
         };
 
         inline static Info* s_Data = nullptr;

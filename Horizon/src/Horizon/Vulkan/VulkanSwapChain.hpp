@@ -31,6 +31,7 @@ namespace Hz
 		inline std::vector<Ref<Image>>& GetSwapChainImages() { return m_Images; }
 		inline Ref<Image> GetDepthImage() { return m_DepthStencil; }
 
+		inline const VkSurfaceKHR GetVkSurface() const { return m_Surface; }
 		inline const VkCommandPool GetVkCommandPool() const { return m_CommandPool; }
 		inline const VkSemaphore GetImageAvailableSemaphore(uint32_t index) const { return m_ImageAvailableSemaphores[index]; }
 		inline const VkSemaphore GetCurrentImageAvailableSemaphore() const { return GetImageAvailableSemaphore(m_CurrentFrame); }
@@ -40,6 +41,8 @@ namespace Hz
 	private:
 		uint32_t AcquireNextImage();
 		void FindImageFormatAndColorSpace();
+
+		bool Is180Rotation();
 
 	private:
 		VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
@@ -54,6 +57,7 @@ namespace Hz
 
 		VkFormat m_ColourFormat = VK_FORMAT_UNDEFINED;
 		VkColorSpaceKHR m_ColourSpace = VK_COLOR_SPACE_MAX_ENUM_KHR;
+		VkSurfaceTransformFlagBitsKHR m_PreTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
 		uint32_t m_CurrentFrame = 0;
 		uint32_t m_AcquiredImage = 0;

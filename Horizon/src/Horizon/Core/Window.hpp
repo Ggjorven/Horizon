@@ -47,6 +47,9 @@ namespace Hz
 		inline uint32_t GetHeight() const { return m_Specification.Height; }
 		std::pair<float, float> GetPosition() const;
 
+		// Note: Used for mobile development
+		inline void SwapWidthAndHeight() { std::swap(m_Specification.Width, m_Specification.Height); }
+
 		void SetVSync(bool vsync);
 		void SetTitle(const std::string& title);
 
@@ -55,6 +58,8 @@ namespace Hz
         inline bool IsMinimized() const { return ((m_Specification.Width == 0) || (m_Specification.Height == 0)); }
 
 		inline void* GetNativeWindow() { return m_Window; }
+
+		inline WindowSpecification& GetSpecification() { return m_Specification; }
 
         static Window& Get();
         static Ref<Window> Create(const WindowSpecification windowSpecs, const RendererSpecification rendererSpecs);

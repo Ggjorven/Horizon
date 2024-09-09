@@ -82,6 +82,11 @@ namespace Hz
 			swapchainExtent = details.Capabilities.currentExtent;
 		}
 
+		// Set the pretransform (used for mobile rotation handling)
+		m_PreTransform = details.Capabilities.currentTransform;
+		if (m_PreTransform & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR || m_PreTransform & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR)
+			std::swap(swapchainExtent.width, swapchainExtent.height);
+
 		if (width == 0 || height == 0)
 			return;
 
@@ -345,6 +350,26 @@ namespace Hz
 				m_ColourSpace = surfaceFormats[0].colorSpace;
 			}
 		}
+	}
+
+	bool VulkanSwapChain::Is180Rotation()
+	{
+		VkSurfaceCapabilitiesKHR surfaceCapabilities = {};
+		VK_CHECK_RESULT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice(), VulkanContext::GetSwapChain()->GetVkSurface(), &surfaceCapabilities));
+
+		VkSurfaceTransformFlagsKHR currentTransform = surfaceCapabilities.currentTransform;
+		switch (currentTransform)
+		{
+		case VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR:		return m_PreTransform == VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR;
+		case VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR:	return m_PreTransform == VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR;
+		case VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR:	return m_PreTransform == VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+		case VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR:	return m_PreTransform == VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR;
+
+		default:
+			break;
+		}
+
+		return false;
 	}
 
 }

@@ -3,6 +3,8 @@
 
 #include "Horizon/Core/Logging.hpp"
 
+#include "Horizon/IO/FileSystem.hpp"
+
 #include "Horizon/Vulkan/VulkanShader.hpp"
 
 #include <shaderc/shaderc.h>
@@ -43,7 +45,7 @@ namespace Hz
 		return shaderc_glsl_vertex_shader;
 	}
 
-    std::vector<char> ShaderCompiler::CompileGLSL(ShaderStage stage, const std::string &code)
+    std::vector<char> ShaderCompiler::CompileGLSL(ShaderStage stage, const std::string& code)
     {
         shaderc::Compiler compiler = {};
 		shaderc::CompileOptions options = {};
@@ -72,27 +74,20 @@ namespace Hz
 
     std::string Shader::ReadGLSL(const std::filesystem::path& path)
     {
-        std::ifstream file(path);
-        HZ_ASSERT((file.is_open() && file.good()), "Failed to open file: '{0}'", path.string())
-
-		std::string content = std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
-
-		file.close();
-		return content;
+		IO::IFile file(path);
+		return file.ReadAll();
     }
 
-    std::vector<char> Shader::ReadSPIRV(const std::filesystem::path &path)
+    std::vector<char> Shader::ReadSPIRV(const std::filesystem::path& path)
     {
-        std::ifstream file(path, std::ios::ate | std::ios::binary);
-        HZ_ASSERT((file.is_open() && file.good()), "Failed to open file: '{0}'", path.string())
+		IO::IFile file(path, IO::FileMode::Ate | IO::FileMode::Binary);
 
-		size_t fileSize = (size_t)file.tellg();
+		size_t fileSize = file.Tell();
 		std::vector<char> buffer(fileSize);
 
-		file.seekg(0);
-		file.read(buffer.data(), fileSize);
+		file.Seek(0);
+		file.Read(buffer, fileSize);
 
-		file.close();
 		return buffer;
     }
 

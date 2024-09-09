@@ -45,6 +45,12 @@ namespace Hz
     using f32 = Pulse::f32;
     using f64 = Pulse::f64;
 
+    #if defined(HZ_PLATFORM_WINDOWS) || defined(HZ_PLATFORM_LINUX) || defined(HZ_PLATFORM_MACOS)
+        #define HZ_DESKTOP_ENVIRONMENT
+    #elif defined(HZ_PLATFORM_ANDROID) || defined(HZ_PLATFORM_IOS)
+        #define HZ_MOBILE_ENVIRONMENT
+    #endif
+
     ///////////////////////////////////////////////////////////
     // Text
     ///////////////////////////////////////////////////////////
@@ -66,7 +72,7 @@ namespace Hz
     {
         using namespace Pulse::Enum;
 
-        #define ENABLE_BITWISE(enum) PULSE_BIT_OPERATORS(enum)
+        #define ENABLE_BITWISE(e) PULSE_BIT_OPERATORS(e)
     }
 
 }
