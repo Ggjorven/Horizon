@@ -80,10 +80,19 @@ namespace Hz
 
     // For extreme verbosity add extension: "VK_LAYER_LUNARG_api_dump"
     const std::vector<const char*> VulkanContext::s_RequestedValidationLayers = { "VK_LAYER_KHRONOS_validation" };
-	const std::vector<const char*> VulkanContext::s_RequestedDeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+	const std::vector<const char*> VulkanContext::s_RequestedDeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    #if defined(HZ_PLATFORM_MACOS)
+        "VK_KHR_portability_subset"
+    #endif
+    };
+    VkPhysicalDeviceFeatures VulkanContext::s_RequestedDeviceFeatures = {};
 
     void VulkanContext::Init(void* window, uint32_t width, uint32_t height, const bool vsync, const uint8_t framesInFlight)
     {
+        s_RequestedDeviceFeatures.samplerAnisotropy = VK_TRUE;
+        s_RequestedDeviceFeatures.fillModeNonSolid = VK_TRUE,
+        // s_RequestedDeviceFeatures.wideLines = VK_TRUE, // Note: Disabled for compatibility reasons, also said in Pipeline.hpp:109
+
         s_Data = new Info();
         s_Data->Window = window;
 
@@ -134,7 +143,7 @@ namespace Hz
         #elif defined(HZ_PLATFORM_LINUX)
             #define VK_KHR_SURFACE_TYPE_NAME "VK_KHR_xcb_surface"
         #elif defined(HZ_PLATFORM_MACOS)
-            #define VK_KHR_SURFACE_TYPE_NAME "VK_KHR_metal_surface"
+            #define VK_KHR_SURFACE_TYPE_NAME "VK_EXT_metal_surface"
         #else
             #error "Unsupported platform"
         #endif
@@ -182,7 +191,7 @@ namespace Hz
 			createInfo.enabledLayerCount = 0;
 		}
 
-		// Note(Jorben): Setup the debug messenger also for the create instance
+		// Note:  Setup the debug messenger also for the create instance
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
 		debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 		debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;

@@ -31,9 +31,12 @@ namespace Hz
 		case DataType::Int3:    return VK_FORMAT_R32G32B32_SINT;
 		case DataType::Int4:    return VK_FORMAT_R32G32B32A32_SINT;
 		case DataType::Bool:    return VK_FORMAT_R8_UINT;
-		}
 
-        HZ_ASSERT(false, "Invalid DataType passed in.");
+        default:
+            HZ_ASSERT(false, "Invalid DataType passed in.");
+            break;
+        }
+
 		return VK_FORMAT_UNDEFINED;
 	}
 

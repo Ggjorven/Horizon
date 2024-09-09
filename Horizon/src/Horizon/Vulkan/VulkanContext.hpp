@@ -80,6 +80,7 @@ namespace Hz
 
 		static const std::vector<const char*> s_RequestedValidationLayers;
 		static const std::vector<const char*> s_RequestedDeviceExtensions;
+		static VkPhysicalDeviceFeatures s_RequestedDeviceFeatures;
 
 		inline static constinit const std::pair<uint8_t, uint8_t> Version = { 1, 3 }; // Vulkan version 1.3.XXX
 	};

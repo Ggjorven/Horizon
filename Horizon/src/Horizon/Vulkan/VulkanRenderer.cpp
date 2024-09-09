@@ -97,7 +97,7 @@ namespace Hz
 
 		VkResult result = VK_SUCCESS;
 		{
-			// Note(Jorben): Without this line there is a memory leak on windows when validation layers are enabled.
+			// Note: Without this line there is a memory leak on windows when validation layers are enabled.
             #if defined(HZ_PLATFORM_WINDOWS)
 			if constexpr (VulkanContext::s_Validation)
 			{
@@ -267,7 +267,6 @@ namespace Hz
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
 		uint32_t currentFrame = GetCurrentFrame();
-		auto device = VulkanContext::GetDevice()->GetVkDevice();
 		VkCommandBuffer commandBuffer = vkCmdBuf->m_CommandBuffers[currentFrame];
 
 		VkSubmitInfo submitInfo = {};

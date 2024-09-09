@@ -38,7 +38,7 @@ namespace Hz
 
 	VulkanPhysicalDevice::~VulkanPhysicalDevice()
 	{
-		// Note(Jorben): Since a Physical Device is not something we created there is nothing to destroy
+		// Note:  Since a Physical Device is not something we created there is nothing to destroy
 	}
 
 	QueueFamilyIndices QueueFamilyIndices::Find(const VkSurfaceKHR surface, const VkPhysicalDevice device)
@@ -121,7 +121,7 @@ namespace Hz
 		VkPhysicalDeviceFeatures supportedFeatures;
 		vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
-		return indices.IsComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy && supportedFeatures.fillModeNonSolid && supportedFeatures.wideLines;
+		return indices.IsComplete() && extensionsSupported && swapChainAdequate && FeaturesSupported(VulkanContext::s_RequestedDeviceFeatures, supportedFeatures);
 	}
 
 	bool VulkanPhysicalDevice::ExtensionsSupported(const VkPhysicalDevice device)
@@ -137,7 +137,7 @@ namespace Hz
 		for (const auto& extension : availableExtensions)
 			requiredExtensions.erase(extension.extensionName);
 
-		// Note(Jorben): It's empty if all the required extensions are available
+		// Note:  It's empty if all the required extensions are available
 		return requiredExtensions.empty();
 	}
 
@@ -171,5 +171,71 @@ namespace Hz
 	{
 		return Ref<VulkanPhysicalDevice>::Create(surface);
 	}
+
+	bool VulkanPhysicalDevice::FeaturesSupported(const VkPhysicalDeviceFeatures& requested, const VkPhysicalDeviceFeatures& found)
+    {
+        bool failed = false;
+
+        #define FEATURE_TEST(feature) failed |= (requested.feature ? (found.feature == (VkBool32)false) : false)
+        
+        FEATURE_TEST(robustBufferAccess);
+        FEATURE_TEST(robustBufferAccess);
+        FEATURE_TEST(fullDrawIndexUint32);
+        FEATURE_TEST(imageCubeArray);
+        FEATURE_TEST(independentBlend);
+        FEATURE_TEST(geometryShader);
+        FEATURE_TEST(tessellationShader);
+        FEATURE_TEST(sampleRateShading);
+        FEATURE_TEST(dualSrcBlend);
+        FEATURE_TEST(logicOp);
+        FEATURE_TEST(multiDrawIndirect);
+        FEATURE_TEST(drawIndirectFirstInstance);
+        FEATURE_TEST(depthClamp);
+        FEATURE_TEST(depthBiasClamp);
+        FEATURE_TEST(fillModeNonSolid);
+        FEATURE_TEST(depthBounds);
+        FEATURE_TEST(wideLines);
+        FEATURE_TEST(largePoints);
+        FEATURE_TEST(alphaToOne);
+        FEATURE_TEST(multiViewport);
+        FEATURE_TEST(samplerAnisotropy);
+        FEATURE_TEST(textureCompressionETC2);
+        FEATURE_TEST(textureCompressionASTC_LDR);
+        FEATURE_TEST(textureCompressionBC);
+        FEATURE_TEST(occlusionQueryPrecise);
+        FEATURE_TEST(pipelineStatisticsQuery);
+        FEATURE_TEST(vertexPipelineStoresAndAtomics);
+        FEATURE_TEST(fragmentStoresAndAtomics);
+        FEATURE_TEST(shaderTessellationAndGeometryPointSize);
+        FEATURE_TEST(shaderImageGatherExtended);
+        FEATURE_TEST(shaderStorageImageExtendedFormats);
+        FEATURE_TEST(shaderStorageImageMultisample);
+        FEATURE_TEST(shaderStorageImageReadWithoutFormat);
+        FEATURE_TEST(shaderStorageImageWriteWithoutFormat);
+        FEATURE_TEST(shaderUniformBufferArrayDynamicIndexing);
+        FEATURE_TEST(shaderSampledImageArrayDynamicIndexing);
+        FEATURE_TEST(shaderStorageBufferArrayDynamicIndexing);
+        FEATURE_TEST(shaderStorageImageArrayDynamicIndexing);
+        FEATURE_TEST(shaderClipDistance);
+        FEATURE_TEST(shaderCullDistance);
+        FEATURE_TEST(shaderFloat64);
+        FEATURE_TEST(shaderInt64);
+        FEATURE_TEST(shaderInt16);
+        FEATURE_TEST(shaderResourceResidency);
+        FEATURE_TEST(shaderResourceMinLod);
+        FEATURE_TEST(sparseBinding);
+        FEATURE_TEST(sparseResidencyBuffer);
+        FEATURE_TEST(sparseResidencyImage2D);
+        FEATURE_TEST(sparseResidencyImage3D);
+        FEATURE_TEST(sparseResidency2Samples);
+        FEATURE_TEST(sparseResidency4Samples);
+        FEATURE_TEST(sparseResidency8Samples);
+        FEATURE_TEST(sparseResidency16Samples);
+        FEATURE_TEST(sparseResidencyAliased);
+        FEATURE_TEST(variableMultisampleRate);
+        FEATURE_TEST(inheritedQueries);
+
+        return !failed;
+    }
 
 }

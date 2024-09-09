@@ -1,3 +1,5 @@
+MacOSVersion = MacOSVersion or "14.5"
+
 project "Horizon"
 	kind "StaticLib"
 	language "C++"
@@ -9,6 +11,7 @@ project "Horizon"
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+	-- Note: VS2022/Make only need the pchheader filename
 	pchheader "hzpch.h"
 	pchsource "src/Horizon/hzpch.cpp"
 
@@ -68,9 +71,7 @@ project "Horizon"
 		links
 		{
 			"%{Dependencies.Vulkan.Windows.LibDir}/%{Dependencies.Vulkan.Windows.LibName}",
-			"%{Dependencies.Vulkan.Windows.LibDir}/%{Dependencies.ShaderC.LibName}",
-
-			"opengl32"
+			"%{Dependencies.Vulkan.Windows.LibDir}/%{Dependencies.ShaderC.Windows.LibName}",
 		}
 
 	filter "system:linux"
@@ -86,28 +87,40 @@ project "Horizon"
 		links
 		{
 			"%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.Vulkan.Linux.LibName}",
-            "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.LibName}",
+            "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.Linux.LibName}",
 
 			"Xrandr", "Xi", "GLU", "GL", "X11", "dl", "pthread", "stdc++fs"
 		}
 
-    -- TODO: Properly implement MacOS
     filter "system:macosx"
 		defines "HZ_PLATFORM_MACOS"
-		systemversion "latest"
+		systemversion "%{MacOSVersion}"
 		staticruntime "on"
+
+		-- Note: XCode only needs the full pchheader path
+		pchheader "src/Horizon/hzpch.h"
 
 		includedirs
 		{
 			"%{Dependencies.Vulkan.MacOS.IncludeDir}"
 		}
 
-		links
+		-- Note: If we don't add the header files to the externalincludedirs
+		-- we can't use <angled> brackets to include files.
+		externalincludedirs
 		{
-			"%{Dependencies.Vulkan.MacOS.LibDir}/%{Dependencies.Vulkan.MacOS.LibName}",
-            "%{Dependencies.Vulkan.MacOS.LibDir}/%{Dependencies.ShaderC.LibName}",
+			"src",
+			"src/Horizon",
 
-            -- TODO: Check for any other links needed
+			"%{Dependencies.spdlog.IncludeDir}",
+			"%{Dependencies.glfw.IncludeDir}",
+			"%{Dependencies.glm.IncludeDir}",
+			"%{Dependencies.stb.IncludeDir}",
+			"%{Dependencies.assimp.IncludeDir}",
+			"%{Dependencies.Pulse.IncludeDir}",
+			"%{Dependencies.Tracy.IncludeDir}",
+
+			"%{Dependencies.Vulkan.MacOS.IncludeDir}",
 		}
 
 	filter "configurations:Debug"

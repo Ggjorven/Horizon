@@ -10,6 +10,12 @@
 
 #include <Pulse/Enum/Enum.hpp>
 
+#if defined(HZ_PLATFORM_WINDOWS) || defined(HZ_PLATFORM_LINUX) || defined(HZ_PLATFORM_MACOS)
+    #define HZ_DESKTOP_ENVIRONMENT
+#elif defined(HZ_PLATFORM_ANDROID) || defined(HZ_PLATFORM_IOS)
+    #define HZ_MOBILE_ENVIRONMENT
+#endif
+
 namespace Hz
 {
 

@@ -1,3 +1,5 @@
+MacOSVersion = MacOSVersion or "14.5"
+
 project "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
@@ -85,14 +87,55 @@ project "Sandbox"
             "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.LibName}",
 		}
 
-    -- TODO: Properly implement MacOS
     filter "system:macosx"
 		defines "HZ_PLATFORM_MACOS"
-		systemversion "latest"
+		systemversion "%{MacOSVersion}"
 		staticruntime "on"
 
 		includedirs
 		{
+			"%{Dependencies.Vulkan.MacOS.IncludeDir}",
+		}
+
+		libdirs
+		{
+			"%{Dependencies.Vulkan.MacOS.LibDir}",
+		}
+
+		links
+		{
+			"%{Dependencies.Vulkan.MacOS.LibName}",
+			"%{Dependencies.ShaderC.MacOS.LibName}",
+
+			"AppKit.framework",
+			"IOKit.framework",
+			"CoreGraphics.framework",
+			"CoreFoundation.framework",
+		}
+
+		postbuildcommands
+		{
+			'{COPYFILE} "%{Dependencies.Vulkan.MacOS.LibDir}/libvulkan.1.dylib" "%{cfg.targetdir}"',
+			'{COPYFILE} "%{Dependencies.Vulkan.MacOS.LibDir}/lib%{Dependencies.Vulkan.MacOS.LibName}.dylib" "%{cfg.targetdir}"',
+		}
+
+		-- Note: If we don't add the header files to the externalincludedirs
+		-- we can't use <angled> brackets to include files.
+		externalincludedirs
+		{
+			"src",
+			"%{wks.location}/vendor",
+	
+			"%{wks.location}/Horizon/src",
+	
+			"%{Dependencies.spdlog.IncludeDir}",
+			"%{Dependencies.glfw.IncludeDir}",
+			"%{Dependencies.glm.IncludeDir}",
+			"%{Dependencies.stb.IncludeDir}",
+			"%{Dependencies.assimp.IncludeDir}",
+			"%{Dependencies.Pulse.IncludeDir}",
+			"%{Dependencies.Tracy.IncludeDir}",
+
 			"%{Dependencies.Vulkan.MacOS.IncludeDir}",
 		}
 

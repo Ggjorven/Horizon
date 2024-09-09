@@ -2,4 +2,4 @@
 
 cd ../..
 
-premake5 gmake2 os=linux
+premake5 xcode os=macosx

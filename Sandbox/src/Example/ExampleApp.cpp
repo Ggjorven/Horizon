@@ -133,6 +133,7 @@ void ExampleApp::EventCallback(Event& e)
     handler.Handle<WindowResizeEvent>([this](WindowResizeEvent& e) -> bool
     {
         Renderer::Recreate(e.GetWidth(), e.GetHeight(), m_Window->IsVSync());
+        m_Renderpass->Resize(e.GetWidth(), e.GetHeight());
         return false;
     });
     handler.Handle<WindowCloseEvent>([this](WindowCloseEvent& e) -> bool

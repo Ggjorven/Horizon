@@ -29,9 +29,12 @@ namespace Hz
 		case DataType::Int3:     return 4 * 3;
 		case DataType::Int4:     return 4 * 4;
 		case DataType::Bool:     return 1;
+
+		default:
+			HZ_ASSERT(false, "Unknown DataType!");
+			break;
 		}
 
-		HZ_ASSERT(false, "Unknown DataType!");
 		return 0;
 	}
 
@@ -55,9 +58,12 @@ namespace Hz
 		case DataType::Int3:    return 3;
 		case DataType::Int4:    return 4;
 		case DataType::Bool:    return 1;
+
+		default:
+			HZ_ASSERT(false, "Unknown DataType!");
+			break;
 		}
 
-		HZ_ASSERT(false, "Unknown DataType!");
 		return 0;
 	}
 
