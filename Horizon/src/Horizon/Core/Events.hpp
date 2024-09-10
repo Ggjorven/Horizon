@@ -17,9 +17,18 @@ namespace Hz
 	enum class EventType : uint8_t
 	{
 		None = 0,
-		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
+		WindowClose, WindowResize, 
+	#if defined(HZ_DESKTOP_ENVIRONMENT)
+		WindowFocus, WindowLostFocus, WindowMoved,
+	#endif
+
 		KeyPressed, KeyReleased, KeyTyped,
+
+	#if defined(HZ_DESKTOP_ENVIRONMENT)
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
+	#elif defined(HZ_PLATFORM_ANDROID)
+		TouchPressed, TouchReleased, TouchMoved, TouchCancelled
+	#endif
 	};
 
 	enum class EventCategory : uint8_t
@@ -28,8 +37,12 @@ namespace Hz
 		Application = 1 << 0,
 		Input = 1 << 1,
 		Keyboard = 1 << 2,
+	#if defined(HZ_DESKTOP_ENVIRONMENT)
 		Mouse = 1 << 3,
 		MouseButton = 1 << 4
+	#elif defined (HZ_PLATFORM_ANDROID)
+		Touch = 1 << 3
+	#endif
 	};
     ENABLE_BITWISE(EventCategory)
 
@@ -108,6 +121,7 @@ namespace Hz
 		uint32_t m_Width, m_Height;
 	};
 
+#if defined(HZ_DESKTOP_ENVIRONMENT)
 	class WindowCloseEvent : public Event
 	{
 	public:
@@ -117,6 +131,7 @@ namespace Hz
 		EVENT_CLASS_TYPE(WindowClose)
 		EVENT_CLASS_CATEGORY(EventCategory::Application)
 	};
+#endif
 
 
 
@@ -195,6 +210,7 @@ namespace Hz
 
 
 
+#if defined(HZ_DESKTOP_ENVIRONMENT)
 	class MouseMovedEvent : public Event
 	{
 	public:
@@ -293,5 +309,89 @@ namespace Hz
 
 		EVENT_CLASS_TYPE(MouseButtonReleased)
 	};
+
+#elif defined(HZ_PLATFORM_ANDROID)
+	class TouchEvent : public Event 
+	{
+	public:
+		inline float GetX() const { return m_X; }
+		inline float GetY() const { return m_Y; }
+		inline int32_t GetPointerId() const { return m_PointerId; }
+
+		EVENT_CLASS_CATEGORY(AndroidEventCategory::Touch | AndroidEventCategory::Input)
+
+	protected:
+		TouchEvent(float x, float y, int32_t pointerId)
+			: m_X(x), m_Y(y), m_PointerId(pointerId) {}
+
+	protected:
+		float m_X, m_Y;
+		int32_t m_PointerId;
+	};
+
+	class TouchPressedEvent : public TouchEvent 
+	{
+	public:
+		TouchPressedEvent(float x, float y, int32_t pointerId)
+			: TouchEvent(x, y, pointerId) {}
+
+		std::string ToString() const override 
+		{
+			std::stringstream ss;
+			ss << "TouchPressedEvent: (" << m_X << ", " << m_Y << "), Pointer ID: " << m_PointerId;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(TouchPressed)
+	};
+
+	class TouchReleasedEvent : public TouchEvent 
+	{
+	public:
+		TouchReleasedEvent(float x, float y, int32_t pointerId)
+			: TouchEvent(x, y, pointerId) {}
+
+		std::string ToString() const override 
+		{
+			std::stringstream ss;
+			ss << "TouchReleasedEvent: (" << m_X << ", " << m_Y << "), Pointer ID: " << m_PointerId;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(TouchReleased)
+	};
+
+	class TouchMovedEvent : public TouchEvent
+	{
+	public:
+		TouchMovedEvent(float x, float y, int32_t pointerId)
+			: TouchEvent(x, y, pointerId) {}
+
+		std::string ToString() const override 
+		{
+			std::stringstream ss;
+			ss << "TouchMovedEvent: (" << m_X << ", " << m_Y << "), Pointer ID: " << m_PointerId;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(TouchMoved)
+	};
+
+	class TouchCancelledEvent : public TouchEvent 
+	{
+	public:
+		TouchCancelledEvent(float x, float y, int32_t pointerId)
+			: TouchEvent(x, y, pointerId) {}
+
+		std::string ToString() const override 
+		{
+			std::stringstream ss;
+			ss << "TouchCancelledEvent: (" << m_X << ", " << m_Y << "), Pointer ID: " << m_PointerId;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(TouchCancelled)
+	};
+#endif
 
 }

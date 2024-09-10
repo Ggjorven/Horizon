@@ -42,7 +42,7 @@ namespace Hz::IO
 
 // For templated functions and classes
 #if defined(HZ_PLATFORM_WINDOWS)
-	#include "Horizon/Platform/Windows/WindowFileSystem.hpp"
+	#include "Horizon/Platform/Windows/WindowsFileSystem.hpp"
 #elif defined(HZ_PLATFORM_LINUX)
 	#include "Horizon/Platform/Linux/LinuxFileSystem.hpp"
 #elif defined(HZ_PLATFORM_MACOS)

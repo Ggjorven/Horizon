@@ -1,10 +1,13 @@
 #pragma once
 
+#include "Horizon/Core/Core.hpp"
+
 #include <cstdint>
 
 namespace Hz
 {
 
+#if defined(HZ_DESKTOP_ENVIRONMENT)
 	// From glfw3.h
 	enum class CursorMode : uint32_t
 	{
@@ -31,5 +34,6 @@ namespace Hz
 		Right = B2,
 		Middle = B3
 	};
+#endif
 
 }

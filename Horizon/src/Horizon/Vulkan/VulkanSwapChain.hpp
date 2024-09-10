@@ -42,7 +42,7 @@ namespace Hz
 		uint32_t AcquireNextImage();
 		void FindImageFormatAndColorSpace();
 
-		bool Is180Rotation();
+		bool Is180Rotation() const;
 
 	private:
 		VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;

@@ -2,4 +2,4 @@
 
 cd ../..
 
-premake5 xcode os=macosx
+premake5 xcode --os=macosx
