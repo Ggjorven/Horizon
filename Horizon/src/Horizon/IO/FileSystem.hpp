@@ -23,10 +23,11 @@ namespace Hz::IO
 
 		static std::filesystem::path Absolute(const std::filesystem::path& path);
 		static std::filesystem::path Relative(const std::filesystem::path& path, const std::filesystem::path& base = CurrentPath());
-		
+
 		static std::filesystem::path CurrentPath();
 	};
 
+#if defined(HZ_PLATFORM_WINDOWS) // Only tested on MSVC
 	enum class FileMode
 	{
 		In = 1 << 1,
@@ -36,6 +37,17 @@ namespace Hz::IO
 		Trunc = 1 << 5,
 		Binary = 1 << 6,
 	};
+#elif defined(HZ_PLATFORM_LINUX) // Only tested on GCC
+    enum class FileMode
+	{
+		In = 1 << 3,
+		Out = 1 << 4,
+		Ate = 1 << 1,
+		App = 1 << 0,
+		Trunc = 1 << 5,
+		Binary = 1 << 2,
+	};
+#endif
 	ENABLE_BITWISE(FileMode)
 
 }
