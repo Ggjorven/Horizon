@@ -83,7 +83,7 @@ namespace Hz::IO
 	{
 		HZ_ASSERT((Open()), "File is not open.");
 		std::string content((std::istreambuf_iterator<char>(m_File)), std::istreambuf_iterator<char>());
-		
+
 		return content;
 	}
 

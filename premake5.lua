@@ -1,4 +1,5 @@
 require("vendor/premake-vscode/vscode")
+require("vendor/premake-android-studio/android_studio")
 
 ------------------------------------------------------------------------------
 -- Dependencies
@@ -108,6 +109,20 @@ workspace "Horizon"
 	{
 		"MultiProcessorCompile"
 	}
+
+	-- Custom workspace settings for android
+	filter "system:android"
+        location ("build")
+        
+        gradleversion "com.android.tools.build:gradle:8.5.2"
+        gradlewrapper { "distributionUrl=https://services.gradle.org/distributions/gradle-8.7-all.zip"}
+        
+        gradleproperties
+        {
+            "org.gradle.jvmargs=-Xmx4608m",
+            "org.gradle.parallel=true",
+            "android.useAndroidX=true", -- For GameActivity
+        }
 
 group "Dependencies"
 	include "vendor/glfw"

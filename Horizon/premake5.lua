@@ -123,6 +123,56 @@ project "Horizon"
 			"%{Dependencies.Vulkan.MacOS.IncludeDir}",
 		}
 
+	-- TODO: Expand
+	filter "system:android"
+		defines "HZ_PLATFORM_ANDROID"
+
+		includedirs
+		{
+			-- CMake specific include directories
+			"${ANDROID_NDK}/sources/vulkan/include",
+            "$<TARGET_PROPERTY:game-activity::game-activity_static,INTERFACE_INCLUDE_DIRECTORIES>"
+		}
+
+		defines
+		{
+			"VK_USE_PLATFORM_ANDROID_KHR"
+		}
+
+		-- Android premake options
+		androiddependencies
+        {
+            "androidx.activity:activity:1.9.2",
+            "androidx.core:core:1.13.1",
+            "androidx.appcompat:appcompat:1.7.0",
+            "com.google.android.material:material:1.12.0",
+            "androidx.games:games-activity:3.0.5",
+        }
+
+		androidabis
+        {
+            'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+
+        androidfindcmakepackages
+        {
+            "game-activity REQUIRED CONFIG"
+        }
+
+        androidlinkcmakepackages
+        {
+            "game-activity::game-activity_static"
+        }
+
+        androidmoduleversions
+        { 
+            "org.jetbrains.kotlin:kotlin-stdlib:1.8.22", 
+            "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22", 
+            "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22" 
+        }
+
+        androidprefab "true"
+
 	filter "configurations:Debug"
 		defines "HZ_CONFIG_DEBUG"
 		runtime "Debug"

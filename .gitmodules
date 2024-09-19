@@ -19,3 +19,6 @@
 [submodule "vendor/tracy"]
 	path = vendor/tracy
 	url = https://github.com/Ggjorven/tracy.git
+[submodule "vendor/premake-android-studio"]
+	path = vendor/premake-android-studio
+	url = https://github.com/Ggjorven/premake-android-studio.git
