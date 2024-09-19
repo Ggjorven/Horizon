@@ -84,7 +84,7 @@ project "Sandbox"
 			"%{Dependencies.Pulse.LibName}",
 
 			"%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.Vulkan.Linux.LibName}",
-            "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.LibName}",
+            "%{Dependencies.Vulkan.Linux.LibDir}/%{Dependencies.ShaderC.Linux.LibName}",
 		}
 
     filter "system:macosx"
@@ -125,9 +125,9 @@ project "Sandbox"
 		{
 			"src",
 			"%{wks.location}/vendor",
-	
+
 			"%{wks.location}/Horizon/src",
-	
+
 			"%{Dependencies.spdlog.IncludeDir}",
 			"%{Dependencies.glfw.IncludeDir}",
 			"%{Dependencies.glm.IncludeDir}",
