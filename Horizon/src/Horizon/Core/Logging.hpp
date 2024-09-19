@@ -76,6 +76,9 @@ namespace Hz
 		case Level::Fatal:
 			spdlog::critical(Text::Format(fmt, args...));
 			break;
+                
+        default:
+            break;
 		}
 	}
 #elif defined(HZ_PLATFORM_ANDROID)
@@ -99,6 +102,9 @@ namespace Hz
 		case Level::Fatal:
 			__android_log_print(ANDROID_LOG_FATAL, "Horizon", Text::Format(fmt, args...));
 			break;
+        
+        default:
+            break;
 		}
 	}
 #endif

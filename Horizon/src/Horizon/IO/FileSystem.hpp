@@ -47,6 +47,16 @@ namespace Hz::IO
 		Trunc = 1 << 5,
 		Binary = 1 << 2,
 	};
+#elif defined(HZ_PLATFORM_MACOS) // Only tested on clang (apple)
+    enum class FileMode
+    {
+        In = 1 << 3,
+        Out = 1 << 4,
+        Ate = 1 << 1,
+        App = 1 << 0,
+        Trunc = 1 << 5,
+        Binary = 1 << 2,
+    };
 #endif
 	ENABLE_BITWISE(FileMode)
 
