@@ -1,5 +1,6 @@
 #pragma once
 
+#if defined(HZ_PLATFORM_ANDROID)
 #include "Horizon/IO/FileSystem.hpp"
 
 #include <android/asset_manager.h>
@@ -57,3 +58,4 @@ namespace Hz::IO
 	};
 
 }
+#endif

@@ -83,15 +83,15 @@ namespace Hz::IO
 	{
 		HZ_ASSERT((Open()), "File is not open.");
 		std::string content((std::istreambuf_iterator<char>(m_File)), std::istreambuf_iterator<char>());
-		
+
 		return content;
 	}
 
-	bool IFile::Seek(size_t position) 
+	bool IFile::Seek(size_t position)
 	{
-		if (!Open()) 
+		if (!Open())
 			return false;
-		
+
 		m_File.seekg(position);
 		return Good();
 	}
@@ -102,7 +102,7 @@ namespace Hz::IO
 		return static_cast<size_t>(m_File.tellg());
 	}
 
-	size_t IFile::Size() 
+	size_t IFile::Size()
 	{
 		HZ_ASSERT((Open()), "File is not open.");
 
@@ -143,7 +143,7 @@ namespace Hz::IO
 		m_File.close();
 	}
 
-	bool OFile::Write(const std::string& data) 
+	bool OFile::Write(const std::string& data)
 	{
 		HZ_ASSERT((Open()), "File is not open.");
 
@@ -159,7 +159,7 @@ namespace Hz::IO
 		return Good();
 	}
 
-	bool OFile::WriteBytes(const std::vector<uint8_t>& bytes) 
+	bool OFile::WriteBytes(const std::vector<uint8_t>& bytes)
 	{
 		HZ_ASSERT((Open()), "File is not open.");
 
@@ -167,7 +167,7 @@ namespace Hz::IO
 		return Good();
 	}
 
-	bool OFile::Seek(size_t position) 
+	bool OFile::Seek(size_t position)
 	{
 		HZ_ASSERT((Open()), "File is not open.");
 
@@ -175,7 +175,7 @@ namespace Hz::IO
 		return Good();
 	}
 
-	size_t OFile::Tell() 
+	size_t OFile::Tell()
 	{
 		HZ_ASSERT((Open()), "File is not open.");
 
@@ -198,12 +198,12 @@ namespace Hz::IO
 		return m_File.good();
 	}
 
-	bool OFile::EndOfFile() const 
+	bool OFile::EndOfFile() const
 	{
 		return m_File.eof();
 	}
 
-	OFile& OFile::operator << (const std::string& data) 
+	OFile& OFile::operator << (const std::string& data)
 	{
 		Write(data);
 		return *this;

@@ -1,5 +1,6 @@
 #pragma once
 
+#if defined(HZ_PLATFORM_WINDOWS)
 #include "Horizon/IO/FileSystem.hpp"
 
 #include <fstream>
@@ -56,3 +57,4 @@ namespace Hz::IO
 	};
 
 }
+#endif

@@ -94,7 +94,7 @@ project "Horizon"
 
     filter "system:macosx"
 		defines "HZ_PLATFORM_MACOS"
-		systemversion "%{MacOSVersion}"
+		systemversion(MacOSVersion)
 		staticruntime "on"
 
 		-- Note: XCode only needs the full pchheader path

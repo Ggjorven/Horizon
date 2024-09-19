@@ -47,6 +47,8 @@ namespace Hz
 
     std::vector<char> ShaderCompiler::CompileGLSL(ShaderStage stage, const std::string& code)
     {
+        HZ_VERIFY((!code.empty()), "Empty string passed in as shader code.");
+
         shaderc::Compiler compiler = {};
 		shaderc::CompileOptions options = {};
 		options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_3);
@@ -75,7 +77,12 @@ namespace Hz
     std::string Shader::ReadGLSL(const std::filesystem::path& path)
     {
 		IO::IFile file(path);
-		return file.ReadAll();
+
+        std::string content = file.ReadAll();
+        if (content.empty())
+            HZ_LOG_WARN("GLSL file: '{0}' is empty, this will 'cause internal errors.", path.string());
+
+		return content;
     }
 
     std::vector<char> Shader::ReadSPIRV(const std::filesystem::path& path)

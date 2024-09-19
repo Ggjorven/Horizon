@@ -89,7 +89,7 @@ project "Sandbox"
 
     filter "system:macosx"
 		defines "HZ_PLATFORM_MACOS"
-		systemversion "%{MacOSVersion}"
+		systemversion(MacOSVersion)
 		staticruntime "on"
 
 		includedirs
