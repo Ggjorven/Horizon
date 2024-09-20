@@ -16,7 +16,6 @@ namespace Hz
 	class Input
 	{
 	public:
-	#if defined (HZ_DESKTOP_ENVIRONMENT)
 		static bool IsKeyPressed(Key keycode);
 		static bool IsMousePressed(MouseButton button);
 
@@ -24,7 +23,6 @@ namespace Hz
 		static void SetCursorPosition(glm::vec2 position);
 
 		static void SetCursorMode(CursorMode mode);
-	#endif
 	};
 
 }

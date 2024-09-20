@@ -7,7 +7,6 @@
 namespace Hz
 {
 
-#if defined(HZ_DESKTOP_ENVIRONMENT)
     enum class Key : uint16_t
     {
         Space = 32,
@@ -133,8 +132,5 @@ namespace Hz
         RightSuper = 347,
         Menu = 348
     };
-#else
-// TODO: Android keys
-#endif
 
 }

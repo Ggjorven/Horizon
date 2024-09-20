@@ -6,13 +6,9 @@
 #include <string_view>
 #include <memory>
 
-#if defined(HZ_DESKTOP_ENVIRONMENT)
-	#include <spdlog/spdlog.h>
-	#include <spdlog/fmt/ostr.h>
-	#include <spdlog/sinks/stdout_color_sinks.h>
-#elif defined(HZ_PLATFORM_ANDROID)
-	#include <android/log.h>
-#endif
+#include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <Pulse/Core/Core.hpp>
 
@@ -46,16 +42,13 @@ namespace Hz
 			#define HZ_LOG_FATAL(...)
 		#endif
 
-	#if defined(HZ_DESKTOP_ENVIRONMENT)
 		static std::shared_ptr<spdlog::logger>& GetLogger();
 
 	private:
 		static std::shared_ptr<spdlog::logger> s_Logger;
 		static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> s_ConsoleSink;
-	#endif
 	};
 
-#if defined(HZ_DESKTOP_ENVIRONMENT) // Desktop logging
     template<typename ... Args>
 	void Log::LogMessage(Log::Level level, std::string_view fmt, const Args& ...args)
 	{
@@ -81,33 +74,6 @@ namespace Hz
             break;
 		}
 	}
-#elif defined(HZ_PLATFORM_ANDROID)
-	template<typename ... Args>
-	void Log::LogMessage(Log::Level level, std::string_view fmt, const Args& ...args)
-	{
-		switch (level)
-		{
-		case Level::Trace:
-			__android_log_print(ANDROID_LOG_VERBOSE, "Horizon", Text::Format(fmt, args...));
-			break;
-		case Level::Info:
-			__android_log_print(ANDROID_LOG_INFO, "Horizon", Text::Format(fmt, args...));
-			break;
-		case Level::Warn:
-			__android_log_print(ANDROID_LOG_WARN, "Horizon", Text::Format(fmt, args...));
-			break;
-		case Level::Error:
-			__android_log_print(ANDROID_LOG_ERROR, "Horizon", Text::Format(fmt, args...));
-			break;
-		case Level::Fatal:
-			__android_log_print(ANDROID_LOG_FATAL, "Horizon", Text::Format(fmt, args...));
-			break;
-        
-        default:
-            break;
-		}
-	}
-#endif
 
 	#ifndef HZ_CONFIG_DIST
 		#define HZ_VERIFY(value, ...) if (!(value)) \

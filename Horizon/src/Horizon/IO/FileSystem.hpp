@@ -69,6 +69,4 @@ namespace Hz::IO
 	#include "Horizon/Platform/Linux/LinuxFileSystem.hpp"
 #elif defined(HZ_PLATFORM_MACOS)
 	#include "Horizon/Platform/MacOS/MacOSFileSystem.hpp"
-#elif defined(HZ_PLATFORM_ANDROID)
-	#error TODO: Implement Android FileSystem
 #endif

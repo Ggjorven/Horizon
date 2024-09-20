@@ -1,6 +1,3 @@
-require("vendor/premake-vscode/vscode")
-require("vendor/premake-android-studio/android_studio")
-
 ------------------------------------------------------------------------------
 -- Dependencies
 ------------------------------------------------------------------------------
@@ -32,25 +29,12 @@ Dependencies =
 			IncludeDir = "%{VULKAN_SDK}/../macOS/include/",
 			LibDir = "%{VULKAN_SDK}/../macOS/lib/",
 		},
-		Android = 	-- Unsupported.
-		{
-			LibName = "vulkan-1",
-			IncludeDir = "%{VULKAN_SDK}/Include/",
-			LibDir = "%{VULKAN_SDK}/Lib/"
-		},
-        iOS = 		-- Unsupported.
-		{
-			LibName = "vulkan.%{VULKAN_VERSION}", 
-			IncludeDir = "%{VULKAN_SDK}/../macOS/include/",
-			LibDir = "%{VULKAN_SDK}/../macOS/lib/",
-		}
 	},
 	ShaderC =
 	{
 		Windows = { LibName = "shaderc_shared" },
 		Linux = { LibName = "shaderc_shared" },
 		MacOS = { LibName = "shaderc_combined" },
-		iOS = { LibName = "shaderc_combined" },
 	},
 
 	-- All other Third-Party libraries
@@ -109,20 +93,6 @@ workspace "Horizon"
 	{
 		"MultiProcessorCompile"
 	}
-
-	-- Custom workspace settings for android
-	filter "system:android"
-        location ("build")
-        
-        gradleversion "com.android.tools.build:gradle:8.5.2"
-        gradlewrapper { "distributionUrl=https://services.gradle.org/distributions/gradle-8.7-all.zip"}
-        
-        gradleproperties
-        {
-            "org.gradle.jvmargs=-Xmx4608m",
-            "org.gradle.parallel=true",
-            "android.useAndroidX=true", -- For GameActivity
-        }
 
 group "Dependencies"
 	include "vendor/glfw"
