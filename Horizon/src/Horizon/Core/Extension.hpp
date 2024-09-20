@@ -3,6 +3,10 @@
 #include "Horizon/Core/Core.hpp"
 #include "Horizon/Core/Events.hpp"
 
+#include <Pulse/Types/TypeUtils.hpp>
+
+#include <vector>
+
 namespace Hz
 {
 
@@ -30,7 +34,48 @@ namespace Hz
 		virtual void OnUIBegin() {}
 		virtual void OnUIEnd() {}
 
-		virtual void OnEvent(Hz::Event& e) {}
+		virtual void OnEvent(Event& e) {}
 	};
+
+
+
+	class ExtensionList
+	{
+	public:
+		ExtensionList() = default;
+		~ExtensionList() = default;
+
+		void OnInitBegin();
+		void OnInitEnd();
+
+		void OnDestroyBegin();
+		void OnDestroyEnd();
+
+		void OnUpdateBegin(float deltaTime);
+		void OnUpdateEnd(float deltaTime);
+
+		void OnRenderBegin();
+		void OnRenderEnd();
+
+		void OnUIBegin();
+		void OnUIEnd();
+
+		void OnEvent(Event& e);
+
+		// Adding a extension
+		template<typename TExtension>
+		void Add() requires (Pulse::Types::InheritsFrom<Extension, TExtension>);
+
+	private:
+		std::vector<Unique<Extension>> m_Extensions = { };
+	};
+
+
+
+	template<typename TExtension>
+	inline void ExtensionList::Add() requires (Pulse::Types::InheritsFrom<Extension, TExtension>)
+	{
+		m_Extensions.emplace_back(Unique<TExtension>::Create());
+	}
 
 }

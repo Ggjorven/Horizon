@@ -1,11 +1,32 @@
-#include "Example/ExampleApp.hpp"
+#include <Horizon/Core/Application.hpp>
+#include <Horizon/Core/Entrypoint.hpp>
 
-int main(int argc, char* argv[])
+#include "MainLayer.hpp"
+
+class Sandbox : public Hz::Application
 {
-    {
-        ExampleApp app = {};
-        app.Run();
-    }
+public:
+	Sandbox(const Hz::ApplicationSpecification& appInfo)
+		: Hz::Application(appInfo)
+	{
+		SetAppLayer<MainLayer>();
+	}
+};
 
-    return 0;
+
+
+// ----------------------------------------------------------------
+//                    Set Application specs here...
+// ----------------------------------------------------------------
+Hz::Application* Hz::CreateApplication(int argc, char* argv[])
+{
+	ApplicationSpecification appInfo = {};
+	appInfo.WindowSpecs.Title = "Sandbox | Horizon Application";
+	appInfo.WindowSpecs.Width = 1280;
+	appInfo.WindowSpecs.Height = 720;
+
+	appInfo.RendererSpecs.Buffers = BufferCount::Triple;
+	appInfo.RendererSpecs.VSync = false;
+
+	return new Sandbox(appInfo);
 }
