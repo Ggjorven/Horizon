@@ -4,11 +4,15 @@
 
 #include <Horizon/Math/Transforms.hpp>
 
+#include "../Extensions/ImGui/imgui/imgui.h"
+
 ExampleApp::ExampleApp()
 {
     WindowSpecification windowSpecs = { 1280, 720, "Window", [this](Event& e){ EventCallback(e); }};
     RendererSpecification rendererSpecs = { BufferCount::Triple, false };
     m_Window = Window::Create(windowSpecs, rendererSpecs);
+
+    m_ImGui.OnInitEnd();
 
     m_Renderpass = Renderpass::Create({
         .ColourAttachment = GraphicsContext::GetSwapChainImages(),
@@ -54,6 +58,8 @@ ExampleApp::ExampleApp()
 
 ExampleApp::~ExampleApp()
 {
+    m_ImGui.OnDestroyBegin();
+
     m_Pipeline.Reset();
     m_Renderpass.Reset();
     m_DescriptorSets.Reset();
@@ -110,6 +116,17 @@ void ExampleApp::Run()
         Renderer::End(m_Renderpass);
         Renderer::Submit(m_Renderpass);
 
+
+
+        m_ImGui.OnUIBegin();
+        
+        ImGui::Begin("A");
+        ImGui::End();
+
+        m_ImGui.OnUIEnd();
+
+
+
         Renderer::EndFrame();
         m_Window->SwapBuffers();
         m_Window->PollEvents();
@@ -141,4 +158,6 @@ void ExampleApp::EventCallback(Event& e)
         m_Running = false;
         return false;
     });
+
+    m_ImGui.OnEvent(e);
 }

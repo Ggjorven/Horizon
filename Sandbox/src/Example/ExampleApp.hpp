@@ -17,6 +17,8 @@
 
 #include "Example/Camera.hpp"
 
+#include "../Extensions/ImGui/ImGuiExtension.hpp"
+
 #include <Pulse/Time/Timer.hpp>
 
 using namespace Hz;
@@ -36,6 +38,8 @@ private:
     Application m_Application;          // Note: The Application
     Ref<Window> m_Window = nullptr;     // and Window need to stay alive the longest.
     bool m_Running = true;
+
+    ImGuiExtension m_ImGui = {};
 
     Ref<Pipeline> m_Pipeline = nullptr;
     Ref<Renderpass> m_Renderpass = nullptr;
