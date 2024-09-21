@@ -45,6 +45,9 @@ namespace Hz
 
 		inline static Application& Get() { return *s_Instance; }
 
+	protected:
+		void Init();
+
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);

@@ -28,6 +28,7 @@ namespace Hz
 	void ExtensionList::OnDestroyEnd()
 	{
 		ALL_EXTENSIONS(OnDestroyEnd);
+		m_Extensions.clear();
 	}
 
 	void ExtensionList::OnUpdateBegin(float deltaTime)

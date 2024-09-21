@@ -12,21 +12,14 @@ namespace Hz
 
 	Application* Application::s_Instance = nullptr;
 
+
+
 	Application::Application(const ApplicationSpecification& appInfo)
 		: m_AppInfo(appInfo)
 	{
 		s_Instance = this;
 
 		Log::Init();
-
-		m_Extensions.OnInitBegin();
-
-		// This also intializes the renderer
-		WindowSpecification windowSpecs = appInfo.WindowSpecs;
-		windowSpecs.EventCallback = [this](Event& e) { OnEvent(e); };
-		m_Window = Window::Create(windowSpecs, appInfo.RendererSpecs);
-
-		m_Extensions.OnInitEnd();
 	}
 
 	Application::~Application()
@@ -67,7 +60,7 @@ namespace Hz
 			}
 
 			{
-				HZ_PROFILE_SCOPE("Update");
+				HZ_PROFILE_SCOPE("App::Update");
 
 				m_Extensions.OnUpdateBegin(deltaTime);
 				m_AppLayer->OnUpdate(deltaTime);
@@ -76,7 +69,7 @@ namespace Hz
 
 			if (!m_Minimized)
 			{
-				HZ_PROFILE_SCOPE("Render");
+				HZ_PROFILE_SCOPE("App::Render");
 
 				m_Extensions.OnRenderBegin();
 				m_AppLayer->OnRender();
@@ -86,7 +79,7 @@ namespace Hz
 			// UI 
 			if (!m_Minimized)
 			{
-				HZ_PROFILE_SCOPE("UI");
+				HZ_PROFILE_SCOPE("App::UI");
 
 				m_Extensions.OnUIBegin();
 				m_AppLayer->OnUIRender();
@@ -100,6 +93,18 @@ namespace Hz
 				m_Window->PollEvents();
 			}
 		}
+	}
+
+	void Application::Init()
+	{
+		m_Extensions.OnInitBegin();
+
+		// This also intializes the renderer
+		WindowSpecification windowSpecs = m_AppInfo.WindowSpecs;
+		windowSpecs.EventCallback = [this](Event& e) { OnEvent(e); };
+		m_Window = Window::Create(windowSpecs, m_AppInfo.RendererSpecs);
+
+		m_Extensions.OnInitEnd();
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

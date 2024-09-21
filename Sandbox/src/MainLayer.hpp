@@ -12,5 +12,7 @@ public:
 
 	void OnUpdate(float deltaTime) override;
 	void OnRender() override;
+	void OnUIRender() override;
+
 	void OnEvent(Event& e) override;
 };

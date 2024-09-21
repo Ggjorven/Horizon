@@ -92,7 +92,7 @@ void ImGuiExtension::OnInitEnd()
 	// Create renderpass
 	RenderpassSpecification specs = {};
 	specs.ColourAttachment = VulkanContext::GetSwapChainImages();
-	specs.ColourLoadOp = LoadOperation::Load; 						// Change based on needs
+	specs.ColourLoadOp = LoadOperation::Clear; 						// Change based on needs
 	specs.PreviousColourImageLayout = ImageLayout::PresentSrcKHR;	// Because before this pass there is pretty much always a renderpass with Presentation
 
 	m_Renderpass = Ref<VulkanRenderpass>::Create(specs, CommandBuffer::Create());
@@ -112,6 +112,8 @@ void ImGuiExtension::OnInitEnd()
 
 void ImGuiExtension::OnDestroyBegin()
 {
+	m_Renderpass.Reset();
+
 	Renderer::Free([pool = s_ImGuiPool]()
 	{
 		vkDestroyDescriptorPool(VulkanContext::GetDevice()->GetVkDevice(), pool, nullptr);

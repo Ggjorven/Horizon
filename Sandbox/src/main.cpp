@@ -1,6 +1,10 @@
 #include <Horizon/Core/Application.hpp>
 #include <Horizon/Core/Entrypoint.hpp>
 
+// Extensions
+#include "../Extensions/ImGui/ImGuiExtension.hpp"
+
+// Main layer
 #include "MainLayer.hpp"
 
 class Sandbox : public Hz::Application
@@ -10,6 +14,9 @@ public:
 		: Hz::Application(appInfo)
 	{
 		SetAppLayer<MainLayer>();
+		AddExtension<ImGuiExtension>();
+
+		Init();
 	}
 };
 

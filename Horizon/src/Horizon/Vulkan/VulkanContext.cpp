@@ -46,7 +46,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugUtilsMessageSev
 	return VK_FALSE;
 }
 
-bool ValidationLayersSupported()
+static bool ValidationLayersSupported()
 {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
