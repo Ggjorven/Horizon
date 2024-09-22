@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "CommandBuffer.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/Vulkan/VulkanCommandBuffer.hpp"
 

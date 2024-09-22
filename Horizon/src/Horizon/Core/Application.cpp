@@ -1,9 +1,11 @@
 #include "hzpch.h"
 #include "Application.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/Utils/Profiler.hpp"
+
+#include "Horizon/Renderer/RendererSpecification.hpp"
 
 #include <Pulse/Time/Timer.hpp>
 
@@ -14,8 +16,8 @@ namespace Hz
 
 
 
-	Application::Application(const ApplicationSpecification& appInfo)
-		: m_AppInfo(appInfo)
+	Application::Application(const ApplicationSpecification& appInfo, const std::string& debugName)
+		: m_AppInfo(appInfo), m_DebugName(debugName)
 	{
 		s_Instance = this;
 
@@ -25,6 +27,8 @@ namespace Hz
 	Application::~Application()
 	{
 		m_Extensions.OnDestroyBegin();
+
+		m_AppLayer->OnDestroy();
 
 		// This also destroys the renderer
 		m_Window.Reset();
@@ -104,7 +108,24 @@ namespace Hz
 		windowSpecs.EventCallback = [this](Event& e) { OnEvent(e); };
 		m_Window = Window::Create(windowSpecs, m_AppInfo.RendererSpecs);
 
+		m_AppLayer->OnInit();
+
 		m_Extensions.OnInitEnd();
+
+		// Log information about the application
+		#if !defined(HZ_CONFIG_DIST)
+			DeviceSpecification gpuInfo = DeviceSpecification::Get();
+
+			HZ_LOG_INFO("Started \"{0}\" | Horizon Application", m_DebugName);
+			HZ_LOG_INFO("  - GPU Information: ");
+			HZ_LOG_INFO("    - Name: {0}", gpuInfo.DeviceName);
+			HZ_LOG_INFO("    - Type: {0}", gpuInfo.DeviceType);
+			HZ_LOG_INFO("    - API Version: {0}", gpuInfo.APIVersion);
+			if (!m_Extensions.Empty())
+				HZ_LOG_INFO("  - Loaded extensions: ");
+			for (const auto& extension : m_Extensions)
+				HZ_LOG_INFO("    - \"{0}\"", extension->GetName());
+		#endif
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

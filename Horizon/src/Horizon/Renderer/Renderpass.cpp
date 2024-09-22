@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "Renderpass.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/Vulkan/VulkanRenderpass.hpp"
 

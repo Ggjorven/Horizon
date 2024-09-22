@@ -11,7 +11,7 @@ class Sandbox : public Hz::Application
 {
 public:
 	Sandbox(const Hz::ApplicationSpecification& appInfo)
-		: Hz::Application(appInfo)
+		: Hz::Application(appInfo, "Sandbox")
 	{
 		SetAppLayer<MainLayer>();
 		AddExtension<ImGuiExtension>();

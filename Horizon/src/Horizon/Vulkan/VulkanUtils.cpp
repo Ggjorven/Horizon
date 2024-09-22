@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "VulkanUtils.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/Renderer/GraphicsContext.hpp"
 
@@ -40,6 +40,36 @@ namespace Hz::VkUtils
 
 		HZ_LOG_ERROR("Failed to find supported format!");
 		return VK_FORMAT_UNDEFINED;
+	}
+
+	DeviceSpecification GetDeviceSpecs()
+	{
+		VkPhysicalDeviceProperties deviceProperties = {};
+		vkGetPhysicalDeviceProperties(VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice(), &deviceProperties);
+
+		DeviceSpecification result = {};
+		result.DeviceID = deviceProperties.deviceID;
+		result.VendorID = deviceProperties.vendorID;
+		result.DeviceName = deviceProperties.deviceName;
+		result.APIVersion = Text::Format("{0}.{1}.{2}", VK_VERSION_MAJOR(deviceProperties.apiVersion), VK_VERSION_MINOR(deviceProperties.apiVersion), VK_VERSION_PATCH(deviceProperties.apiVersion));
+
+		switch (deviceProperties.deviceType)
+		{
+		case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:		
+			result.DeviceType = "Discrete GPU";
+			break;
+		case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:	
+			result.DeviceType = "Integrated GPU";
+			break;
+		case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:		
+			result.DeviceType = "Virtual GPU";
+			break;
+		case VK_PHYSICAL_DEVICE_TYPE_CPU:				
+			result.DeviceType = "CPU";
+			break;
+		}
+
+		return result;
 	}
 
     //////////////////////////////////////////////////////////

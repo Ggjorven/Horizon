@@ -22,7 +22,9 @@ project "Sandbox"
 
 	includedirs
 	{
+		"%{prj.location}",
 		"src",
+		"Extensions",
 		"%{wks.location}/vendor",
 
 		"%{wks.location}/Horizon/src",

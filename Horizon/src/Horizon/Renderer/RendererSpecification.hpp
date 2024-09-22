@@ -25,4 +25,17 @@ namespace Hz
 		constexpr ~RendererSpecification() = default;
 	};
 
+	struct DeviceSpecification
+	{
+	public:
+		std::string DeviceType = {};
+		std::string DeviceName = {};
+		uint32_t VendorID = 0;
+		uint32_t DeviceID = 0;
+		std::string APIVersion = {};
+
+	public:
+		static DeviceSpecification Get();
+	};
+
 }

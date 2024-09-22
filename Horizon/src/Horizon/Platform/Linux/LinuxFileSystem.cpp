@@ -1,7 +1,7 @@
 #include "hzpch.h"
 
 #if defined(HZ_PLATFORM_LINUX)
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/IO/FileSystem.hpp"
 

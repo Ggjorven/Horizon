@@ -10,6 +10,11 @@
 namespace Hz
 {
 
+	Extension::Extension(const std::string& name)
+		: m_DebugName(name)
+	{
+	}
+
 	void ExtensionList::OnInitBegin()
 	{
 		ALL_EXTENSIONS(OnInitBegin);

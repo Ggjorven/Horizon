@@ -26,7 +26,7 @@ namespace Hz
 	class Application
 	{
 	public:
-		Application(const ApplicationSpecification& appInfo);
+		Application(const ApplicationSpecification& appInfo, const std::string& debugName = "Default Horizon App");
 		~Application();
 
 		void OnEvent(Event& e);
@@ -53,7 +53,8 @@ namespace Hz
 		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
-		ApplicationSpecification m_AppInfo = {};
+		ApplicationSpecification m_AppInfo;
+		std::string m_DebugName;
 
 		Ref<Window> m_Window = nullptr;
 		bool m_Running = true;

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Horizon/Core/Core.hpp"
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
+
+#include "Horizon/Renderer/RendererSpecification.hpp"
 
 #include <Pulse/Enum/Enum.hpp>
 
@@ -28,6 +30,8 @@ namespace Hz::VkUtils
 
     VkFormat FindDepthFormat();
     VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+
+    DeviceSpecification GetDeviceSpecs();
 
     // A vulkan specific helper class for allocating Buffers/Images using VMA
     class Allocator

@@ -1,6 +1,6 @@
 #include "ImGuiExtension.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 #include "Horizon/Core/Window.hpp"
 
 #include "Horizon/Vulkan/VulkanUtils.hpp"
@@ -20,6 +20,12 @@
 using namespace Hz;
 
 static VkDescriptorPool s_ImGuiPool = VK_NULL_HANDLE;
+
+ImGuiExtension::ImGuiExtension()
+	: Extension("ImGui")
+{
+	// Note: Don't initialize anything in here.
+}
 
 void ImGuiExtension::OnInitEnd()
 {

@@ -16,7 +16,7 @@ namespace Hz
 	class Extension
 	{
 	public:
-		Extension() = default;
+		Extension(const std::string& name = "Unnamed Extension");
 		virtual ~Extension() = default;
 
 		virtual void OnInitBegin() {}
@@ -35,6 +35,11 @@ namespace Hz
 		virtual void OnUIEnd() {}
 
 		virtual void OnEvent(Event& e) {}
+
+		inline const std::string& GetName() const { return m_DebugName; }
+
+	protected:
+		std::string m_DebugName = {};
 	};
 
 
@@ -66,6 +71,14 @@ namespace Hz
 		template<typename TExtension>
 		void Add() requires (Pulse::Types::InheritsFrom<Extension, TExtension>);
 
+		// Iterators
+		inline std::vector<Unique<Extension>>::iterator			begin()			{ return m_Extensions.begin(); }
+		inline std::vector<Unique<Extension>>::iterator			end()			{ return m_Extensions.end(); }
+		inline std::vector<Unique<Extension>>::const_iterator	begin()	const	{ return m_Extensions.begin(); }
+		inline std::vector<Unique<Extension>>::const_iterator	end() const		{ return m_Extensions.end(); }
+
+		inline bool Empty() const { return m_Extensions.empty(); }
+		
 	private:
 		std::vector<Unique<Extension>> m_Extensions = { };
 	};

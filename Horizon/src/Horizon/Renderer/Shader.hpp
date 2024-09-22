@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Horizon/Core/Core.hpp"
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
 #include "Horizon/Renderer/Descriptors.hpp"

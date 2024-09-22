@@ -3,7 +3,7 @@
 #if defined(HZ_PLATFORM_MACOS)
 #include "Horizon/Core/Window.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 #include "Horizon/Utils/Profiler.hpp"
 
 #include "Horizon/Renderer/Renderer.hpp"

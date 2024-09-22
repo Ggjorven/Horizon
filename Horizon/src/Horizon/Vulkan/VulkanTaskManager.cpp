@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "VulkanTaskManager.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include <Pulse/Enum/Enum.hpp>
 

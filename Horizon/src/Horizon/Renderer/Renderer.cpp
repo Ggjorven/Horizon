@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "Renderer.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/Renderer/GraphicsContext.hpp"
 #include "Horizon/Renderer/Buffers.hpp"

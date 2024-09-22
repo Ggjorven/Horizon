@@ -8,6 +8,8 @@
 class ImGuiExtension : public Hz::Extension
 {
 public:
+	ImGuiExtension();
+
 	void OnInitEnd() override;
 	void OnDestroyBegin() override;
 

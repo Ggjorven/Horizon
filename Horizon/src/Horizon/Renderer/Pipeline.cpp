@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "Pipeline.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/Renderer/Shader.hpp"
 #include "Horizon/Renderer/Renderer.hpp"

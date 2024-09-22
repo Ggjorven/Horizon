@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "Buffers.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/Renderer/Descriptors.hpp"
 #include "Horizon/Renderer/CommandBuffer.hpp"

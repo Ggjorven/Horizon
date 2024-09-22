@@ -1,7 +1,7 @@
 #include "hzpch.h"
 #include "GraphicsContext.hpp"
 
-#include "Horizon/Core/Logging.hpp"
+#include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/Vulkan/VulkanContext.hpp"
 
