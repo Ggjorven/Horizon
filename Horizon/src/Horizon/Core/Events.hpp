@@ -3,6 +3,7 @@
 #include "Horizon/Core/Core.hpp"
 #include "Horizon/Core/Input/KeyCodes.hpp"
 #include "Horizon/Core/Input/MouseCodes.hpp"
+#include "Horizon/Core/Input/JoyStickCodes.hpp"
 
 #include <Pulse/Types/Concepts.hpp>
 
@@ -22,7 +23,9 @@ namespace Hz
 
 		KeyPressed, KeyReleased, KeyTyped,
 
-		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
+		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled,
+
+		JoyStickConnected, JoyStickDisconnected
 	};
 
 	enum class EventCategory : uint8_t
@@ -32,7 +35,8 @@ namespace Hz
 		Input = 1 << 1,
 		Keyboard = 1 << 2,
 		Mouse = 1 << 3,
-		MouseButton = 1 << 4
+		MouseButton = 1 << 4,
+		Gamepad = 1 << 5
 	};
     ENABLE_BITWISE(EventCategory)
 
@@ -295,6 +299,36 @@ namespace Hz
 		}
 
 		EVENT_CLASS_TYPE(MouseButtonReleased)
+	};
+
+
+
+	class JoyStickConnectedEvent : public Event
+	{
+	public:
+		JoyStickConnectedEvent(JoyStick joyStick)
+			: m_JoyStick(joyStick) {}
+		~JoyStickConnectedEvent() = default;
+
+		EVENT_CLASS_TYPE(JoyStickConnected)
+		EVENT_CLASS_CATEGORY(EventCategory::Gamepad)
+
+	private:
+		JoyStick m_JoyStick;
+	};
+
+	class JoyStickDisconnectedEvent : public Event
+	{
+	public:
+		JoyStickDisconnectedEvent(JoyStick joyStick)
+			: m_JoyStick(joyStick) {}
+		~JoyStickDisconnectedEvent() = default;
+
+		EVENT_CLASS_TYPE(JoyStickDisconnected)
+		EVENT_CLASS_CATEGORY(EventCategory::Gamepad)
+
+	private:
+		JoyStick m_JoyStick;
 	};
 
 }

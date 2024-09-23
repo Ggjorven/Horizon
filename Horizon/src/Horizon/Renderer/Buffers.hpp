@@ -91,6 +91,8 @@ namespace Hz
 		virtual void Bind(Ref<CommandBuffer> commandBuffer) const = 0;
         static void Bind(Ref<CommandBuffer> commandBuffer, std::vector<Ref<VertexBuffer>>&& buffers);
 
+		virtual void SetData(void* data, size_t size, size_t offset = 0) = 0;
+
 		static Ref<VertexBuffer> Create(const BufferSpecification& specs, void* data, size_t size);
 	};
 
@@ -101,6 +103,9 @@ namespace Hz
 		virtual ~IndexBuffer() = default;
 
 		virtual void Bind(Ref<CommandBuffer> commandBuffer) const = 0;
+
+		// The offset is in count, so 1,2,3,4,5 instead of size(uint32_t)
+		virtual void SetData(uint32_t* indices, uint32_t count, size_t countOffset = 0) = 0;
 
 		virtual uint32_t GetCount() const = 0;
 

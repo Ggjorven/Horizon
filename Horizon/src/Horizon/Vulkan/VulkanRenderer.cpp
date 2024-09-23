@@ -342,11 +342,16 @@ namespace Hz
 		vkCmdDraw(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), vertexCount, instanceCount, 0, 0);
     }
 
-    void VulkanRenderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
+    void VulkanRenderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, uint32_t indexCount, uint32_t instanceCount)
     {
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
-		vkCmdDrawIndexed(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), indexBuffer->GetCount(), instanceCount, 0, 0, 0);
+        vkCmdDrawIndexed(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), indexCount, instanceCount, 0, 0, 0);
+    }
+
+    void VulkanRenderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
+    {
+        DrawIndexed(cmdBuf, indexBuffer->GetCount(), instanceCount);
     }
 
     void VulkanRenderer::Free(FreeFunction&& func)

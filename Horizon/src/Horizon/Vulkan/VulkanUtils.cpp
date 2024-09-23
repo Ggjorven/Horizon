@@ -147,12 +147,13 @@ namespace Hz::VkUtils
 		return allocation;
     }
 
-    void Allocator::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size)
+    void Allocator::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size, VkDeviceSize offset)
     {
         VulkanCommand command = VulkanCommand(true);
 
 		VkBufferCopy copyRegion = {};
 		copyRegion.size = size;
+		copyRegion.dstOffset = offset;
 		vkCmdCopyBuffer(command.GetVkCommandBuffer(), srcBuffer, dstBuffer, 1, &copyRegion);
 
 		command.EndAndSubmit();

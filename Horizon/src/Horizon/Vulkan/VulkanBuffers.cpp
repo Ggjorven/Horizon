@@ -45,17 +45,9 @@ namespace Hz
     {
         m_Allocation = VkUtils::Allocator::AllocateBuffer(m_BufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
 
-		VkBuffer stagingBuffer = VK_NULL_HANDLE;
-		VmaAllocation stagingBufferAllocation = VK_NULL_HANDLE;
-		stagingBufferAllocation = VkUtils::Allocator::AllocateBuffer(m_BufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
-
-		void* mappedData = nullptr;
-		VkUtils::Allocator::MapMemory(stagingBufferAllocation, mappedData);
-		memcpy(mappedData, data, m_BufferSize);
-		VkUtils::Allocator::UnMapMemory(stagingBufferAllocation);
-
-		VkUtils::Allocator::CopyBuffer(stagingBuffer, m_Buffer, m_BufferSize);
-		VkUtils::Allocator::DestroyBuffer(stagingBuffer, stagingBufferAllocation);
+        // Only set data, if the data is valid
+        if (data != nullptr)
+            SetData(data, size, 0);
     }
 
     VulkanVertexBuffer::~VulkanVertexBuffer()
@@ -93,23 +85,32 @@ namespace Hz
         vkCmdBindVertexBuffers(vkCmdBuf->GetVkCommandBuffer(Renderer::GetCurrentFrame()), 0, static_cast<uint32_t>(vkBuffers.size()), vkBuffers.data(), offsets.data());
     }
 
+    void VulkanVertexBuffer::SetData(void* data, size_t size, size_t offset)
+    {
+        // Ensure that the size + offset doesn't exceed bounds
+        HZ_VERIFY((size + offset <= m_BufferSize), "Size and offset exceeds the buffer's bounds");
+
+        VkBuffer stagingBuffer = VK_NULL_HANDLE;
+        VmaAllocation stagingBufferAllocation = VK_NULL_HANDLE;
+        stagingBufferAllocation = VkUtils::Allocator::AllocateBuffer(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
+
+        void* mappedData = nullptr;
+        VkUtils::Allocator::MapMemory(stagingBufferAllocation, mappedData);
+        std::memcpy(mappedData, data, size);  // Copy only 'size' bytes
+        VkUtils::Allocator::UnMapMemory(stagingBufferAllocation);
+
+        // Copy data from the staging buffer to the vertex buffer at the specified offset
+        VkUtils::Allocator::CopyBuffer(stagingBuffer, m_Buffer, size, offset); 
+        VkUtils::Allocator::DestroyBuffer(stagingBuffer, stagingBufferAllocation);
+    }
+
     VulkanIndexBuffer::VulkanIndexBuffer(const BufferSpecification& specs, uint32_t* indices, uint32_t count)
         : m_Count(count)
     {
 		VkDeviceSize bufferSize = sizeof(uint32_t) * count;
 		m_Allocation = VkUtils::Allocator::AllocateBuffer(bufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, (VmaMemoryUsage)specs.Usage, m_Buffer);
 
-		VkBuffer stagingBuffer = VK_NULL_HANDLE;
-		VmaAllocation stagingBufferAllocation = VK_NULL_HANDLE;
-		stagingBufferAllocation = VkUtils::Allocator::AllocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
-
-		void* mappedData = nullptr;
-		VkUtils::Allocator::MapMemory(stagingBufferAllocation, mappedData);
-		memcpy(mappedData, indices, bufferSize);
-		VkUtils::Allocator::UnMapMemory(stagingBufferAllocation);
-
-		VkUtils::Allocator::CopyBuffer(stagingBuffer, m_Buffer, bufferSize);
-		VkUtils::Allocator::DestroyBuffer(stagingBuffer, stagingBufferAllocation);
+        SetData(indices, count, 0);
     }
 
     VulkanIndexBuffer::~VulkanIndexBuffer()
@@ -126,6 +127,26 @@ namespace Hz
         Ref<VulkanCommandBuffer> vkCmdBuf = commandBuffer.As<VulkanCommandBuffer>();
 
 		vkCmdBindIndexBuffer(vkCmdBuf->GetVkCommandBuffer(Renderer::GetCurrentFrame()), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
+    }
+
+    void VulkanIndexBuffer::SetData(uint32_t* indices, uint32_t count, size_t countOffset)
+    {
+        // Ensure that the size + offset doesn't exceed bounds
+        HZ_VERIFY((count <= m_Count), "Count and countOffset exceeds the buffer's bounds");
+
+        VkBuffer stagingBuffer = VK_NULL_HANDLE;
+        VmaAllocation stagingBufferAllocation = VK_NULL_HANDLE;
+        VkDeviceSize size = count * sizeof(uint32_t);
+        stagingBufferAllocation = VkUtils::Allocator::AllocateBuffer(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY, stagingBuffer);
+
+        void* mappedData = nullptr;
+        VkUtils::Allocator::MapMemory(stagingBufferAllocation, mappedData);
+        std::memcpy(mappedData, indices, size);  // Copy only 'size' bytes
+        VkUtils::Allocator::UnMapMemory(stagingBufferAllocation);
+
+        // Copy data from the staging buffer to the vertex buffer at the specified offset
+        VkUtils::Allocator::CopyBuffer(stagingBuffer, m_Buffer, size, (countOffset * sizeof(uint32_t)));
+        VkUtils::Allocator::DestroyBuffer(stagingBuffer, stagingBufferAllocation);
     }
 
     VulkanUniformBuffer::VulkanUniformBuffer(const BufferSpecification& specs, size_t dataSize)

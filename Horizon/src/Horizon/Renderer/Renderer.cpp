@@ -100,6 +100,11 @@ namespace Hz
         RendererType::Draw(cmdBuf, vertexCount, instanceCount);
     }
 
+    void Renderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, uint32_t indexCount, uint32_t instanceCount)
+    {
+        RendererType::DrawIndexed(cmdBuf, indexCount, instanceCount);
+    }
+
     void Renderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount)
     {
         RendererType::DrawIndexed(cmdBuf, indexBuffer, instanceCount);

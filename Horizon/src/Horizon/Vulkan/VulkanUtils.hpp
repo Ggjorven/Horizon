@@ -44,7 +44,7 @@ namespace Hz::VkUtils
     public:
         // Buffers
         static VmaAllocation AllocateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage, VkBuffer& dstBuffer, VkMemoryPropertyFlags requiredFlags = 0);
-		static void CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size);
+		static void CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size, VkDeviceSize offset = 0);
 		static void DestroyBuffer(VkBuffer buffer, VmaAllocation allocation);
 
         // Image

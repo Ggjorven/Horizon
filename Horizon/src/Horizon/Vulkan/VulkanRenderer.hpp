@@ -38,6 +38,7 @@ namespace Hz
         static void Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<Ref<CommandBuffer>>& waitOn);
 
         static void Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount);
+        static void DrawIndexed(Ref<CommandBuffer> cmdBuf, uint32_t indexCount, uint32_t instanceCount);
         static void DrawIndexed(Ref<CommandBuffer> cmdBuf, Ref<IndexBuffer> indexBuffer, uint32_t instanceCount);
 
         static void Free(FreeFunction&& func);

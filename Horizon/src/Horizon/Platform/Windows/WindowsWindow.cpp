@@ -57,7 +57,6 @@ namespace Hz
 			WindowResizeEvent event = WindowResizeEvent(width, height);
 			data.EventCallback(event);
 		});
-
 		glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
 		{
 			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
@@ -92,7 +91,6 @@ namespace Hz
 			}
 			}
 		});
-
 		glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int keycode)
 		{
 			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
@@ -121,7 +119,6 @@ namespace Hz
 			}
 			}
 		});
-
 		glfwSetScrollCallback(window, [](GLFWwindow* window, double xOffset, double yOffset)
 		{
 			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
@@ -129,13 +126,33 @@ namespace Hz
 			MouseScrolledEvent event = MouseScrolledEvent((float)xOffset, (float)yOffset);
 			data.EventCallback(event);
 		});
-
 		glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xPos, double yPos)
 		{
 			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
 			MouseMovedEvent event = MouseMovedEvent((float)xPos, (float)yPos);
 			data.EventCallback(event);
+		});
+
+		glfwSetJoystickCallback([](int jid, int e)
+		{
+			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(static_cast<GLFWwindow*>(Window::Get().GetNativeWindow()));
+
+			switch (e)
+			{
+			case GLFW_CONNECTED:
+			{
+				JoyStickConnectedEvent event = JoyStickConnectedEvent(static_cast<JoyStick>(jid));
+				data.EventCallback(event);
+				break;
+			}
+			case GLFW_DISCONNECTED:
+			{
+				JoyStickDisconnectedEvent event = JoyStickDisconnectedEvent(static_cast<JoyStick>(jid));
+				data.EventCallback(event);
+				break;
+			}
+			}
 		});
 
         Renderer::Init(rendererSpecs);

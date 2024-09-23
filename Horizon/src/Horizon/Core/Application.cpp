@@ -43,6 +43,7 @@ namespace Hz
 		handler.Handle<WindowCloseEvent>([this](WindowCloseEvent& e) -> bool { return OnWindowClose(e); });
 		handler.Handle<WindowResizeEvent>([this](WindowResizeEvent& e) -> bool { return OnWindowResize(e); });
 
+		m_AppLayer->OnEvent(e);
 		m_Extensions.OnEvent(e);
 	}
 
@@ -56,6 +57,7 @@ namespace Hz
 		while (m_Running)
 		{
 			deltaTime = (float)deltaTimer.ElapsedSeconds();
+			deltaTimer.Reset();
 
 			// Update & Render
 			{

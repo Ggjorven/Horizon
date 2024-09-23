@@ -12,7 +12,8 @@ namespace Hz
 		static void Destroy();
 
 	public:
-
+		static void BeginBatch();
+		static void EndBatch();
 	};
 
 }

@@ -49,94 +49,111 @@ namespace Hz
 		glfwSetWindowUserPointer(window, (void*)&m_Specification); //So we can access/get to the data in lambda functions
 
 		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height)
-			{
-				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
-				data.Width = width;
-				data.Height = height;
+		{
+			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+			data.Width = width;
+			data.Height = height;
 
-				WindowResizeEvent event = WindowResizeEvent(width, height);
-				data.EventCallback(event);
-			});
-
+			WindowResizeEvent event = WindowResizeEvent(width, height);
+			data.EventCallback(event);
+		});
 		glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
-			{
-				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+		{
+			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
-				WindowCloseEvent event = WindowCloseEvent();
-				data.EventCallback(event);
-			});
+			WindowCloseEvent event = WindowCloseEvent();
+			data.EventCallback(event);
+		});
 
 		glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+		{
+			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+
+			switch (action)
 			{
-				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
-
-				switch (action)
-				{
-				case GLFW_PRESS:
-				{
-					KeyPressedEvent event = KeyPressedEvent(key, 0);
-					data.EventCallback(event);
-					break;
-				}
-				case GLFW_RELEASE:
-				{
-					KeyReleasedEvent event = KeyReleasedEvent(key);
-					data.EventCallback(event);
-					break;
-				}
-				case GLFW_REPEAT:
-				{
-					KeyPressedEvent event = KeyPressedEvent(key, 1);
-					data.EventCallback(event);
-					break;
-				}
-				}
-			});
-
-		glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int keycode)
+			case GLFW_PRESS:
 			{
-				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
-
-				KeyTypedEvent event = KeyTypedEvent(keycode);
+				KeyPressedEvent event = KeyPressedEvent(key, 0);
 				data.EventCallback(event);
-			});
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				KeyReleasedEvent event = KeyReleasedEvent(key);
+				data.EventCallback(event);
+				break;
+			}
+			case GLFW_REPEAT:
+			{
+				KeyPressedEvent event = KeyPressedEvent(key, 1);
+				data.EventCallback(event);
+				break;
+			}
+			}
+		});
+		glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int keycode)
+		{
+			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+
+			KeyTypedEvent event = KeyTypedEvent(keycode);
+			data.EventCallback(event);
+		});
 
 		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods)
+		{
+			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+
+			switch (action)
 			{
-				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
-
-				switch (action)
-				{
-				case GLFW_PRESS:
-				{
-					MouseButtonPressedEvent event = MouseButtonPressedEvent(button);
-					data.EventCallback(event);
-					break;
-				}
-				case GLFW_RELEASE:
-				{
-					MouseButtonReleasedEvent event = MouseButtonReleasedEvent(button);
-					data.EventCallback(event);
-					break;
-				}
-				}
-			});
-
+			case GLFW_PRESS:
+			{
+				MouseButtonPressedEvent event = MouseButtonPressedEvent(button);
+				data.EventCallback(event);
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				MouseButtonReleasedEvent event = MouseButtonReleasedEvent(button);
+				data.EventCallback(event);
+				break;
+			}
+			}
+		});
 		glfwSetScrollCallback(window, [](GLFWwindow* window, double xOffset, double yOffset)
-			{
-				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+		{
+			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
-				MouseScrolledEvent event = MouseScrolledEvent((float)xOffset, (float)yOffset);
-				data.EventCallback(event);
-			});
-
+			MouseScrolledEvent event = MouseScrolledEvent((float)xOffset, (float)yOffset);
+			data.EventCallback(event);
+		});
 		glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xPos, double yPos)
-			{
-				WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
+		{
+			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(window);
 
-				MouseMovedEvent event = MouseMovedEvent((float)xPos, (float)yPos);
+			MouseMovedEvent event = MouseMovedEvent((float)xPos, (float)yPos);
+			data.EventCallback(event);
+		});
+
+		glfwSetJoystickCallback([](int jid, int e)
+		{
+			WindowSpecification& data = *(WindowSpecification*)glfwGetWindowUserPointer(static_cast<GLFWwindow*>(Window::Get().GetNativeWindow()));
+
+			switch (e)
+			{
+			case GLFW_CONNECTED:
+			{
+				JoyStickConnectedEvent event = JoyStickConnectedEvent(static_cast<JoyStick>(jid));
 				data.EventCallback(event);
-			});
+				break;
+			}
+			case GLFW_DISCONNECTED:
+			{
+				JoyStickDisconnectedEvent event = JoyStickDisconnectedEvent(static_cast<JoyStick>(jid));
+				data.EventCallback(event);
+				break;
+			}
+			}
+		});
 
 		Renderer::Init(rendererSpecs);
 	}

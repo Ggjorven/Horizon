@@ -24,6 +24,8 @@ namespace Hz
 		void Bind(Ref<CommandBuffer> commandBuffer) const override;
 		static void Bind(Ref<CommandBuffer> commandBuffer, std::vector<Ref<VertexBuffer>>&& buffers);
 
+		void SetData(void* data, size_t size, size_t offset) override;
+
 	private:
 		VkBuffer m_Buffer = VK_NULL_HANDLE;
 		VmaAllocation m_Allocation = VK_NULL_HANDLE;
@@ -38,6 +40,8 @@ namespace Hz
 		~VulkanIndexBuffer();
 
 		void Bind(Ref<CommandBuffer> commandBuffer) const override;
+
+		void SetData(uint32_t* indices, uint32_t count, size_t countOffset) override;
 
 		inline uint32_t GetCount() const override { return m_Count; }
 
