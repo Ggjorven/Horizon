@@ -83,7 +83,7 @@ namespace Hz
 			.Type = PipelineType::Graphics,
 			.Bufferlayout = BatchVertex2D::GetLayout(),
 			.Polygonmode = PolygonMode::Fill,
-			.Cullingmode = CullingMode::Back, // TODO: Change if necessary
+			.Cullingmode = CullingMode::None,
 			// .Blending = true
 		}, Batch.DescriptorSets, Batch.Shader, Batch.Renderpass);
 

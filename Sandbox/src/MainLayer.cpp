@@ -57,7 +57,17 @@ void MainLayer::OnRender()
 {
 	Renderer2D::BeginBatch();
 
-	BatchRenderer2D::AddQuad({ 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
+	// Top left square
+	BatchRenderer2D::AddQuad({ -0.9f, -0.9f, 0.1f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f });
+	
+	// Moveable square
+	if (Input::JoyStickPresent(JoyStick::J1))
+	{
+		auto axes = Input::GetJoyStickAxes(JoyStick::J1);
+		RemoveControllerDrift(axes[0], axes[1]);
+
+		BatchRenderer2D::AddQuad({ axes[0] - 0.5f, axes[1] - 0.5f, 0.1f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
+	}
 
 	Renderer2D::EndBatch();
 }
