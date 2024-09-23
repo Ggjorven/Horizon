@@ -223,7 +223,7 @@ namespace Hz
 		for (auto& pair : vkDescriptorSets->m_DescriptorLayouts)
 			descriptorLayouts.push_back(pair.second);
 
-        // Push constants // TODO: Migrate to other pipeline types as well
+        // Push constants
         std::vector<VkPushConstantRange> pushConstants;
         pushConstants.reserve(m_Specification.PushConstants.size());
 
@@ -246,9 +246,19 @@ namespace Hz
 
         VK_CHECK_RESULT(vkCreatePipelineLayout(VulkanContext::GetDevice()->GetVkDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout));
 
+        VkFormat dynamicColourFormat = (VkFormat)m_Specification.DynamicColourFormat;
+
+        VkPipelineRenderingCreateInfo dynamicRenderInfo = {};
+        dynamicRenderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
+        dynamicRenderInfo.colorAttachmentCount = 1; // Note: We only support 1 attachment at the moment for dynamic rendering
+        dynamicRenderInfo.pColorAttachmentFormats = &dynamicColourFormat;
+        dynamicRenderInfo.depthAttachmentFormat = (VkFormat)m_Specification.DynamicDepthFormat;
+        dynamicRenderInfo.stencilAttachmentFormat = (VkFormat)m_Specification.DynamicStencilFormat;
+
 		// Create the actual graphics pipeline (where we actually use the shaders and other info)
 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        if (renderpass == nullptr) pipelineInfo.pNext = &dynamicRenderInfo;
 		pipelineInfo.stageCount = (uint32_t)shaderStages.size();
 		pipelineInfo.pStages = shaderStages.data();
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
@@ -278,6 +288,7 @@ namespace Hz
 		computeShaderStageInfo.module = vkShader->GetShader(ShaderStage::Compute);
 		computeShaderStageInfo.pName = "main";
 
+        // Descriptor layouts
 		auto vkDescriptorSets = sets.As<VulkanDescriptorSets>();
 
 		std::vector<VkDescriptorSetLayout> descriptorLayouts;
@@ -286,9 +297,24 @@ namespace Hz
 		for (auto& pair : vkDescriptorSets->m_DescriptorLayouts)
 			descriptorLayouts.push_back(pair.second);
 
+        // Push constants
+        std::vector<VkPushConstantRange> pushConstants;
+        pushConstants.reserve(m_Specification.PushConstants.size());
+
+        for (auto& [stage, info] : m_Specification.PushConstants)
+        {
+            HZ_ASSERT((info.Size > 0), "Push constant range passed has size of 0.");
+
+            VkPushConstantRange& range = pushConstants.emplace_back();
+            range.stageFlags = (VkShaderStageFlagBits)stage;
+            range.offset = static_cast<uint32_t>(info.Offset);
+            range.size = static_cast<uint32_t>(info.Size);
+        }
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.pushConstantRangeCount = 0;
+        pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
+        pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
 		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorLayouts.size());
 		pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
 
@@ -434,10 +460,25 @@ namespace Hz
         for (auto& pair : vkDescriptorSets->m_DescriptorLayouts)
             descriptorLayouts.push_back(pair.second);
 
+        // Push constants
+        std::vector<VkPushConstantRange> pushConstants;
+        pushConstants.reserve(m_Specification.PushConstants.size());
+
+        for (auto& [stage, info] : m_Specification.PushConstants)
+        {
+            HZ_ASSERT((info.Size > 0), "Push constant range passed has size of 0.");
+
+            VkPushConstantRange& range = pushConstants.emplace_back();
+            range.stageFlags = (VkShaderStageFlagBits)stage;
+            range.offset = static_cast<uint32_t>(info.Offset);
+            range.size = static_cast<uint32_t>(info.Size);
+        }
+
         // Layout create info
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.pushConstantRangeCount = 0;
+        pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
+        pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
         pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorLayouts.size());
         pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
 
@@ -590,10 +631,25 @@ namespace Hz
         for (auto& pair : vkDescriptorSets->m_DescriptorLayouts)
             descriptorLayouts.push_back(pair.second);
 
+        // Push constants
+        std::vector<VkPushConstantRange> pushConstants;
+        pushConstants.reserve(m_Specification.PushConstants.size());
+
+        for (auto& [stage, info] : m_Specification.PushConstants)
+        {
+            HZ_ASSERT((info.Size > 0), "Push constant range passed has size of 0.");
+
+            VkPushConstantRange& range = pushConstants.emplace_back();
+            range.stageFlags = (VkShaderStageFlagBits)stage;
+            range.offset = static_cast<uint32_t>(info.Offset);
+            range.size = static_cast<uint32_t>(info.Size);
+        }
+        
         // Layout create info
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.pushConstantRangeCount = 0;
+        pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
+        pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
         pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorLayouts.size());
         pipelineLayoutInfo.pSetLayouts = descriptorLayouts.data();
 

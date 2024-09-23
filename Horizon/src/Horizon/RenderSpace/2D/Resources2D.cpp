@@ -18,12 +18,14 @@ namespace Hz
 	void Resources2D::Init()
 	{
 		s_Instance = Unique<Resources2D>::Create();
+		s_Instance->InitCamera();
 		s_Instance->InitBatch();
 	}
 
 	void Resources2D::Destroy()
 	{
 		s_Instance->DestroyBatch();
+		s_Instance->DestroyCamera();
 		s_Instance.Reset();
 	}
 
@@ -35,14 +37,17 @@ namespace Hz
 	//////////////////////////////////////////////////////////
 	// Methods
 	//////////////////////////////////////////////////////////
+	void Resources2D::InitCamera()
+	{
+		Camera.Buffer = UniformBuffer::Create({ .Usage = BufferMemoryUsage::CPUToGPU }, (sizeof(glm::mat4) * 2)); // For View & Projection
+	}
+
 	void Resources2D::InitBatch()
 	{
-		// std::vector<BatchVertex2D> vertices;
-		// vertices.reserve(static_cast<size_t>(BatchVertex2D::MaxQuadsPerDraw) * 4);
 		std::vector<uint32_t> indices;
-		indices.reserve(static_cast<size_t>(BatchVertex2D::MaxQuadsPerDraw) * 6);
+		indices.reserve(static_cast<size_t>(BatchRenderer2D::MaxQuadsPerDraw) * 6);
 
-		for (uint32_t i = 0, offset = 0; i < BatchVertex2D::MaxQuadsPerDraw * 6; i += 6, offset += 4)
+		for (uint32_t i = 0, offset = 0; i < BatchRenderer2D::MaxQuadsPerDraw * 6; i += 6, offset += 4)
 		{
 			indices.push_back(offset + 0);
 			indices.push_back(offset + 1);
@@ -53,20 +58,7 @@ namespace Hz
 			indices.push_back(offset + 0);
 		}
 
-		Batch.Renderpass = Renderpass::Create({
-			.ColourAttachment = GraphicsContext::GetSwapChainImages(),
-			.ColourLoadOp = LoadOperation::Clear,
-			.ColourStoreOp = StoreOperation::Store,
-			.ColourClearColour { 0.0f, 0.0f, 0.0f, 1.0f },
-			.PreviousColourImageLayout = ImageLayout::Undefined,
-			.FinalColourImageLayout = ImageLayout::PresentSrcKHR,
-
-			.DepthAttachment = GraphicsContext::GetDepthImage(),
-			.DepthLoadOp = LoadOperation::Clear,
-			.DepthStoreOp = StoreOperation::Store,
-			.PreviousDepthImageLayout = ImageLayout::Undefined,
-			.FinalDepthImageLayout = ImageLayout::DepthStencil,
-		}, CommandBuffer::Create());
+		Batch.CommandBuffer = CommandBuffer::Create();
 
 		Batch.Shader = Shader::Create({
 			.ShaderCode = {
@@ -76,7 +68,9 @@ namespace Hz
 		});
 		
 		Batch.DescriptorSets = DescriptorSets::Create({ 
-			// TODO: Add sets
+			{ 1, { 0, {
+				{ DescriptorType::UniformBuffer, 0, "u_Camera", ShaderStage::Vertex }
+			}}}
 		});
 
 		Batch.Pipeline = Pipeline::Create({
@@ -85,10 +79,14 @@ namespace Hz
 			.Polygonmode = PolygonMode::Fill,
 			.Cullingmode = CullingMode::None,
 			// .Blending = true
-		}, Batch.DescriptorSets, Batch.Shader, Batch.Renderpass);
+		}, Batch.DescriptorSets, Batch.Shader);
 
-		Batch.VertexBuffer = VertexBuffer::Create({ .Usage = BufferMemoryUsage::CPUToGPU }, nullptr, sizeof(BatchVertex2D) * BatchVertex2D::MaxQuadsPerDraw * 4);
+		Batch.VertexBuffer = VertexBuffer::Create({ .Usage = BufferMemoryUsage::CPUToGPU }, nullptr, sizeof(BatchVertex2D) * BatchRenderer2D::MaxQuadsPerDraw * 4);
 		Batch.IndexBuffer = IndexBuffer::Create({}, indices.data(), static_cast<uint32_t>(indices.size()));
+	}
+
+	void Resources2D::DestroyCamera()
+	{
 	}
 
 	void Resources2D::DestroyBatch()

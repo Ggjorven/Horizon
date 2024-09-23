@@ -109,6 +109,11 @@ namespace Hz
 		float LineWidth = 1.0f; // Note: Don't use, since for compatibility reasons we have disabled PhysicalDeviceFeature: WideLines.
 		bool Blending = false;
 
+        // Dynamic rendering
+        ImageFormat DynamicColourFormat = ImageFormat::BGRA;
+        ImageFormat DynamicDepthFormat = ImageFormat::Depth32SFloat;
+        ImageFormat DynamicStencilFormat = ImageFormat::Undefined;
+
         // Raytracing KHR
         uint32_t MaxRayRecursion = 1;
 	};

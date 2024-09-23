@@ -13,9 +13,7 @@ namespace Hz
 	struct BatchVertex2D
 	{
 	public:
-		constexpr static uint32_t MaxQuadsPerDraw = 10000u;
-	public:
-		glm::vec3 Position = { 0.0f, 0.0f, 0.0f }; // TODO: Check if Z should be 0.0f or 1.0f
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
 		glm::vec2 UV = { 0.0f, 0.0f };
 		glm::vec4 Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -25,6 +23,8 @@ namespace Hz
 
 	class BatchRenderer2D
 	{
+	public:
+		constexpr static uint32_t MaxQuadsPerDraw = 10000u;
 	public:
 		static void Init();
 		static void Destroy();

@@ -65,6 +65,11 @@ namespace Hz
         RendererType::EndDynamic(cmdBuf);
     }
 
+    void Renderer::SetViewportAndScissor(Ref<CommandBuffer> cmdBuf, uint32_t width, uint32_t height)
+    {
+        RendererType::SetViewportAndScissor(cmdBuf, width, height);
+    }
+
     void Renderer::Begin(Ref<CommandBuffer> cmdBuf)
     {
         RendererType::Begin(cmdBuf);

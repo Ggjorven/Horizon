@@ -4,6 +4,7 @@
 #include "Horizon/IO/Logging.hpp"
 
 #include "Horizon/Renderer/Renderer.hpp"
+#include "Horizon/Renderer/GraphicsContext.hpp"
 
 #include "Horizon/RenderSpace/2D/Resources2D.hpp"
 
@@ -35,6 +36,11 @@ namespace Hz
 		auto& resources = Resources2D::Get().Batch;
 
 		resources.CPUBuffer.clear();
+		resources.DrawIndex++;
+
+		resources.DescriptorSets->GetSets(0)[0]->Upload({ 
+			{ Resources2D::Get().Camera.Buffer, resources.DescriptorSets->GetLayout(0).GetDescriptorByName("u_Camera") }
+		});
 	}
 
 	void BatchRenderer2D::End()
@@ -46,33 +52,61 @@ namespace Hz
 			resources.VertexBuffer->SetData((void*)resources.CPUBuffer.data(), (resources.CPUBuffer.size() * sizeof(BatchVertex2D)), 0);
 	}
 
-	void BatchRenderer2D::Flush()
+	void BatchRenderer2D::Flush() 
 	{
 		auto& resources = Resources2D::Get().Batch;
 
-		Renderer::Begin(resources.Renderpass);
+		auto& colourAttachment = GraphicsContext::GetSwapChainImages()[Renderer::GetAcquiredImage()];
+
+		DynamicRenderState state = {
+			.ColourAttachment = colourAttachment,
+			.ColourLoadOp = LoadOperation::Clear,
+			.ColourStoreOp = StoreOperation::Store,
+			.ColourClearValue = { 0.0f, 0.0f, 0.0f, 1.0f },
+
+			.DepthAttachment = GraphicsContext::GetDepthImage(),
+			.DepthLoadOp = LoadOperation::Clear,
+			.DepthStoreOp = StoreOperation::Store,
+			.DepthClearValue = 1.0f
+		};
+
+		// Set LoadOperation to Load on multiple draw batches
+		if (resources.DrawIndex > 1) [[unlikely]]
+		{
+			state.ColourLoadOp = LoadOperation::Load;
+			state.DepthLoadOp = LoadOperation::Load;
+		}
+
+		colourAttachment->Transition(ImageLayout::PresentSrcKHR, ImageLayout::Colour);
 
 		// Start rendering
-		auto cmdBuf = resources.Renderpass->GetCommandBuffer();
+		Renderer::Begin(resources.CommandBuffer);
+		Renderer::BeginDynamic(resources.CommandBuffer, std::move(state));
+        Renderer::SetViewportAndScissor(resources.CommandBuffer, colourAttachment->GetSpecification().Width, colourAttachment->GetSpecification().Height);
 
-		resources.Pipeline->Use(cmdBuf, PipelineBindPoint::Graphics);
+		resources.Pipeline->Use(resources.CommandBuffer, PipelineBindPoint::Graphics);
 
-		resources.IndexBuffer->Bind(cmdBuf);
-		resources.VertexBuffer->Bind(cmdBuf);
+		resources.DescriptorSets->GetSets(0)[0]->Bind(resources.Pipeline, resources.CommandBuffer);
+
+		resources.IndexBuffer->Bind(resources.CommandBuffer);
+		resources.VertexBuffer->Bind(resources.CommandBuffer);
 
 		// Draw all at once
-		Renderer::DrawIndexed(cmdBuf, ((resources.CPUBuffer.size() / 4u) * 6u), 1);
+		Renderer::DrawIndexed(resources.CommandBuffer, static_cast<uint32_t>(((resources.CPUBuffer.size() / 4ull) * 6ull)), 1);
 
 		// End rendering
-		Renderer::End(resources.Renderpass);
-		Renderer::Submit(resources.Renderpass);
+		Renderer::EndDynamic(resources.CommandBuffer);
+		Renderer::End(resources.CommandBuffer);
+		Renderer::Submit(resources.CommandBuffer);
+
+		colourAttachment->Transition(ImageLayout::Colour, ImageLayout::PresentSrcKHR);
 	}
 
 	void BatchRenderer2D::AddQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour)
 	{
 		auto& resources = Resources2D::Get().Batch;
 
-		if ((resources.CPUBuffer.size() / 4u) >= BatchVertex2D::MaxQuadsPerDraw)
+		if ((resources.CPUBuffer.size() / 4u) >= BatchRenderer2D::MaxQuadsPerDraw)
 		{
 			End();
 			Flush();

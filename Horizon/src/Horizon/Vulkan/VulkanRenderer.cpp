@@ -177,6 +177,25 @@ namespace Hz
         vkCmdEndRendering(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()));
     }
 
+    void VulkanRenderer::SetViewportAndScissor(Ref<CommandBuffer> cmdBuf, uint32_t width, uint32_t height)
+    {
+        Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
+
+        VkViewport viewport = {};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = (float)width;
+        viewport.height = (float)height;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()], 0, 1, &viewport);
+
+        VkRect2D scissor = {};
+        scissor.offset = { 0, 0 };
+        scissor.extent = { width, height };
+        vkCmdSetScissor(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()], 0, 1, &scissor);
+    }
+
     void VulkanRenderer::Begin(Ref<CommandBuffer> cmdBuf)
     {
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
@@ -228,19 +247,7 @@ namespace Hz
 
         vkCmdBeginRenderPass(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        VkViewport viewport = {};
-        viewport.x = 0.0f;
-        viewport.y = 0.0f;
-        viewport.width = (float)extent.width;
-        viewport.height = (float)extent.height;
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-        vkCmdSetViewport(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()], 0, 1, &viewport);
-
-        VkRect2D scissor = {};
-        scissor.offset = { 0, 0 };
-        scissor.extent = extent;
-        vkCmdSetScissor(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()], 0, 1, &scissor);
+        SetViewportAndScissor(cmdBuf, extent.width, extent.height);
     }
 
     void VulkanRenderer::End(Ref<CommandBuffer> cmdBuf)

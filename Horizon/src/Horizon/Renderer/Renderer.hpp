@@ -66,8 +66,12 @@ namespace Hz
         static void Present();
 
         // Note: These are only when you actually want to use dynamic rendering, 'static' rendering using renderpasses can be done just with Begin() etc.
+        // Note 2: You still have to call Begin, End & Submit for the CommandBuffer yourself.
         static void BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state);
         static void EndDynamic(Ref<CommandBuffer> cmdBuf);
+
+        // Note: Used for dynamic rendering
+        static void SetViewportAndScissor(Ref<CommandBuffer> cmdBuf, uint32_t width, uint32_t height);
 
         // Execution of Renderpasses/CommandBuffers
         static void Begin(Ref<CommandBuffer> cmdBuf);

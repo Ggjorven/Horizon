@@ -290,6 +290,16 @@ namespace Hz
 			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
             break;
 		}
+		case Enum::Fuse(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL):
+		{
+			barrier.srcAccessMask = 0;  
+			barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT; 
+
+			sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; 
+			break;
+		}
+
 
         default:
             HZ_ASSERT(false, "Layout transition not supported.");
@@ -299,6 +309,9 @@ namespace Hz
         vkCmdPipelineBarrier(command.GetVkCommandBuffer(), sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
 		command.EndAndSubmit();
+
+		// Set the layout
+		m_Specification.Layout = final;
 	}
 
     void VulkanImage::CreateImage(uint32_t width, uint32_t height)

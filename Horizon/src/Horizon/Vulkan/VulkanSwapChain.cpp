@@ -250,6 +250,8 @@ namespace Hz
             else
                 m_Images[i] = Ref<VulkanImage>::Create(specs, tempImages[i], imageView);
 
+			// We transition manually since, the layout set in the specification doesn't get used
+			// since we manually set all the data.
             m_Images[i]->Transition(ImageLayout::Undefined, ImageLayout::PresentSrcKHR);
 		}
 

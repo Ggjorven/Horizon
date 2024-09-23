@@ -21,8 +21,15 @@ namespace Hz
 		Resources2D::Destroy();
 	}
 
-	void Renderer2D::BeginBatch()
+	void Renderer2D::BeginBatch(const glm::mat4& projection, const glm::mat4& view)
 	{
+		auto& resources = Resources2D::Get();
+
+		// Set buffer data
+		std::array<const glm::mat4, 2> data = { view, projection };
+		resources.Camera.Buffer->SetData((void*)data.data(), sizeof(glm::mat4) * 2, 0);
+
+		resources.Batch.DrawIndex = 0;
 		BatchRenderer2D::Begin();
 	}
 

@@ -30,6 +30,8 @@ namespace Hz
         static void BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state);
         static void EndDynamic(Ref<CommandBuffer> cmdBuf);
 
+        static void SetViewportAndScissor(Ref<CommandBuffer> cmdBuf, uint32_t width, uint32_t height);
+
         static void Begin(Ref<CommandBuffer> cmdBuf);
         static void Begin(Ref<Renderpass> renderpass);
         static void End(Ref<CommandBuffer> cmdBuf);
