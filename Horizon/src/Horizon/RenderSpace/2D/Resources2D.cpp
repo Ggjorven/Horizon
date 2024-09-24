@@ -52,37 +52,37 @@ namespace Hz
 			indices.push_back(offset + 0);
 			indices.push_back(offset + 1);
 			indices.push_back(offset + 2);
-			
+
 			indices.push_back(offset + 2);
 			indices.push_back(offset + 3);
 			indices.push_back(offset + 0);
 		}
 
-		Batch.CommandBuffer = CommandBuffer::Create();
+		Batch.CommandBufferObject = CommandBuffer::Create();
 
-		Batch.Shader = Shader::Create({
+		Batch.ShaderObject = Shader::Create({
 			.ShaderCode = {
 				{ ShaderStage::Vertex, ShaderCompiler::Compile(ShaderStage::Vertex, Shader::ReadGLSL("Sandbox/Shaders/shader.vert.glsl")) },
 				{ ShaderStage::Fragment, ShaderCompiler::Compile(ShaderStage::Fragment, Shader::ReadGLSL("Sandbox/Shaders/shader.frag.glsl")) }
 			}
 		});
-		
-		Batch.DescriptorSets = DescriptorSets::Create({ 
+
+		Batch.DescriptorSetsObject = DescriptorSets::Create({
 			{ 1, { 0, {
 				{ DescriptorType::UniformBuffer, 0, "u_Camera", ShaderStage::Vertex }
 			}}}
 		});
 
-		Batch.Pipeline = Pipeline::Create({
+		Batch.PipelineObject = Pipeline::Create({
 			.Type = PipelineType::Graphics,
 			.Bufferlayout = BatchVertex2D::GetLayout(),
 			.Polygonmode = PolygonMode::Fill,
 			.Cullingmode = CullingMode::None,
 			// .Blending = true
-		}, Batch.DescriptorSets, Batch.Shader);
+		}, Batch.DescriptorSetsObject, Batch.ShaderObject);
 
-		Batch.VertexBuffer = VertexBuffer::Create({ .Usage = BufferMemoryUsage::CPUToGPU }, nullptr, sizeof(BatchVertex2D) * BatchRenderer2D::MaxQuadsPerDraw * 4);
-		Batch.IndexBuffer = IndexBuffer::Create({}, indices.data(), static_cast<uint32_t>(indices.size()));
+		Batch.VertexBufferObject = VertexBuffer::Create({ .Usage = BufferMemoryUsage::CPUToGPU }, nullptr, sizeof(BatchVertex2D) * BatchRenderer2D::MaxQuadsPerDraw * 4);
+		Batch.IndexBufferObject = IndexBuffer::Create({}, indices.data(), static_cast<uint32_t>(indices.size()));
 	}
 
 	void Resources2D::DestroyCamera()

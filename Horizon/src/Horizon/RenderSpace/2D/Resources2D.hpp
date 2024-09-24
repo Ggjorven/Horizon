@@ -27,7 +27,7 @@ namespace Hz
 		static Resources2D& Get();
 
 	///////////////////////////////////////////////////////////
-	// Data 
+	// Data
 	///////////////////////////////////////////////////////////
 	public:
 		struct
@@ -37,14 +37,14 @@ namespace Hz
 
 		struct
 		{
-			Ref<Pipeline> Pipeline = nullptr;
-			Ref<Shader> Shader = nullptr;
-			Ref<DescriptorSets> DescriptorSets = nullptr;
+			Ref<Pipeline> PipelineObject = nullptr;
+			Ref<Shader> ShaderObject = nullptr;
+			Ref<DescriptorSets> DescriptorSetsObject = nullptr;
 
-			Ref<CommandBuffer> CommandBuffer = nullptr;
+			Ref<CommandBuffer> CommandBufferObject = nullptr;
 
-			Ref<VertexBuffer> VertexBuffer = nullptr;
-			Ref<IndexBuffer> IndexBuffer = nullptr;
+			Ref<VertexBuffer> VertexBufferObject = nullptr;
+			Ref<IndexBuffer> IndexBufferObject = nullptr;
 
 			std::vector<BatchVertex2D> CPUBuffer = {};
 			uint32_t DrawIndex = 0; // Used for having multiple batches and handling dynamic state

@@ -38,8 +38,8 @@ namespace Hz
 		resources.CPUBuffer.clear();
 		resources.DrawIndex++;
 
-		resources.DescriptorSets->GetSets(0)[0]->Upload({ 
-			{ Resources2D::Get().Camera.Buffer, resources.DescriptorSets->GetLayout(0).GetDescriptorByName("u_Camera") }
+		resources.DescriptorSetsObject->GetSets(0)[0]->Upload({
+			{ Resources2D::Get().Camera.Buffer, resources.DescriptorSetsObject->GetLayout(0).GetDescriptorByName("u_Camera") }
 		});
 	}
 
@@ -49,10 +49,10 @@ namespace Hz
 
 		// Only draw if there's something TO draw
 		if (resources.CPUBuffer.size() > 0)
-			resources.VertexBuffer->SetData((void*)resources.CPUBuffer.data(), (resources.CPUBuffer.size() * sizeof(BatchVertex2D)), 0);
+			resources.VertexBufferObject->SetData((void*)resources.CPUBuffer.data(), (resources.CPUBuffer.size() * sizeof(BatchVertex2D)), 0);
 	}
 
-	void BatchRenderer2D::Flush() 
+	void BatchRenderer2D::Flush()
 	{
 		auto& resources = Resources2D::Get().Batch;
 
@@ -80,24 +80,24 @@ namespace Hz
 		colourAttachment->Transition(ImageLayout::PresentSrcKHR, ImageLayout::Colour);
 
 		// Start rendering
-		Renderer::Begin(resources.CommandBuffer);
-		Renderer::BeginDynamic(resources.CommandBuffer, std::move(state));
-        Renderer::SetViewportAndScissor(resources.CommandBuffer, colourAttachment->GetSpecification().Width, colourAttachment->GetSpecification().Height);
+		Renderer::Begin(resources.CommandBufferObject);
+		Renderer::BeginDynamic(resources.CommandBufferObject, std::move(state));
+        Renderer::SetViewportAndScissor(resources.CommandBufferObject, colourAttachment->GetSpecification().Width, colourAttachment->GetSpecification().Height);
 
-		resources.Pipeline->Use(resources.CommandBuffer, PipelineBindPoint::Graphics);
+		resources.PipelineObject->Use(resources.CommandBufferObject, PipelineBindPoint::Graphics);
 
-		resources.DescriptorSets->GetSets(0)[0]->Bind(resources.Pipeline, resources.CommandBuffer);
+		resources.DescriptorSetsObject->GetSets(0)[0]->Bind(resources.PipelineObject, resources.CommandBufferObject);
 
-		resources.IndexBuffer->Bind(resources.CommandBuffer);
-		resources.VertexBuffer->Bind(resources.CommandBuffer);
+		resources.IndexBufferObject->Bind(resources.CommandBufferObject);
+		resources.VertexBufferObject->Bind(resources.CommandBufferObject);
 
 		// Draw all at once
-		Renderer::DrawIndexed(resources.CommandBuffer, static_cast<uint32_t>(((resources.CPUBuffer.size() / 4ull) * 6ull)), 1);
+		Renderer::DrawIndexed(resources.CommandBufferObject, static_cast<uint32_t>(((resources.CPUBuffer.size() / 4ull) * 6ull)), 1);
 
 		// End rendering
-		Renderer::EndDynamic(resources.CommandBuffer);
-		Renderer::End(resources.CommandBuffer);
-		Renderer::Submit(resources.CommandBuffer);
+		Renderer::EndDynamic(resources.CommandBufferObject);
+		Renderer::End(resources.CommandBufferObject);
+		Renderer::Submit(resources.CommandBufferObject);
 
 		colourAttachment->Transition(ImageLayout::Colour, ImageLayout::PresentSrcKHR);
 	}

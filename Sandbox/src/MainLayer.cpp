@@ -7,23 +7,7 @@
 #include <Horizon/RenderSpace/2D/Renderer2D.hpp>
 #include <Horizon/RenderSpace/2D/BatchRenderer2D.hpp> // TODO: Remove
 
-#include "Extensions/ImGui/imgui/imgui.h"
-
-static void RemoveControllerDrift(float& x, float& y)
-{
-	constexpr static float DeadZone = 0.1f;
-
-	// Calculate the magnitude
-	float magnitude = std::sqrt(x * x + y * y);
-
-	// Check if within the dead zone
-	if (magnitude < DeadZone)
-	{
-		x = 0.0f;
-		y = 0.0f;
-		return;
-	}
-}
+#include "../Extensions/ImGui/imgui/imgui.h"
 
 void MainLayer::OnInit()
 {
@@ -57,38 +41,13 @@ void MainLayer::OnRender()
 {
 	Renderer2D::BeginBatch();
 
-	// Top left square
-	BatchRenderer2D::AddQuad({ -0.9f, -0.9f, 0.1f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f });
-	
-	// Moveable square
-	if (Input::JoyStickPresent(JoyStick::J1))
-	{
-		auto axes = Input::GetJoyStickAxes(JoyStick::J1);
-		RemoveControllerDrift(axes[0], axes[1]);
-
-		BatchRenderer2D::AddQuad({ axes[0] - 0.5f, axes[1] - 0.5f, 0.1f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
-	}
+	BatchRenderer2D::AddQuad({ -0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f });
 
 	Renderer2D::EndBatch();
 }
 
 void MainLayer::OnUIRender()
 {
-	ImGui::Begin("Test UI Window");
-
-	ImGui::Text("Text");
-	ImGui::Button("Button");
-
-	if (Input::JoyStickPresent(JoyStick::J1))
-	{
-		auto axes = Input::GetJoyStickAxes(JoyStick::J1);
-		RemoveControllerDrift(axes[0], axes[1]);
-	
-		ImGui::Text(Text::Format("X: {}", axes[0]).c_str());
-		ImGui::Text(Text::Format("Y: {}", axes[1]).c_str());
-	}
-	
-	ImGui::End();
 }
 
 void MainLayer::OnEvent(Event& e)
