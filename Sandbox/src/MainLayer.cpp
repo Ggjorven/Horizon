@@ -7,7 +7,24 @@
 #include <Horizon/RenderSpace/2D/Renderer2D.hpp>
 #include <Horizon/RenderSpace/2D/BatchRenderer2D.hpp> // TODO: Remove
 
+#include <Pulse/Utils/Random.hpp>
+
 #include "../Extensions/ImGui/imgui/imgui.h"
+
+static uint32_t PCG_Hash(uint32_t seed)
+{
+	uint32_t state = seed * 747796405u + 2891336453u;
+	uint32_t word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+	return (word >> 22u) ^ word;
+}
+
+static float RandomFloat(uint32_t& seed)
+{
+	seed = PCG_Hash(seed);
+	return (float)seed / (float)Pulse::Numeric::Max<uint32_t>();
+}
+
+
 
 void MainLayer::OnInit()
 {
@@ -41,13 +58,20 @@ void MainLayer::OnRender()
 {
 	Renderer2D::BeginBatch();
 
-	BatchRenderer2D::AddQuad({ -0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f });
+	static uint32_t seed = 0;
+	for (uint32_t i = 0; i < 9000; i++)
+	{
+		BatchRenderer2D::AddQuad({ RandomFloat(seed) * 2.0f - 1.0f, RandomFloat(seed) * 2.0f - 1.0f, 0.0f }, { 0.05f, 0.05f }, { RandomFloat(seed), RandomFloat(seed), RandomFloat(seed), 1.0f });
+	}
 
 	Renderer2D::EndBatch();
 }
 
 void MainLayer::OnUIRender()
 {
+	ImGui::Begin("UI Window");
+
+	ImGui::End();
 }
 
 void MainLayer::OnEvent(Event& e)

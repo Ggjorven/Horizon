@@ -29,7 +29,6 @@ namespace Hz
 		std::array<const glm::mat4, 2> data = { view, projection };
 		resources.Camera.Buffer->SetData((void*)data.data(), sizeof(glm::mat4) * 2, 0);
 
-		resources.Batch.DrawIndex = 0;
 		BatchRenderer2D::Begin();
 	}
 

@@ -10,11 +10,6 @@
 namespace Hz
 {
 
-	Extension::Extension(const std::string& name)
-		: m_DebugName(name)
-	{
-	}
-
 	void ExtensionList::OnInitBegin()
 	{
 		ALL_EXTENSIONS(OnInitBegin);
@@ -69,6 +64,17 @@ namespace Hz
 	void ExtensionList::OnEvent(Event& e)
 	{
 		ALL_EXTENSIONS(OnEvent, e);
+	}
+
+	bool ExtensionList::UISupport() const
+	{
+		for (const auto& extension : m_Extensions)
+		{
+			if (extension->ImplementsUI())
+				return true;
+		}
+
+		return false;
 	}
 
 }

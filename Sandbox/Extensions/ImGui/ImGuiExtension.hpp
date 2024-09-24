@@ -8,8 +8,6 @@
 class ImGuiExtension : public Hz::Extension
 {
 public:
-	ImGuiExtension();
-
 	void OnInitEnd() override;
 	void OnDestroyBegin() override;
 
@@ -17,6 +15,9 @@ public:
 	void OnUIEnd() override;
 
 	void OnEvent(Hz::Event& e) override;
+
+	inline const bool ImplementsUI() const override { return true; }
+	inline const std::string GetName() const override { return "ImGui"; }
 
 private:
 	Hz::Ref<Hz::Renderpass> m_Renderpass = nullptr;

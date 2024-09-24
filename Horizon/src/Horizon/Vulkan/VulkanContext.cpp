@@ -81,9 +81,9 @@ namespace Hz
     // For extreme verbosity add extension: "VK_LAYER_LUNARG_api_dump"
     const std::vector<const char*> VulkanContext::s_RequestedValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 	const std::vector<const char*> VulkanContext::s_RequestedDeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
-    #if defined(HZ_PLATFORM_MACOS)
-        "VK_KHR_portability_subset"
-    #endif
+        #if defined(HZ_PLATFORM_MACOS)
+            "VK_KHR_portability_subset"
+        #endif
     };
     VkPhysicalDeviceFeatures VulkanContext::s_RequestedDeviceFeatures = {
         .fillModeNonSolid = VK_TRUE,
@@ -148,16 +148,18 @@ namespace Hz
             #error "Unsupported platform"
         #endif
 
+        // Check for validation layer support
+        bool validationSupport = ValidationLayersSupported();
+        if constexpr (s_Validation)
+        {
+            if (!validationSupport)
+                HZ_LOG_WARN("Requested validation layers, but no support found.");
+        }
 
 		std::vector<const char*> instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_TYPE_NAME };
 		if constexpr (s_Validation)
 		{
-            if (!ValidationLayersSupported())
-            {
-                // We only give this error once, but we still do this check below
-                HZ_LOG_ERROR("Validation layers are not supported!");
-            }
-            else
+            if (validationSupport)
             {
                 instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
                 instanceExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
@@ -180,10 +182,10 @@ namespace Hz
 
 		if constexpr (s_Validation)
 		{
-            if (ValidationLayersSupported())
+            if (validationSupport)
             {
-			    createInfo.enabledLayerCount = static_cast<uint32_t>(s_RequestedValidationLayers.size());
-			    createInfo.ppEnabledLayerNames = s_RequestedValidationLayers.data();
+                createInfo.enabledLayerCount = static_cast<uint32_t>(s_RequestedValidationLayers.size());
+                createInfo.ppEnabledLayerNames = s_RequestedValidationLayers.data();
             }
 		}
 		else
@@ -200,7 +202,7 @@ namespace Hz
 
 		if constexpr (s_Validation)
 		{
-            if (ValidationLayersSupported())
+            if (validationSupport)
             {
 			    createInfo.enabledLayerCount = static_cast<uint32_t>(s_RequestedValidationLayers.size());
 			    createInfo.ppEnabledLayerNames = s_RequestedValidationLayers.data();
@@ -221,7 +223,7 @@ namespace Hz
 		///////////////////////////////////////////////////////////
 		if constexpr (s_Validation)
 		{
-            if (ValidationLayersSupported())
+            if (validationSupport)
             {
 			    VK_CHECK_RESULT(CreateDebugUtilsMessengerEXT(s_Data->VulkanInstance, &debugCreateInfo, nullptr, &s_Data->DebugMessenger));
             }

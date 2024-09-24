@@ -83,7 +83,7 @@ namespace Hz
 			}
 
 			// UI 
-			if (!m_Minimized)
+			if (m_UI && !m_Minimized)
 			{
 				HZ_PROFILE_SCOPE("App::UI");
 
@@ -113,6 +113,8 @@ namespace Hz
 		m_AppLayer->OnInit();
 
 		m_Extensions.OnInitEnd();
+
+		m_UI = m_Extensions.UISupport();
 
 		// Log information about the application
 		#if !defined(HZ_CONFIG_DIST)

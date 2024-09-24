@@ -12,11 +12,10 @@ namespace Hz
 
 	// Note: This class is used for easily adding extended
 	// functionality to the Horizon library.
-	// Note 2: This class is currently unused.
 	class Extension
 	{
 	public:
-		Extension(const std::string& name = "Unnamed Extension");
+		Extension() = default;
 		virtual ~Extension() = default;
 
 		virtual void OnInitBegin() {}
@@ -36,10 +35,8 @@ namespace Hz
 
 		virtual void OnEvent(Event& e) {}
 
-		inline const std::string& GetName() const { return m_DebugName; }
-
-	protected:
-		std::string m_DebugName = {};
+		inline virtual const bool ImplementsUI() const { return false; }
+		inline virtual const std::string GetName() const { return "Unnamed Extension"; }
 	};
 
 
@@ -76,7 +73,8 @@ namespace Hz
 		inline std::vector<Unique<Extension>>::iterator			end()			{ return m_Extensions.end(); }
 		inline std::vector<Unique<Extension>>::const_iterator	begin()	const	{ return m_Extensions.begin(); }
 		inline std::vector<Unique<Extension>>::const_iterator	end() const		{ return m_Extensions.end(); }
-
+		
+		bool UISupport() const;
 		inline bool Empty() const { return m_Extensions.empty(); }
 		
 	private:

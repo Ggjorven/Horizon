@@ -14,7 +14,7 @@ public:
 		: Hz::Application(appInfo, "Sandbox")
 	{
 		SetAppLayer<MainLayer>();
-		AddExtension<ImGuiExtension>();
+		//AddExtension<ImGuiExtension>();
 
 		Init();
 	}

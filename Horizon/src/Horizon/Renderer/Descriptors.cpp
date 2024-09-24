@@ -35,7 +35,7 @@ namespace Hz
     Descriptor DescriptorSetLayout::GetDescriptorByName(const std::string& name) const
     {
         auto it = Descriptors.find(name);
-		if (it == Descriptors.end())
+		if (it == Descriptors.end()) [[unlikely]]
 		{
 			HZ_LOG_ERROR("Failed to find descriptor by name: '{0}'", name);
 			return {};

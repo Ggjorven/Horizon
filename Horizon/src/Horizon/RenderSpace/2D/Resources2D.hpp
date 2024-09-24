@@ -35,7 +35,7 @@ namespace Hz
 			Ref<UniformBuffer> Buffer = nullptr;
 		} Camera;
 
-		struct
+		struct // TODO: Use static rendering.
 		{
 			Ref<Pipeline> PipelineObject = nullptr;
 			Ref<Shader> ShaderObject = nullptr;
@@ -47,7 +47,6 @@ namespace Hz
 			Ref<IndexBuffer> IndexBufferObject = nullptr;
 
 			std::vector<BatchVertex2D> CPUBuffer = {};
-			uint32_t DrawIndex = 0; // Used for having multiple batches and handling dynamic state
 		} Batch;
 
 	///////////////////////////////////////////////////////////

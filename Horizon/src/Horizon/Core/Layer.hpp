@@ -21,6 +21,9 @@ namespace Hz
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender() {}
 		virtual void OnEvent(Event& e) {}
+
+		// Note: OnUIRender doesn't get called by default, since there's no default UI library
+		// if you wish to use this function add your own custom extension which sets UINeeded to true.
 		virtual void OnUIRender() {}
 	};
 

@@ -24,7 +24,8 @@ namespace Hz
 	class BatchRenderer2D
 	{
 	public:
-		constexpr static uint32_t MaxQuadsPerDraw = 10000u;
+		// Note: Subject to change at any time
+		constexpr static uint32_t MaxQuads = 10000u;
 	public:
 		static void Init();
 		static void Destroy();

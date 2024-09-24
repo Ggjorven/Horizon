@@ -21,12 +21,6 @@ using namespace Hz;
 
 static VkDescriptorPool s_ImGuiPool = VK_NULL_HANDLE;
 
-ImGuiExtension::ImGuiExtension()
-	: Extension("ImGui")
-{
-	// Note: Don't initialize anything in here.
-}
-
 void ImGuiExtension::OnInitEnd()
 {
 	{

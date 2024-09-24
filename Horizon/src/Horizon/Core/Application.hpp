@@ -9,6 +9,8 @@
 
 #include "Horizon/Renderer/RendererSpecification.hpp"
 
+#include <Pulse/Types/TypeUtils.hpp>
+
 #include <vector>
 #include <memory>
 #include <queue>
@@ -34,8 +36,10 @@ namespace Hz
 		void Run();
 
 		// App layers & extension layers
-		template<typename TLayer> void SetAppLayer() { m_AppLayer = Unique<TLayer>::Create(); }
-		template<typename TExtension> void AddExtension() { m_Extensions.Add<TExtension>(); }
+		template<typename TLayer> 
+		void SetAppLayer() requires (Pulse::Types::InheritsFrom<Layer, TLayer>);
+		template<typename TExtension> 
+		void AddExtension() requires (Pulse::Types::InheritsFrom<Extension, TExtension>);
 
 		inline void Close() { m_Running = false; }
 		inline bool IsMinimized() const { return m_Minimized; }
@@ -59,14 +63,29 @@ namespace Hz
 		Ref<Window> m_Window = nullptr;
 		bool m_Running = true;
 		bool m_Minimized = false;
+		bool m_UI = false;
 
 		Unique<Layer> m_AppLayer = nullptr;
 		ExtensionList m_Extensions = {};
 
 	private:
 		static Application* s_Instance;
-
 	};
+
+	///////////////////////////////////////////////////////////
+	// Templated functions
+	///////////////////////////////////////////////////////////
+	template<typename TLayer>
+	void Application::SetAppLayer() requires (Pulse::Types::InheritsFrom<Layer, TLayer>)
+	{ 
+		m_AppLayer = Unique<TLayer>::Create(); 
+	}
+
+	template<typename TExtension>
+	void Application::AddExtension() requires (Pulse::Types::InheritsFrom<Extension, TExtension>)
+	{ 
+		m_Extensions.Add<TExtension>();
+	}
 
 
 

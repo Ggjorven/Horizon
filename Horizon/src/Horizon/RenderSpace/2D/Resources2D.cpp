@@ -45,9 +45,9 @@ namespace Hz
 	void Resources2D::InitBatch()
 	{
 		std::vector<uint32_t> indices;
-		indices.reserve(static_cast<size_t>(BatchRenderer2D::MaxQuadsPerDraw) * 6);
+		indices.reserve(static_cast<size_t>(BatchRenderer2D::MaxQuads) * 6);
 
-		for (uint32_t i = 0, offset = 0; i < BatchRenderer2D::MaxQuadsPerDraw * 6; i += 6, offset += 4)
+		for (uint32_t i = 0, offset = 0; i < BatchRenderer2D::MaxQuads * 6; i += 6, offset += 4)
 		{
 			indices.push_back(offset + 0);
 			indices.push_back(offset + 1);
@@ -81,8 +81,11 @@ namespace Hz
 			// .Blending = true
 		}, Batch.DescriptorSetsObject, Batch.ShaderObject);
 
-		Batch.VertexBufferObject = VertexBuffer::Create({ .Usage = BufferMemoryUsage::CPUToGPU }, nullptr, sizeof(BatchVertex2D) * BatchRenderer2D::MaxQuadsPerDraw * 4);
+		Batch.VertexBufferObject = VertexBuffer::Create({ .Usage = BufferMemoryUsage::CPUToGPU }, nullptr, sizeof(BatchVertex2D) * BatchRenderer2D::MaxQuads * 4);
 		Batch.IndexBufferObject = IndexBuffer::Create({}, indices.data(), static_cast<uint32_t>(indices.size()));
+
+		// Reserve enough space for cpu buffer
+		Batch.CPUBuffer.reserve(static_cast<size_t>(BatchRenderer2D::MaxQuads) * 4);
 	}
 
 	void Resources2D::DestroyCamera()

@@ -36,7 +36,6 @@ namespace Hz
 		auto& resources = Resources2D::Get().Batch;
 
 		resources.CPUBuffer.clear();
-		resources.DrawIndex++;
 
 		resources.DescriptorSetsObject->GetSets(0)[0]->Upload({
 			{ Resources2D::Get().Camera.Buffer, resources.DescriptorSetsObject->GetLayout(0).GetDescriptorByName("u_Camera") }
@@ -70,13 +69,6 @@ namespace Hz
 			.DepthClearValue = 1.0f
 		};
 
-		// Set LoadOperation to Load on multiple draw batches
-		if (resources.DrawIndex > 1) [[unlikely]]
-		{
-			state.ColourLoadOp = LoadOperation::Load;
-			state.DepthLoadOp = LoadOperation::Load;
-		}
-
 		colourAttachment->Transition(ImageLayout::PresentSrcKHR, ImageLayout::Colour);
 
 		// Start rendering
@@ -104,24 +96,24 @@ namespace Hz
 
 	void BatchRenderer2D::AddQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour)
 	{
+		constexpr const glm::vec2 uv0(1.0f, 0.0f);
+		constexpr const glm::vec2 uv1(0.0f, 0.0f);
+		constexpr const glm::vec2 uv2(0.0f, 1.0f);
+		constexpr const glm::vec2 uv3(1.0f, 1.0f);
+
 		auto& resources = Resources2D::Get().Batch;
 
-		if ((resources.CPUBuffer.size() / 4u) >= BatchRenderer2D::MaxQuadsPerDraw)
+		if ((resources.CPUBuffer.size() / 4u) >= BatchRenderer2D::MaxQuads)
 		{
 			End();
 			Flush();
 			Begin();
 		}
 
-		auto& p0 = position;
-		auto p1 = glm::vec3(p0.x + size.x, p0.y, p0.z);
-		auto p2 = glm::vec3(p0.x + size.x, p0.y + size.y, p0.z);
-		auto p3 = glm::vec3(p0.x, p0.y + size.y, p0.z);
-
-		resources.CPUBuffer.emplace_back(p0, glm::vec2(1.0f, 0.0f), colour);
-		resources.CPUBuffer.emplace_back(p1, glm::vec2(0.0f, 0.0f), colour);
-		resources.CPUBuffer.emplace_back(p2, glm::vec2(0.0f, 1.0f), colour);
-		resources.CPUBuffer.emplace_back(p3, glm::vec2(1.0f, 1.0f), colour);
+		resources.CPUBuffer.emplace_back(position, uv0, colour);
+		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y, position.z), uv1, colour);
+		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y + size.y, position.z), uv2, colour);
+		resources.CPUBuffer.emplace_back(glm::vec3(position.x, position.y + size.y, position.z), uv3, colour);
 	}
 
 }
