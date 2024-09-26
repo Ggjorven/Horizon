@@ -1,6 +1,9 @@
 #pragma once
 
+#include <Horizon/Core/Core.hpp>
 #include <Horizon/Core/Layer.hpp>
+
+#include "Core/Camera.hpp"
 
 using namespace Hz;
 
@@ -15,4 +18,7 @@ public:
 	void OnUIRender() override;
 
 	void OnEvent(Event& e) override;
+
+private:
+	Ref<Camera> m_Camera = nullptr;
 };

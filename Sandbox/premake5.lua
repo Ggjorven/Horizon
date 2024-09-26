@@ -161,6 +161,7 @@ project "Sandbox"
         }
 
 	filter "configurations:Dist"
+		kind "WindowedApp"
 		defines "HZ_CONFIG_DIST"
 		runtime "Release"
 		optimize "on"

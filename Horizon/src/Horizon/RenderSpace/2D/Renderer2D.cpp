@@ -21,6 +21,11 @@ namespace Hz
 		Resources2D::Destroy();
 	}
 
+	void Renderer2D::Resize(uint32_t width, uint32_t height)
+	{
+		BatchRenderer2D::Resize(width, height);
+	}
+
 	void Renderer2D::BeginBatch(const glm::mat4& projection, const glm::mat4& view)
 	{
 		auto& resources = Resources2D::Get();

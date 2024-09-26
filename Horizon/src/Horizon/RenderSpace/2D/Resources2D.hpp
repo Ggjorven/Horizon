@@ -35,13 +35,13 @@ namespace Hz
 			Ref<UniformBuffer> Buffer = nullptr;
 		} Camera;
 
-		struct // TODO: Use static rendering.
+		struct
 		{
 			Ref<Pipeline> PipelineObject = nullptr;
 			Ref<Shader> ShaderObject = nullptr;
 			Ref<DescriptorSets> DescriptorSetsObject = nullptr;
 
-			Ref<CommandBuffer> CommandBufferObject = nullptr;
+			Ref<Renderpass> RenderpassObject = nullptr;
 
 			Ref<VertexBuffer> VertexBufferObject = nullptr;
 			Ref<IndexBuffer> IndexBufferObject = nullptr;

@@ -58,7 +58,20 @@ namespace Hz
 			indices.push_back(offset + 0);
 		}
 
-		Batch.CommandBufferObject = CommandBuffer::Create();
+		Batch.RenderpassObject = Renderpass::Create({
+			.ColourAttachment = GraphicsContext::GetSwapChainImages(),
+			.ColourLoadOp = LoadOperation::Clear,
+			.ColourStoreOp = StoreOperation::Store,
+			.ColourClearColour { 0.0f, 0.0f, 0.0f, 1.0f },
+			.PreviousColourImageLayout = ImageLayout::Undefined,
+			.FinalColourImageLayout = ImageLayout::PresentSrcKHR,
+
+			.DepthAttachment = GraphicsContext::GetDepthImage(),
+			.DepthLoadOp = LoadOperation::Clear,
+			.DepthStoreOp = StoreOperation::Store,
+			.PreviousDepthImageLayout = ImageLayout::Undefined,
+			.FinalDepthImageLayout = ImageLayout::DepthStencil,
+		}, CommandBuffer::Create());
 
 		Batch.ShaderObject = Shader::Create({
 			.ShaderCode = {
@@ -79,7 +92,7 @@ namespace Hz
 			.Polygonmode = PolygonMode::Fill,
 			.Cullingmode = CullingMode::None,
 			// .Blending = true
-		}, Batch.DescriptorSetsObject, Batch.ShaderObject);
+		}, Batch.DescriptorSetsObject, Batch.ShaderObject, Batch.RenderpassObject);
 
 		Batch.VertexBufferObject = VertexBuffer::Create({ .Usage = BufferMemoryUsage::CPUToGPU }, nullptr, sizeof(BatchVertex2D) * BatchRenderer2D::MaxQuads * 4);
 		Batch.IndexBufferObject = IndexBuffer::Create({}, indices.data(), static_cast<uint32_t>(indices.size()));

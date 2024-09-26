@@ -30,6 +30,8 @@ namespace Hz
 		static void Init();
 		static void Destroy();
 
+		static void Resize(uint32_t width, uint32_t height);
+
 	public:
 		static void Begin();
 		static void End();
