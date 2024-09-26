@@ -50,6 +50,20 @@ namespace Hz
         MutableValve = MutableEXT,
     };
 
+    enum class DescriptorBindingFlags : uint32_t
+    {
+        None = 0,
+        UpdateAfterBind = 1,
+        UpdateUnusedWhilePending = 2,
+        PartiallyBound = 4,
+        VariableDescriptorCount = 8,
+
+        UpdateAfterBindEXT = UpdateAfterBind,
+        UpdateUnusedWhilePendingEXT = UpdateUnusedWhilePending,
+        PartiallyBoundEXT = PartiallyBound,
+        VariableDescriptorCountEXT = VariableDescriptorCount,
+    };
+
 	enum class ShaderStage : uint32_t
 	{
         None = 0,
@@ -94,6 +108,8 @@ namespace Hz
 	struct Descriptor
 	{
 	public:
+        static constexpr const uint32_t MaxBindlessResources = 16536u;
+    public:
 		std::string Name = "Empty";
 		uint32_t Binding = 0;
 		DescriptorType Type = DescriptorType::None;
@@ -111,10 +127,12 @@ namespace Hz
 		uint32_t SetID = 0;
 		std::unordered_map<std::string, Descriptor> Descriptors = { };
 
+        DescriptorBindingFlags BindingFlags = DescriptorBindingFlags::None;
+
 	public:
 		DescriptorSetLayout() = default;
-		DescriptorSetLayout(uint32_t setID, const std::vector<Descriptor>& descriptors);
-		DescriptorSetLayout(uint32_t setID, const std::initializer_list<Descriptor>& descriptors);
+		DescriptorSetLayout(uint32_t setID, const std::vector<Descriptor>& descriptors, DescriptorBindingFlags bindingFlags = DescriptorBindingFlags::None);
+		DescriptorSetLayout(uint32_t setID, const std::initializer_list<Descriptor>& descriptors, DescriptorBindingFlags bindingFlags = DescriptorBindingFlags::None);
 		~DescriptorSetLayout() = default;
 
 		Descriptor GetDescriptorByName(const std::string& name) const;

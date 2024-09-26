@@ -20,15 +20,15 @@ namespace Hz
     {
     }
 
-    DescriptorSetLayout::DescriptorSetLayout(uint32_t setID, const std::vector<Descriptor>& descriptors)
-        : SetID(setID)
+    DescriptorSetLayout::DescriptorSetLayout(uint32_t setID, const std::vector<Descriptor>& descriptors, DescriptorBindingFlags bindingFlags)
+        : SetID(setID), BindingFlags(bindingFlags)
 	{
 		for (auto& descriptor : descriptors)
 			Descriptors[descriptor.Name] = descriptor;
 	}
 
-    DescriptorSetLayout::DescriptorSetLayout(uint32_t setID, const std::initializer_list<Descriptor>& descriptors)
-        : DescriptorSetLayout(setID, std::vector(descriptors))
+    DescriptorSetLayout::DescriptorSetLayout(uint32_t setID, const std::initializer_list<Descriptor>& descriptors, DescriptorBindingFlags bindingFlags)
+        : DescriptorSetLayout(setID, std::vector(descriptors), bindingFlags)
 	{
 	}
 

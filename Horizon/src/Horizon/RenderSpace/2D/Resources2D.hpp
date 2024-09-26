@@ -2,6 +2,7 @@
 
 #include "Horizon/Core/Core.hpp"
 
+#include "Horizon/Renderer/Image.hpp"
 #include "Horizon/Renderer/Shader.hpp"
 #include "Horizon/Renderer/Buffers.hpp"
 #include "Horizon/Renderer/Pipeline.hpp"
@@ -11,6 +12,7 @@
 #include "Horizon/RenderSpace/2D/BatchRenderer2D.hpp"
 
 #include <vector>
+#include <unordered_map>
 
 namespace Hz
 {
@@ -46,7 +48,10 @@ namespace Hz
 			Ref<VertexBuffer> VertexBufferObject = nullptr;
 			Ref<IndexBuffer> IndexBufferObject = nullptr;
 
-			std::vector<BatchVertex2D> CPUBuffer = {};
+			std::vector<BatchVertex2D> CPUBuffer = { };
+
+			uint32_t CurrentTextureIndex = 0;
+			std::unordered_map<Image*, uint32_t> TextureIndices = { };
 		} Batch;
 
 	///////////////////////////////////////////////////////////

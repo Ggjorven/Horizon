@@ -22,21 +22,30 @@ namespace Hz
 		float queuePriority = 1.0f;
 		for (uint32_t queueFamily : uniqueQueueFamilies)
 		{
-			VkDeviceQueueCreateInfo queueCreateInfo = {};
+			VkDeviceQueueCreateInfo& queueCreateInfo = queueCreateInfos.emplace_back();
 			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 			queueCreateInfo.queueFamilyIndex = queueFamily;
 			queueCreateInfo.queueCount = 1;
 			queueCreateInfo.pQueuePriorities = &queuePriority;
-			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
+		// Enable dynamic rendering features
 		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeature = {};
 		dynamicRenderingFeature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
 		dynamicRenderingFeature.dynamicRendering = VK_TRUE;
 
+		// Enable descriptor indexing features (for bindless support)
+		VkPhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures = {};
+		indexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
+		indexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
+		indexingFeatures.runtimeDescriptorArray = VK_TRUE;
+
+		// Chain both features into the pNext chain
+		indexingFeatures.pNext = &dynamicRenderingFeature;
+
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.pNext = &dynamicRenderingFeature; // Chain dynamic rendering feature
+		createInfo.pNext = &indexingFeatures; // Chain indexing & dynamic rendering
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = queueCreateInfos.data();
 		createInfo.pEnabledFeatures = &VulkanContext::s_RequestedDeviceFeatures;

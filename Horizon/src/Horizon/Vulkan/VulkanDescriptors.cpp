@@ -157,9 +157,9 @@ namespace Hz
 		{
 			m_OriginalLayouts[group.Layout.SetID] = group.Layout;
 
-			CreateDescriptorSetLayout(group.Layout.SetID);
-			CreateDescriptorPool(group.Layout.SetID, group.Amount);
-			CreateDescriptorSets(group.Layout.SetID, group.Amount);
+			CreateDescriptorSetLayout(group.Layout.SetID, group.Layout.BindingFlags);
+			CreateDescriptorPool(group.Layout.SetID, group.Amount, group.Layout.BindingFlags);
+			CreateDescriptorSets(group.Layout.SetID, group.Amount, group.Layout.BindingFlags);
 		}
     }
 
@@ -181,8 +181,8 @@ namespace Hz
     {
         vkDestroyDescriptorPool(VulkanContext::GetDevice()->GetVkDevice(), m_DescriptorPools[setID], nullptr);
 
-		CreateDescriptorPool(setID, amount);
-		CreateDescriptorSets(setID, amount);
+		CreateDescriptorPool(setID, amount, m_OriginalLayouts[setID].BindingFlags);
+		CreateDescriptorSets(setID, amount, m_OriginalLayouts[setID].BindingFlags);
     }
 
     uint32_t VulkanDescriptorSets::GetAmountOf(uint32_t setID) const
@@ -213,17 +213,17 @@ namespace Hz
 		return it->second;
     }
 
-    void VulkanDescriptorSets::CreateDescriptorSetLayout(uint32_t setID)
+    void VulkanDescriptorSets::CreateDescriptorSetLayout(uint32_t setID, DescriptorBindingFlags descriptorBindingFlags)
     {
         std::vector<VkDescriptorSetLayoutBinding> layouts = { };
 
-		for (auto& element : m_OriginalLayouts[setID].Descriptors)
+		for (const auto& [name, descriptor] : m_OriginalLayouts[setID].Descriptors)
 		{
 			VkDescriptorSetLayoutBinding& layoutBinding = layouts.emplace_back();
-			layoutBinding.binding = element.second.Binding;
-			layoutBinding.descriptorType = (VkDescriptorType)element.second.Type;
-			layoutBinding.descriptorCount = element.second.Count;
-			layoutBinding.stageFlags = (VkShaderStageFlags)element.second.Stage;
+			layoutBinding.binding = descriptor.Binding;
+			layoutBinding.descriptorType = (VkDescriptorType)descriptor.Type;
+			layoutBinding.descriptorCount = descriptor.Count;
+			layoutBinding.stageFlags = (VkShaderStageFlags)descriptor.Stage;
 			layoutBinding.pImmutableSamplers = nullptr; // Optional
 		}
 
@@ -232,11 +232,29 @@ namespace Hz
 		layoutInfo.bindingCount = (uint32_t)layouts.size();
 		layoutInfo.pBindings = layouts.data();
 
+
+
+        // Only set it if we actually use the flags
+        if (descriptorBindingFlags != DescriptorBindingFlags::None)
+         layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT; // For bindless support
+
+        std::vector<VkDescriptorBindingFlags> vkBindingFlags(layouts.size(), (VkDescriptorBindingFlagBits)descriptorBindingFlags);
+
+        VkDescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT, nullptr };
+        extendedInfo.bindingCount = (uint32_t)layouts.size();
+        extendedInfo.pBindingFlags = vkBindingFlags.data();
+
+        // Only set it if we actually use the flags
+        if (descriptorBindingFlags != DescriptorBindingFlags::None) 
+            layoutInfo.pNext = &extendedInfo;
+
+
+
 		m_DescriptorLayouts[setID] = VK_NULL_HANDLE;
         VK_CHECK_RESULT(vkCreateDescriptorSetLayout(VulkanContext::GetDevice()->GetVkDevice(), &layoutInfo, nullptr, &m_DescriptorLayouts[setID]));
     }
 
-    void VulkanDescriptorSets::CreateDescriptorPool(uint32_t setID, uint32_t amount)
+    void VulkanDescriptorSets::CreateDescriptorPool(uint32_t setID, uint32_t amount, DescriptorBindingFlags descriptorBindingFlags)
     {
 		// Note: Just for myself, the poolSizes is just the amount of elements of a certain type to able to allocate per pool
 		std::vector<VkDescriptorPoolSize> poolSizes = { };
@@ -256,11 +274,19 @@ namespace Hz
 		poolInfo.pPoolSizes = poolSizes.data();
 		poolInfo.maxSets = framesInFlight * amount; // A set for every frame in flight
 
+
+
+        // Only set it if we actually use the flags
+        if (descriptorBindingFlags != DescriptorBindingFlags::None)
+            poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+
+
+
 		m_DescriptorPools[setID] = VK_NULL_HANDLE;
         VK_CHECK_RESULT(vkCreateDescriptorPool(VulkanContext::GetDevice()->GetVkDevice(), &poolInfo, nullptr, &m_DescriptorPools[setID]));
     }
 
-    void VulkanDescriptorSets::CreateDescriptorSets(uint32_t setID, uint32_t amount)
+    void VulkanDescriptorSets::CreateDescriptorSets(uint32_t setID, uint32_t amount, DescriptorBindingFlags descriptorBindingFlags)
     {
 		const uint32_t framesInFlight = (uint32_t)Renderer::GetSpecification().Buffers;
 
@@ -272,6 +298,21 @@ namespace Hz
 		allocInfo.descriptorPool = m_DescriptorPools[setID];
 		allocInfo.descriptorSetCount = framesInFlight * amount;
 		allocInfo.pSetLayouts = layouts.data();
+
+
+
+        // This number is the max allocatable count
+        constexpr const uint32_t maxBinding = Descriptor::MaxBindlessResources - 1;
+
+        VkDescriptorSetVariableDescriptorCountAllocateInfoEXT countInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT };
+        countInfo.descriptorSetCount = framesInFlight * amount;
+        countInfo.pDescriptorCounts = &maxBinding;
+
+        // Only set it if we actually use the flags
+        if (descriptorBindingFlags != DescriptorBindingFlags::None)
+            allocInfo.pNext = &countInfo;
+
+
 
 		descriptorSets.resize((size_t)framesInFlight * amount);
 

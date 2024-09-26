@@ -55,9 +55,9 @@ namespace Hz
 		std::vector<Ref<DescriptorSet>>& GetSets(uint32_t setID) override;
 
 	private:
-		void CreateDescriptorSetLayout(uint32_t setID);
-		void CreateDescriptorPool(uint32_t setID, uint32_t amount);
-		void CreateDescriptorSets(uint32_t setID, uint32_t amount);
+		void CreateDescriptorSetLayout(uint32_t setID, DescriptorBindingFlags descriptorBindingFlags);
+		void CreateDescriptorPool(uint32_t setID, uint32_t amount, DescriptorBindingFlags descriptorBindingFlags);
+		void CreateDescriptorSets(uint32_t setID, uint32_t amount, DescriptorBindingFlags descriptorBindingFlags);
 		void ConvertToVulkanDescriptorSets(uint32_t setID, uint32_t amount, std::vector<VkDescriptorSet>& sets);
 
 	private:

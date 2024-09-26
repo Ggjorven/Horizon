@@ -121,7 +121,16 @@ namespace Hz
 		VkPhysicalDeviceFeatures supportedFeatures;
 		vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
-		return indices.IsComplete() && extensionsSupported && swapChainAdequate && FeaturesSupported(VulkanContext::s_RequestedDeviceFeatures, supportedFeatures);
+		// Index features
+		VkPhysicalDeviceDescriptorIndexingFeatures indexFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT, nullptr };
+		VkPhysicalDeviceFeatures2 deviceFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, &indexFeatures };
+
+		vkGetPhysicalDeviceFeatures2(device, &deviceFeatures);
+
+		// Check support for bindless textures
+		bool bindlessSupport = indexFeatures.descriptorBindingPartiallyBound && indexFeatures.runtimeDescriptorArray;
+
+		return indices.IsComplete() && extensionsSupported && swapChainAdequate && FeaturesSupported(VulkanContext::s_RequestedDeviceFeatures, supportedFeatures) && bindlessSupport;
 	}
 
 	bool VulkanPhysicalDevice::ExtensionsSupported(const VkPhysicalDevice device)
