@@ -3,6 +3,8 @@
 #include <Horizon/Core/Core.hpp>
 #include <Horizon/Core/Layer.hpp>
 
+#include <Horizon/Renderer/Image.hpp>
+
 #include "Core/Camera.hpp"
 
 using namespace Hz;
@@ -20,5 +22,8 @@ public:
 	void OnEvent(Event& e) override;
 
 private:
+	Ref<Image> m_Texture0 = nullptr;
+	Ref<Image> m_Texture1 = nullptr;
+
 	Ref<Camera> m_Camera = nullptr;
 };

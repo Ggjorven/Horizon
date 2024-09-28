@@ -3,6 +3,8 @@
 
 #include "Horizon/IO/Logging.hpp"
 
+#include "Horizon/Utils/Profiler.hpp"
+
 #include "Horizon/RenderSpace/2D/Resources2D.hpp"
 #include "Horizon/RenderSpace/2D/BatchRenderer2D.hpp"
 
@@ -23,11 +25,13 @@ namespace Hz
 
 	void Renderer2D::Resize(uint32_t width, uint32_t height)
 	{
+		HZ_PROFILE_SCOPE("Renderer2D::Resize");
 		BatchRenderer2D::Resize(width, height);
 	}
 
 	void Renderer2D::BeginBatch(const glm::mat4& projection, const glm::mat4& view)
 	{
+		HZ_PROFILE_SCOPE("Renderer2D::BeginBatch");
 		auto& resources = Resources2D::Get();
 
 		// Set buffer data
@@ -39,6 +43,7 @@ namespace Hz
 
 	void Renderer2D::EndBatch()
 	{
+		HZ_PROFILE_SCOPE("Renderer2D::EndBatch");
 		BatchRenderer2D::End();
 		BatchRenderer2D::Flush();
 	}

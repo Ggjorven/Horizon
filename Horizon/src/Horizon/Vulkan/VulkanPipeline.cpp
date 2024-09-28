@@ -179,7 +179,7 @@ namespace Hz
 
 		VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
 		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		colorBlendAttachment.blendEnable = m_Specification.Blending; // Note:  Set true for transparancy
+		colorBlendAttachment.blendEnable = m_Specification.Blending; // Note: Set true for transparancy
 
 		VkPipelineColorBlendStateCreateInfo colorBlending = {};
 		colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -187,10 +187,10 @@ namespace Hz
 		colorBlending.logicOp = VK_LOGIC_OP_COPY;
 		colorBlending.attachmentCount = 1;
 		colorBlending.pAttachments = &colorBlendAttachment;
-		colorBlending.blendConstants[0] = 0.0f;
-		colorBlending.blendConstants[1] = 0.0f;
-		colorBlending.blendConstants[2] = 0.0f;
-		colorBlending.blendConstants[3] = 0.0f;
+		colorBlending.blendConstants[0] = 1.0f;
+		colorBlending.blendConstants[1] = 1.0f;
+		colorBlending.blendConstants[2] = 1.0f;
+		colorBlending.blendConstants[3] = 1.0f;
 
 		VkPipelineDepthStencilStateCreateInfo depthStencil = {};
 		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -258,7 +258,7 @@ namespace Hz
 		// Create the actual graphics pipeline (where we actually use the shaders and other info)
 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        if (renderpass == nullptr) pipelineInfo.pNext = &dynamicRenderInfo;
+        pipelineInfo.pNext = (renderpass == nullptr ? &dynamicRenderInfo : nullptr);
 		pipelineInfo.stageCount = (uint32_t)shaderStages.size();
 		pipelineInfo.pStages = shaderStages.data();
 		pipelineInfo.pVertexInputState = &vertexInputInfo;

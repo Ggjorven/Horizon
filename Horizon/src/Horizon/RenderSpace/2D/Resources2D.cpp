@@ -89,8 +89,8 @@ namespace Hz
 
 		Batch.ShaderObject = Shader::Create({
 			.ShaderCode = {
-				{ ShaderStage::Vertex, ShaderCompiler::Compile(ShaderStage::Vertex, Shader::ReadGLSL(Application::Get().GetWorkingDir() / "Sandbox/Shaders/shader.vert.glsl")) },
-				{ ShaderStage::Fragment, ShaderCompiler::Compile(ShaderStage::Fragment, Shader::ReadGLSL(Application::Get().GetWorkingDir() / "Sandbox/Shaders/shader.frag.glsl")) }
+				{ ShaderStage::Vertex, ShaderCompiler::Compile(ShaderStage::Vertex, Shader::ReadGLSL(Application::Get().GetWorkingDir() / "Sandbox/Resources/Shaders/shader.vert.glsl")) },
+				{ ShaderStage::Fragment, ShaderCompiler::Compile(ShaderStage::Fragment, Shader::ReadGLSL(Application::Get().GetWorkingDir() / "Sandbox/Resources/Shaders/shader.frag.glsl")) }
 			}
 		});
 
@@ -106,7 +106,7 @@ namespace Hz
 			.Bufferlayout = BatchVertex2D::GetLayout(),
 			.Polygonmode = PolygonMode::Fill,
 			.Cullingmode = CullingMode::None,
-			// .Blending = true
+			//.Blending = true
 		}, Batch.DescriptorSetsObject, Batch.ShaderObject, Batch.RenderpassObject);
 
 		Batch.VertexBufferObject = VertexBuffer::Create({ .Usage = BufferMemoryUsage::CPUToGPU }, nullptr, sizeof(BatchVertex2D) * BatchRenderer2D::MaxQuads * 4);

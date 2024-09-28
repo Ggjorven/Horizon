@@ -3,6 +3,8 @@
 
 #include "Horizon/IO/Logging.hpp"
 
+#include "Horizon/Utils/Profiler.hpp"
+
 #include "Horizon/Renderer/Renderer.hpp"
 #include "Horizon/Renderer/GraphicsContext.hpp"
 #include "Horizon/Renderer/Pipeline.hpp"
@@ -26,6 +28,7 @@ namespace Hz
 
     void VulkanDescriptorSet::Bind(Ref<Pipeline> pipeline, Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint, const std::vector<uint32_t>& dynamicOffsets)
     {
+        HZ_PROFILE_SCOPE("VkDescriptorSet::Bind");
 		auto vkPipelineLayout = pipeline.As<VulkanPipeline>()->GetVkPipelineLayout();
 		auto vkCmdBuf = commandBuffer.As<VulkanCommandBuffer>()->GetVkCommandBuffer(Renderer::GetCurrentFrame());
 
@@ -34,11 +37,14 @@ namespace Hz
 
     void VulkanDescriptorSet::Upload(const std::vector<Uploadable>& elements)
     {
+        HZ_PROFILE_SCOPE("VkDescriptorSet::Upload");
         std::vector<VkWriteDescriptorSet> writes;
         writes.reserve(elements.size());
 
-        std::vector<VkDescriptorImageInfo> imageInfos = { };
-        std::vector<VkDescriptorBufferInfo> bufferInfos = { };
+        std::vector<VkDescriptorImageInfo> imageInfos;
+        imageInfos.reserve(elements.size());
+        std::vector<VkDescriptorBufferInfo> bufferInfos;
+        bufferInfos.reserve(elements.size());
 
         uint32_t frame = Renderer::GetCurrentFrame();
 
@@ -54,18 +60,24 @@ namespace Hz
             }, uploadable);
         }
 
-        vkUpdateDescriptorSets(VulkanContext::GetDevice()->GetVkDevice(), static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
+        {
+            HZ_PROFILE_SCOPE("VkDescriptorSet::Upload::UpdateCmd");
+            vkUpdateDescriptorSets(VulkanContext::GetDevice()->GetVkDevice(), static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
+        }
     }
 
     void VulkanDescriptorSet::UploadAll(const std::vector<Uploadable>& elements)
     {
+        HZ_PROFILE_SCOPE("VkDescriptorSet::UploadAll");
         const uint32_t framesInFlight = static_cast<uint32_t>(Renderer::GetSpecification().Buffers);
 
         std::vector<std::vector<VkWriteDescriptorSet>> writes((size_t)framesInFlight);
         for (auto& write : writes) write.reserve(elements.size());
 
         std::vector<std::vector<VkDescriptorImageInfo>> imageInfos((size_t)framesInFlight);
+        for (auto& imageInfo : imageInfos) imageInfo.reserve(elements.size());
         std::vector<std::vector<VkDescriptorBufferInfo>> bufferInfos((size_t)framesInFlight);
+        for (auto& bufferInfo : bufferInfos) bufferInfo.reserve(elements.size());
 
         for (const auto& [uploadable, descriptor, arrayIndex] : elements)
         {
@@ -91,8 +103,11 @@ namespace Hz
             }, uploadable);
         }
 
-        for (auto& write : writes)
-            vkUpdateDescriptorSets(VulkanContext::GetDevice()->GetVkDevice(), static_cast<uint32_t>(write.size()), write.data(), 0, nullptr);
+        {
+            HZ_PROFILE_SCOPE("VkDescriptorSet::UploadAll::UpdateCmds");
+            for (auto& write : writes)
+                vkUpdateDescriptorSets(VulkanContext::GetDevice()->GetVkDevice(), static_cast<uint32_t>(write.size()), write.data(), 0, nullptr);
+        }
     }
 
     void VulkanDescriptorSet::QueueUpload(const std::vector<Uploadable> &elements)
@@ -245,9 +260,9 @@ namespace Hz
         layoutInfo.flags = (bindless ? VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT : 0); // For bindless support
 
         // Add custom bindingFlags when there is a bindless descriptor found
+        VkDescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo = {};
         if (bindless)
         {
-            VkDescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo = {};
             extendedInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
             extendedInfo.bindingCount = (uint32_t)layouts.size();
             extendedInfo.pBindingFlags = bindingFlags.data();
@@ -315,9 +330,9 @@ namespace Hz
         }
 
         // Set max bindings when there is a bindless descriptor found
+        VkDescriptorSetVariableDescriptorCountAllocateInfoEXT countInfo = {};
         if (bindless)
         {
-            VkDescriptorSetVariableDescriptorCountAllocateInfoEXT countInfo = {};
             countInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT;
             countInfo.descriptorSetCount = framesInFlight * amount;
             countInfo.pDescriptorCounts = maxBindings.data();

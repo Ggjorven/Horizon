@@ -3,6 +3,8 @@
 
 #include "Horizon/IO/Logging.hpp"
 
+#include "Horizon/Utils/Profiler.hpp"
+
 #include <Pulse/Enum/Enum.hpp>
 
 namespace Hz
@@ -10,12 +12,14 @@ namespace Hz
 
     void VulkanTaskManager::ResetFences()
     {
+        HZ_PROFILE_SCOPE("VkTaskManager::ResetFences");
         uint32_t frame = Renderer::GetCurrentFrame();
         m_Fences[frame].clear();
     }
 
     void VulkanTaskManager::ResetSemaphores()
     {
+        HZ_PROFILE_SCOPE("VkTaskManager::ResetSemaphores");
         uint32_t frame = Renderer::GetCurrentFrame();
         m_Semaphores[frame].first.clear();
         m_Semaphores[frame].second.clear();
@@ -23,6 +27,7 @@ namespace Hz
 
     void VulkanTaskManager::Add(Ref<VulkanCommandBuffer> cmdBuf, ExecutionPolicy policy)
     {
+        HZ_PROFILE_SCOPE("VkTaskManager::Add(CommandBuffer)");
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
         uint32_t frame = Renderer::GetCurrentFrame();
@@ -36,6 +41,7 @@ namespace Hz
 
     void VulkanTaskManager::Add(VkSemaphore semaphore)
     {
+        HZ_PROFILE_SCOPE("VkTaskManager::Add(Semaphore)");
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
         uint32_t frame = Renderer::GetCurrentFrame();
@@ -49,6 +55,7 @@ namespace Hz
 
     void VulkanTaskManager::Remove(VkSemaphore semaphore, uint32_t frame)
     {
+        HZ_PROFILE_SCOPE("VkTaskManager::Remove(Semaphore)");
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
         // Check the InOrder list
@@ -70,6 +77,7 @@ namespace Hz
 
     void VulkanTaskManager::RemoveFromAll(VkSemaphore semaphore)
     {
+        HZ_PROFILE_SCOPE("VkTaskManager::RemoveFromAll(Semaphore)");
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
         for (uint32_t frame = 0; frame < (uint32_t)Renderer::GetSpecification().Buffers; frame++)
@@ -83,6 +91,7 @@ namespace Hz
 
     void VulkanTaskManager::Remove(VkFence fence, uint32_t frame)
     {
+        HZ_PROFILE_SCOPE("VkTaskManager::Remove(Fence)");
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
         auto it = std::find(m_Fences[frame].begin(), m_Fences[frame].end(), fence);
@@ -95,6 +104,7 @@ namespace Hz
 
     void VulkanTaskManager::RemoveFromAll(VkFence fence)
     {
+        HZ_PROFILE_SCOPE("VkTaskManager::RemoveFromAll(Fence)");
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
         for (uint32_t frame = 0; frame < (uint32_t)Renderer::GetSpecification().Buffers; frame++)
@@ -103,6 +113,7 @@ namespace Hz
 
     VkSemaphore VulkanTaskManager::GetNext()
     {
+        HZ_PROFILE_SCOPE("VkTaskManager::GetNext");
         std::scoped_lock<std::mutex> lock(m_ThreadSafety);
 
         uint32_t frame = Renderer::GetCurrentFrame();

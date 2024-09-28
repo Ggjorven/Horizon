@@ -29,6 +29,7 @@ namespace Hz
 		m_Extensions.OnDestroyBegin();
 
 		m_AppLayer->OnDestroy();
+		m_AppLayer.Reset();
 
 		// This also destroys the renderer
 		m_Window.Reset();

@@ -3,6 +3,8 @@
 
 #include "Horizon/IO/Logging.hpp"
 
+#include "Horizon/Utils/Profiler.hpp"
+
 #include "Horizon/Renderer/Renderer.hpp"
 #include "Horizon/Renderer/GraphicsContext.hpp"
 
@@ -34,6 +36,7 @@ namespace Hz
 
 	void BatchRenderer2D::Resize(uint32_t width, uint32_t height)
 	{
+		HZ_PROFILE_SCOPE("BatchRenderer2D::Resize");
 		auto& resources = Resources2D::Get().Batch;
 
 		resources.RenderpassObject->Resize(width, height);
@@ -41,6 +44,7 @@ namespace Hz
 
 	void BatchRenderer2D::Begin()
 	{
+		HZ_PROFILE_SCOPE("BatchRenderer2D::Begin");
 		auto& resources = Resources2D::Get().Batch;
 
 		resources.CPUBuffer.clear();
@@ -54,32 +58,37 @@ namespace Hz
 
 	void BatchRenderer2D::End()
 	{
+		HZ_PROFILE_SCOPE("BatchRenderer2D::End");
 		auto& resources = Resources2D::Get().Batch;
 
+		std::vector<Uploadable> uploadQueue;
+		uploadQueue.reserve(resources.TextureIndices.size() + 1); // + 1 for the Camera Buffer.
 		{
-			std::vector<Uploadable> uploadQueue;
-			uploadQueue.reserve(resources.TextureIndices.size() + 1); // + 1 for the Camera Buffer.
-
+			HZ_PROFILE_SCOPE("BatchRenderer2D::End::FormUploadQueue");
 			uploadQueue.push_back({ Resources2D::Get().Camera.Buffer, resources.DescriptorSetsObject->GetLayout(0).GetDescriptorByName("u_Camera") });
 
 			// Upload all images
 			const auto& descriptor = resources.DescriptorSetsObject->GetLayout(0).GetDescriptorByName("u_Textures");
 			for (const auto& [image, textureID] : resources.TextureIndices)
-			{
 				uploadQueue.push_back({ Ref(image), descriptor, textureID });
-			}
-
-			// Actual upload command
+		}
+		// Actual upload command
+		{
+			HZ_PROFILE_SCOPE("BatchRenderer2D::End::ExecuteUploadQueue");
 			resources.DescriptorSetsObject->GetSets(0)[0]->Upload(uploadQueue);
 		}
 
 		// Only draw if there's something TO draw
 		if (resources.CPUBuffer.size() > 0)
+		{
+			HZ_PROFILE_SCOPE("BatchRenderer2D::End::UploadVertexData");
 			resources.VertexBufferObject->SetData((void*)resources.CPUBuffer.data(), (resources.CPUBuffer.size() * sizeof(BatchVertex2D)), 0);
+		}
 	}
 
 	void BatchRenderer2D::Flush()
 	{
+		HZ_PROFILE_SCOPE("BatchRenderer2D::Flush");
 		auto& resources = Resources2D::Get().Batch;
 
 		// Start rendering
@@ -109,6 +118,7 @@ namespace Hz
 
 	void BatchRenderer2D::AddQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour, Ref<Image> texture)
 	{
+		HZ_PROFILE_SCOPE("BatchRenderer2D::AddQuad");
 		constexpr const glm::vec2 uv0(1.0f, 0.0f);
 		constexpr const glm::vec2 uv1(0.0f, 0.0f);
 		constexpr const glm::vec2 uv2(0.0f, 1.0f);

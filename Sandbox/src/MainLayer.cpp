@@ -5,7 +5,7 @@
 #include <Horizon/Utils/Profiler.hpp>
 
 #include <Horizon/RenderSpace/2D/Renderer2D.hpp>
-#include <Horizon/RenderSpace/2D/BatchRenderer2D.hpp> // TODO: Remove
+#include <Horizon/RenderSpace/2D/BatchRenderer2D.hpp>
 
 #include <Pulse/Utils/Random.hpp>
 
@@ -30,6 +30,9 @@ void MainLayer::OnInit()
 {
 	Renderer2D::Init();
 
+	m_Texture0 = Image::Create({ Application::Get().GetWorkingDir() / "Sandbox/Resources/Images/texture0.tga" }, {});
+	m_Texture1 = Image::Create({ Application::Get().GetWorkingDir() / "Sandbox/Resources/Images/texture1.png" }, {});
+
 	m_Camera = Ref<Camera>::Create();
 }
 
@@ -40,6 +43,7 @@ void MainLayer::OnDestroy()
 
 void MainLayer::OnUpdate(float deltaTime)
 {
+	HZ_PROFILE_SCOPE("MainLayer::OnUpdate");
 	constexpr float s_Threshold = 0.3f;
 	static float s_Timer = 0.0f;
 	static uint32_t s_FPS = 0u;
@@ -60,6 +64,7 @@ void MainLayer::OnUpdate(float deltaTime)
 
 void MainLayer::OnRender()
 {
+	HZ_PROFILE_SCOPE("MainLayer::OnRender");
 	Renderer2D::BeginBatch(m_Camera->GetProjectionMatrix(), m_Camera->GetViewMatrix());
 
 	auto& window = Window::Get();
@@ -68,7 +73,18 @@ void MainLayer::OnRender()
 	static uint32_t seed = 0;
 	for (uint32_t i = 0; i < 10000; i++)
 	{
-		BatchRenderer2D::AddQuad({ (RandomFloat(seed) * 2.0f - 1.0f) * aspectRatio, RandomFloat(seed) * 2.0f - 1.0f, 0.0f }, { 0.05f, 0.05f }, { RandomFloat(seed), RandomFloat(seed), RandomFloat(seed), 1.0f });
+		if (i % 2 == 0)
+		{
+			BatchRenderer2D::AddQuad({ (RandomFloat(seed) * 2.0f - 1.0f) * aspectRatio, RandomFloat(seed) * 2.0f - 1.0f, 0.0f }, { 0.05f, 0.05f }, { RandomFloat(seed), RandomFloat(seed), RandomFloat(seed), 1.0f });
+		}
+		else if (i % 3 == 0)
+		{
+			BatchRenderer2D::AddQuad({ (RandomFloat(seed) * 2.0f - 1.0f) * aspectRatio, RandomFloat(seed) * 2.0f - 1.0f, 0.0f }, { 0.05f, 0.05f }, { RandomFloat(seed), RandomFloat(seed), RandomFloat(seed), 1.0f }, m_Texture0);
+		}
+		else
+		{
+			BatchRenderer2D::AddQuad({ (RandomFloat(seed) * 2.0f - 1.0f) * aspectRatio, RandomFloat(seed) * 2.0f - 1.0f, 0.0f }, { 0.05f, 0.05f }, { 1.0f, 1.0f, 1.0f, 1.0f }, m_Texture1);
+		}
 	}
 
 	Renderer2D::EndBatch();
@@ -76,6 +92,8 @@ void MainLayer::OnRender()
 
 void MainLayer::OnUIRender()
 {
+	HZ_PROFILE_SCOPE("MainLayer::OnUIRender");
+
 	ImGui::Begin("UI Window");
 
 	ImGui::End();

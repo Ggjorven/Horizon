@@ -4,6 +4,8 @@
 #include "Horizon/IO/Logging.hpp"
 #include "Horizon/Core/Window.hpp"
 
+#include "Horizon/Utils/Profiler.hpp"
+
 #include "Horizon/Renderer/Renderer.hpp"
 #include "Horizon/Renderer/GraphicsContext.hpp"
 #include "Horizon/Renderer/Image.hpp"
@@ -41,6 +43,7 @@ namespace Hz
 
     void VulkanRenderer::Recreate(uint32_t width, uint32_t height, const bool vsync)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::Recreate");
         VulkanContext::GetSwapChain()->Init(width, height, vsync, (uint8_t)Renderer::GetSpecification().Buffers);
         s_Data->Specification.VSync = vsync;
     }
@@ -50,6 +53,7 @@ namespace Hz
         if (Window::Get().IsMinimized())
             return;
 
+        HZ_PROFILE_SCOPE("VkRenderer::BeginFrame");
         Renderer::FreeObjects();
 
         auto swapChain = VulkanContext::GetSwapChain();
@@ -76,12 +80,16 @@ namespace Hz
     {
         if (Window::Get().IsMinimized())
             return;
+
+        HZ_PROFILE_SCOPE("VkRenderer::EndFrame");
     }
 
     void VulkanRenderer::Present()
     {
         if (Window::Get().IsMinimized())
             return;
+
+        HZ_PROFILE_SCOPE("VkRenderer::Present");
 
         auto& semaphores = s_Data->Manager.GetSemaphores();
         auto swapChain = VulkanContext::GetSwapChain();
@@ -101,11 +109,15 @@ namespace Hz
             #if defined(HZ_PLATFORM_WINDOWS)
 			if constexpr (VulkanContext::s_Validation)
 			{
+                HZ_PROFILE_SCOPE("VkRenderer::WaitIdle");
 				vkQueueWaitIdle(VulkanContext::GetDevice()->GetGraphicsQueue());
 			}
             #endif
 
-			result = vkQueuePresentKHR(VulkanContext::GetDevice()->GetPresentQueue(), &presentInfo);
+            {
+                HZ_PROFILE_SCOPE("VkRenderer::QueuePresent");
+			    result = vkQueuePresentKHR(VulkanContext::GetDevice()->GetPresentQueue(), &presentInfo);
+            }
 		}
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
@@ -124,6 +136,7 @@ namespace Hz
 
     void VulkanRenderer::BeginDynamic(Ref<CommandBuffer> cmdBuf, DynamicRenderState&& state)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::BeginDynamic");
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
         VkRenderingAttachmentInfo colourAttachment = {};
@@ -172,6 +185,7 @@ namespace Hz
 
     void VulkanRenderer::EndDynamic(Ref<CommandBuffer> cmdBuf)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::EndDynamic");
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
         vkCmdEndRendering(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()));
@@ -179,6 +193,7 @@ namespace Hz
 
     void VulkanRenderer::SetViewportAndScissor(Ref<CommandBuffer> cmdBuf, uint32_t width, uint32_t height)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::SetViewportAndScissor");
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
         VkViewport viewport = {};
@@ -198,6 +213,7 @@ namespace Hz
 
     void VulkanRenderer::Begin(Ref<CommandBuffer> cmdBuf)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::Begin(CommandBuffer)");
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
 		uint32_t currentFrame = GetCurrentFrame();
@@ -214,6 +230,7 @@ namespace Hz
 
     void VulkanRenderer::Begin(Ref<Renderpass> renderpass)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::Begin(Renderpass)");
         Ref<CommandBuffer> cmdBuf = renderpass->GetCommandBuffer();
         Ref<VulkanRenderpass> vkRenderpass = renderpass.As<VulkanRenderpass>();
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
@@ -252,6 +269,7 @@ namespace Hz
 
     void VulkanRenderer::End(Ref<CommandBuffer> cmdBuf)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::End(CommandBuffer)");
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
         VK_CHECK_RESULT(vkEndCommandBuffer(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()]));
@@ -259,6 +277,7 @@ namespace Hz
 
     void VulkanRenderer::End(Ref<Renderpass> renderpass)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::End(Renderpass)");
         Ref<VulkanCommandBuffer> vkCmdBuf = renderpass->GetCommandBuffer().As<VulkanCommandBuffer>();
         vkCmdEndRenderPass(vkCmdBuf->m_CommandBuffers[GetCurrentFrame()]);
 
@@ -267,6 +286,7 @@ namespace Hz
 
     void VulkanRenderer::Submit(Ref<CommandBuffer> cmdBuf, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::Submit(CommandBuffer)");
         #if defined(HZ_CONFIG_DEBUG)
             VerifyExectionPolicy(policy);
         #endif
@@ -339,11 +359,13 @@ namespace Hz
 
     void VulkanRenderer::Submit(Ref<Renderpass> renderpass, ExecutionPolicy policy, Queue queue, PipelineStage waitStage, const std::vector<Ref<CommandBuffer>>& waitOn)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::Submit(Renderpass)");
         Submit(renderpass->GetCommandBuffer(), policy, queue, waitStage, waitOn);
     }
 
     void VulkanRenderer::Draw(Ref<CommandBuffer> cmdBuf, uint32_t vertexCount, uint32_t instanceCount)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::Draw");
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
 		vkCmdDraw(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), vertexCount, instanceCount, 0, 0);
@@ -351,6 +373,7 @@ namespace Hz
 
     void VulkanRenderer::DrawIndexed(Ref<CommandBuffer> cmdBuf, uint32_t indexCount, uint32_t instanceCount)
     {
+        HZ_PROFILE_SCOPE("VkRenderer::DrawIndexed");
         Ref<VulkanCommandBuffer> vkCmdBuf = cmdBuf.As<VulkanCommandBuffer>();
 
         vkCmdDrawIndexed(vkCmdBuf->GetVkCommandBuffer(GetCurrentFrame()), indexCount, instanceCount, 0, 0, 0);
@@ -369,6 +392,7 @@ namespace Hz
 
     void VulkanRenderer::FreeObjects()
     {
+        HZ_PROFILE_SCOPE("VkRenderer::FreeObjects");
         if (s_FreeQueue.empty()) return;
 
         VulkanContext::GetDevice()->Wait(); // Wait till idle
@@ -390,6 +414,7 @@ namespace Hz
 
     uint32_t VulkanRenderer::GetAcquiredImage()
     {
+        HZ_PROFILE_SCOPE("VkRenderer::GetAcquiredImage");
         return VulkanContext::GetSwapChain()->GetAquiredImage();
     }
 

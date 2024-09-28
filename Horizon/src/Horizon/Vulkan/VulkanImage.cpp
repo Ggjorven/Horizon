@@ -334,6 +334,8 @@ namespace Hz
 	void VulkanImage::CreateImage(const std::filesystem::path& path)
 	{
 		int width, height, texChannels;
+
+		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* pixels = stbi_load(path.string().c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
 
         HZ_ASSERT((pixels != nullptr), "Failed to load image from '{0}'", path.string());
@@ -431,6 +433,11 @@ namespace Hz
 		vkCmdPipelineBarrier(command.GetVkCommandBuffer(), VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
 		command.EndAndSubmit();
+
+		// Generating the mipmaps sets the image layout to 
+		// ShaderRead, but ofcourse doesn't automatically set the 
+		// specification layout. So we do it here manually.
+		m_Specification.Layout = ImageLayout::ShaderRead;
 	}
 
     void VulkanImage::Destroy()
