@@ -15,6 +15,12 @@ namespace Hz
     ///////////////////////////////////////////////////////////
 	// Specifications
     ///////////////////////////////////////////////////////////
+	enum class VertexInputRate : uint8_t
+	{
+		Vertex = 0,
+		Instance = 1 // GLSL: gl_InstanceID
+	};
+
 	enum class DataType : uint8_t
 	{
 		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
@@ -42,10 +48,11 @@ namespace Hz
 	{
 	public:
 		BufferLayout() = default;
-		BufferLayout(const std::initializer_list<BufferElement>& elements);
+		BufferLayout(const std::initializer_list<BufferElement>& elements, VertexInputRate vertexInputRate = VertexInputRate::Vertex);
 		~BufferLayout() = default;
 
 		inline size_t GetStride() const { return m_Stride; }
+		inline VertexInputRate GetVertexInputRate() const { return m_VertexInputRate; }
 		inline const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
 		inline std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
@@ -59,6 +66,8 @@ namespace Hz
 	private:
 		std::vector<BufferElement> m_Elements = { };
 		size_t m_Stride = 0;
+	
+		VertexInputRate m_VertexInputRate = VertexInputRate::Vertex;
 	};
 
     enum class BufferMemoryUsage

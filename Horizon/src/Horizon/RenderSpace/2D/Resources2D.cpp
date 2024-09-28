@@ -3,6 +3,8 @@
 
 #include "Horizon/IO/Logging.hpp"
 
+#include "Horizon/Core/Application.hpp"
+
 #include "Horizon/Renderer/GraphicsContext.hpp"
 
 namespace Hz
@@ -18,6 +20,8 @@ namespace Hz
 	void Resources2D::Init()
 	{
 		s_Instance = Unique<Resources2D>::Create();
+
+		s_Instance->InitMain();
 		s_Instance->InitCamera();
 		s_Instance->InitBatch();
 	}
@@ -26,6 +30,8 @@ namespace Hz
 	{
 		s_Instance->DestroyBatch();
 		s_Instance->DestroyCamera();
+		s_Instance->DestroyMain();
+
 		s_Instance.Reset();
 	}
 
@@ -37,6 +43,11 @@ namespace Hz
 	//////////////////////////////////////////////////////////
 	// Methods
 	//////////////////////////////////////////////////////////
+	void Resources2D::InitMain()
+	{
+		//Main.WhiteTexture
+	}
+
 	void Resources2D::InitCamera()
 	{
 		Camera.Buffer = UniformBuffer::Create({ .Usage = BufferMemoryUsage::CPUToGPU }, (sizeof(glm::mat4) * 2)); // For View & Projection
@@ -75,8 +86,8 @@ namespace Hz
 
 		Batch.ShaderObject = Shader::Create({
 			.ShaderCode = {
-				{ ShaderStage::Vertex, ShaderCompiler::Compile(ShaderStage::Vertex, Shader::ReadGLSL("Sandbox/Shaders/shader.vert.glsl")) },
-				{ ShaderStage::Fragment, ShaderCompiler::Compile(ShaderStage::Fragment, Shader::ReadGLSL("Sandbox/Shaders/shader.frag.glsl")) }
+				{ ShaderStage::Vertex, ShaderCompiler::Compile(ShaderStage::Vertex, Shader::ReadGLSL(Application::Get().GetWorkingDir() / "Sandbox/Shaders/shader.vert.glsl")) },
+				{ ShaderStage::Fragment, ShaderCompiler::Compile(ShaderStage::Fragment, Shader::ReadGLSL(Application::Get().GetWorkingDir() / "Sandbox/Shaders/shader.frag.glsl")) }
 			}
 		});
 
@@ -99,6 +110,10 @@ namespace Hz
 
 		// Reserve enough space for cpu buffer
 		Batch.CPUBuffer.reserve(static_cast<size_t>(BatchRenderer2D::MaxQuads) * 4);
+	}
+
+	void Resources2D::DestroyMain()
+	{
 	}
 
 	void Resources2D::DestroyCamera()

@@ -11,9 +11,10 @@
 
 #include <Pulse/Types/TypeUtils.hpp>
 
+#include <queue>
 #include <vector>
 #include <memory>
-#include <queue>
+#include <filesystem>
 
 namespace Hz
 {
@@ -43,6 +44,9 @@ namespace Hz
 
 		inline void Close() { m_Running = false; }
 		inline bool IsMinimized() const { return m_Minimized; }
+
+		const std::filesystem::path GetExeDir() const;
+		const std::filesystem::path GetWorkingDir() const;
 
 		inline Window& GetWindow() { return *m_Window; }
 		inline const ApplicationSpecification& GetSpecification() const { return m_AppInfo; }

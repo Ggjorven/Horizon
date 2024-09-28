@@ -67,8 +67,8 @@ namespace Hz
 		return 0;
 	}
 
-	BufferLayout::BufferLayout(const std::initializer_list<BufferElement>& elements)
-		: m_Elements(elements)
+	BufferLayout::BufferLayout(const std::initializer_list<BufferElement>& elements, VertexInputRate vertexInputRate)
+		: m_Elements(elements), m_VertexInputRate(vertexInputRate)
 	{
 		CalculateOffsetsAndStride();
 	}

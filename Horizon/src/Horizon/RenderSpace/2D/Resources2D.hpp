@@ -34,6 +34,11 @@ namespace Hz
 	public:
 		struct
 		{
+			Ref<Image> WhiteTexture;
+		} Main;
+
+		struct
+		{
 			Ref<UniformBuffer> Buffer = nullptr;
 		} Camera;
 
@@ -58,9 +63,11 @@ namespace Hz
 	// Methods
 	///////////////////////////////////////////////////////////
 	private:
+		void InitMain();
 		void InitCamera();
 		void InitBatch();
 
+		void DestroyMain();
 		void DestroyCamera();
 		void DestroyBatch();
 	};

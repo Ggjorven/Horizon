@@ -43,15 +43,15 @@ namespace Hz
 		auto& resources = Resources2D::Get().Batch;
 
 		resources.CPUBuffer.clear();
-
-		resources.DescriptorSetsObject->GetSets(0)[0]->Upload({
-			{ Resources2D::Get().Camera.Buffer, resources.DescriptorSetsObject->GetLayout(0).GetDescriptorByName("u_Camera") }
-		});
 	}
 
 	void BatchRenderer2D::End()
 	{
 		auto& resources = Resources2D::Get().Batch;
+
+		resources.DescriptorSetsObject->GetSets(0)[0]->Upload({
+			{ Resources2D::Get().Camera.Buffer, resources.DescriptorSetsObject->GetLayout(0).GetDescriptorByName("u_Camera") }
+		});
 
 		// Only draw if there's something TO draw
 		if (resources.CPUBuffer.size() > 0)
@@ -84,6 +84,11 @@ namespace Hz
 
 	void BatchRenderer2D::AddQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour)
 	{
+		AddQuad(position, size, colour, nullptr);
+	}
+
+	void BatchRenderer2D::AddQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour, Ref<Image> texture)
+	{
 		constexpr const glm::vec2 uv0(1.0f, 0.0f);
 		constexpr const glm::vec2 uv1(0.0f, 0.0f);
 		constexpr const glm::vec2 uv2(0.0f, 1.0f);
@@ -101,6 +106,8 @@ namespace Hz
 		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y, position.z), uv1, colour);
 		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y + size.y, position.z), uv2, colour);
 		resources.CPUBuffer.emplace_back(glm::vec3(position.x, position.y + size.y, position.z), uv3, colour);
+
+		// TODO: Upload texture
 	}
 
 }

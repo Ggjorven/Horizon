@@ -674,7 +674,7 @@ namespace Hz
 		VkVertexInputBindingDescription description = {};
 		description.binding = 0;
 		description.stride = static_cast<uint32_t>(m_Specification.Bufferlayout.GetStride());
-		description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        description.inputRate = (VkVertexInputRate)m_Specification.Bufferlayout.GetVertexInputRate();
 
 		return description;
 	}

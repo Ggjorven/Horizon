@@ -101,6 +101,16 @@ namespace Hz
 		}
 	}
 
+	const std::filesystem::path Application::GetExeDir() const
+	{
+		return std::filesystem::path(__argv[0]).parent_path();
+	}
+
+	const std::filesystem::path Application::GetWorkingDir() const
+	{
+		return std::filesystem::current_path();
+	}
+
 	void Application::Init()
 	{
 		m_Extensions.OnInitBegin();

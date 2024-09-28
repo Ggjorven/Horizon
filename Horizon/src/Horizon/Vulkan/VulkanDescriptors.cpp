@@ -111,7 +111,7 @@ namespace Hz
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrite.dstSet = m_DescriptorSets[frame];
         descriptorWrite.dstBinding = descriptor.Binding;
-        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.dstArrayElement = image->GetBindlessID(); // Is 0 when not set.
         descriptorWrite.descriptorType = (VkDescriptorType)descriptor.Type;
         descriptorWrite.descriptorCount = descriptor.Count;
         descriptorWrite.pImageInfo = &imageInfo;

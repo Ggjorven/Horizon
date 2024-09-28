@@ -2,6 +2,7 @@
 
 #include "Horizon/Core/Core.hpp"
 
+#include "Horizon/Renderer/Image.hpp"
 #include "Horizon/Renderer/Buffers.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -38,6 +39,7 @@ namespace Hz
 		static void Flush();
 
 		static void AddQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour);
+		static void AddQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour, Ref<Image> texture);
 	};
 
 }
