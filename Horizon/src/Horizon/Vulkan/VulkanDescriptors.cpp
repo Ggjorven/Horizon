@@ -113,7 +113,7 @@ namespace Hz
         descriptorWrite.dstBinding = descriptor.Binding;
         descriptorWrite.dstArrayElement = arrayIndex; // Is 0 when not set.
         descriptorWrite.descriptorType = (VkDescriptorType)descriptor.Type;
-        descriptorWrite.descriptorCount = descriptor.Count;
+        descriptorWrite.descriptorCount = 1; // descriptor.Count;
         descriptorWrite.pImageInfo = &imageInfo;
     }
 
@@ -130,7 +130,7 @@ namespace Hz
         descriptorWrite.dstBinding = descriptor.Binding;
         descriptorWrite.dstArrayElement = arrayIndex; // Is 0 when not set.
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrite.descriptorCount = descriptor.Count;
+        descriptorWrite.descriptorCount = 1; // descriptor.Count;
         descriptorWrite.pBufferInfo = &bufferInfo;
     }
 
@@ -147,7 +147,7 @@ namespace Hz
         descriptorWrite.dstBinding = descriptor.Binding;
         descriptorWrite.dstArrayElement = arrayIndex; // Is 0 when not set.
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        descriptorWrite.descriptorCount = descriptor.Count;
+        descriptorWrite.descriptorCount = 1; // descriptor.Count;
         descriptorWrite.pBufferInfo = &bufferInfo;
     }
 
@@ -224,6 +224,8 @@ namespace Hz
         bool bindless = false;
 		for (const auto& [name, descriptor] : m_OriginalLayouts[setID].Descriptors)
 		{
+            HZ_VERIFY((descriptor.Count != 0), "Descriptor.Count == 0.");
+
 			VkDescriptorSetLayoutBinding& layoutBinding = layouts.emplace_back();
 			layoutBinding.binding = descriptor.Binding;
 			layoutBinding.descriptorType = (VkDescriptorType)descriptor.Type;

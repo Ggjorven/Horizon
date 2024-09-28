@@ -15,5 +15,5 @@ layout (set = 0, binding = 1) uniform sampler2D u_Textures[];
 
 void main()
 {
-    o_Colour = v_Colour;
+    o_Colour = v_Colour * texture(u_Textures[v_TextureID], v_TexCoord);
 }

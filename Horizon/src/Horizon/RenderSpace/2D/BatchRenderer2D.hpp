@@ -30,6 +30,7 @@ namespace Hz
 	public:
 		// Note: Subject to change at any time
 		constexpr static uint32_t MaxQuads = 10000u;
+		constexpr static uint32_t MaxTextures = 1024u;
 	public:
 		static void Init();
 		static void Destroy();

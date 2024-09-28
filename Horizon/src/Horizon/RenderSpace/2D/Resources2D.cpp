@@ -97,7 +97,7 @@ namespace Hz
 		Batch.DescriptorSetsObject = DescriptorSets::Create({
 			{ 1, { 0, {
 				{ DescriptorType::UniformBuffer, 0, "u_Camera", ShaderStage::Vertex },
-				{ DescriptorType::CombinedImageSampler, 1, "u_Textures", ShaderStage::Fragment, Descriptor::MaxBindlessResources, DescriptorBindingFlags::Default },
+				{ DescriptorType::CombinedImageSampler, 1, "u_Textures", ShaderStage::Fragment, BatchRenderer2D::MaxTextures, DescriptorBindingFlags::Default },
 			}}}
 		});
 

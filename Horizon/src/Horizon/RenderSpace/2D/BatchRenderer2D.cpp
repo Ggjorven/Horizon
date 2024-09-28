@@ -65,7 +65,9 @@ namespace Hz
 			// Upload all images
 			const auto& descriptor = resources.DescriptorSetsObject->GetLayout(0).GetDescriptorByName("u_Textures");
 			for (const auto& [image, textureID] : resources.TextureIndices)
+			{
 				uploadQueue.push_back({ Ref(image), descriptor, textureID });
+			}
 
 			// Actual upload command
 			resources.DescriptorSetsObject->GetSets(0)[0]->Upload(uploadQueue);

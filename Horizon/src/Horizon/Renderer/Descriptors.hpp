@@ -64,7 +64,7 @@ namespace Hz
         VariableDescriptorCountEXT = VariableDescriptorCount,
 
         // Note: Most often used for sampler2D[]
-        Default = UpdateAfterBind | VariableDescriptorCount | PartiallyBound
+        Default = UpdateAfterBind | PartiallyBound
     };
 
 	enum class ShaderStage : uint32_t
