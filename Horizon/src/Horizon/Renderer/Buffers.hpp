@@ -23,7 +23,7 @@ namespace Hz
 
 	enum class DataType : uint8_t
 	{
-		None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
+		None = 0, Float, Float2, Float3, Float4, Int, Int2, Int3, Int4, UInt, UInt2, UInt3, UInt4, Bool, Mat3, Mat4
 	};
 	size_t DataTypeSize(DataType type);
 

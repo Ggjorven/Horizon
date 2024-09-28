@@ -45,7 +45,10 @@ namespace Hz
 	//////////////////////////////////////////////////////////
 	void Resources2D::InitMain()
 	{
-		//Main.WhiteTexture
+		Main.WhiteTexture = Image::Create({ 1, 1, ImageUsageFlags::Colour | ImageUsageFlags::Sampled }, {});
+
+		uint32_t white = 0xFFFFFFFF;
+		Main.WhiteTexture->SetData(&white, sizeof(uint32_t));
 	}
 
 	void Resources2D::InitCamera()
@@ -93,7 +96,8 @@ namespace Hz
 
 		Batch.DescriptorSetsObject = DescriptorSets::Create({
 			{ 1, { 0, {
-				{ DescriptorType::UniformBuffer, 0, "u_Camera", ShaderStage::Vertex }
+				{ DescriptorType::UniformBuffer, 0, "u_Camera", ShaderStage::Vertex },
+				{ DescriptorType::CombinedImageSampler, 1, "u_Textures", ShaderStage::Fragment, Descriptor::MaxBindlessResources, DescriptorBindingFlags::Default },
 			}}}
 		});
 

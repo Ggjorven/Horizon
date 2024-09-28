@@ -26,14 +26,14 @@ namespace Hz
 		inline uint32_t GetSetID() const { return m_SetID; }
 		inline const VkDescriptorSet GetVkDescriptorSet(uint32_t index) const { return m_DescriptorSets[index]; }
 
-        void Upload(const std::initializer_list<Uploadable>& elements) override;
-        void UploadAll(const std::initializer_list<Uploadable>& elements) override;
-        void QueueUpload(const std::initializer_list<Uploadable>& elements) override;
+        void Upload(const std::vector<Uploadable>& elements) override;
+        void UploadAll(const std::vector<Uploadable>& elements) override;
+        void QueueUpload(const std::vector<Uploadable>& elements) override;
 
     private:
-        void UploadImage(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorImageInfo>& imageInfos, Ref<VulkanImage> image, Descriptor descriptor, uint32_t frame);
-        void UploadUniformBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<VulkanUniformBuffer> buffer, Descriptor descriptor, uint32_t frame);
-        void UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<VulkanStorageBuffer> buffer, Descriptor descriptor, uint32_t frame);
+        void UploadImage(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorImageInfo>& imageInfos, Ref<VulkanImage> image, Descriptor descriptor, uint32_t arrayIndex, uint32_t frame);
+        void UploadUniformBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<VulkanUniformBuffer> buffer, Descriptor descriptor, uint32_t arrayIndex, uint32_t frame);
+        void UploadStorageBuffer(std::vector<VkWriteDescriptorSet>& writes, std::vector<VkDescriptorBufferInfo>& bufferInfos, Ref<VulkanStorageBuffer> buffer, Descriptor descriptor, uint32_t arrayIndex, uint32_t frame);
 
 	private:
 		uint32_t m_SetID = 0;
@@ -55,9 +55,9 @@ namespace Hz
 		std::vector<Ref<DescriptorSet>>& GetSets(uint32_t setID) override;
 
 	private:
-		void CreateDescriptorSetLayout(uint32_t setID, DescriptorBindingFlags descriptorBindingFlags);
-		void CreateDescriptorPool(uint32_t setID, uint32_t amount, DescriptorBindingFlags descriptorBindingFlags);
-		void CreateDescriptorSets(uint32_t setID, uint32_t amount, DescriptorBindingFlags descriptorBindingFlags);
+		void CreateDescriptorSetLayout(uint32_t setID);
+		void CreateDescriptorPool(uint32_t setID, uint32_t amount);
+		void CreateDescriptorSets(uint32_t setID, uint32_t amount);
 		void ConvertToVulkanDescriptorSets(uint32_t setID, uint32_t amount, std::vector<VkDescriptorSet>& sets);
 
 	private:

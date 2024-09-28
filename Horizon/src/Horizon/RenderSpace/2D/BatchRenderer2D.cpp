@@ -18,6 +18,7 @@ namespace Hz
 			{ DataType::Float3, 0, "Position" },
 			{ DataType::Float2, 1, "UV" },
 			{ DataType::Float4, 2, "Colour" },
+			{ DataType::UInt, 3, "TextureID" },
 		};
 	}
 
@@ -43,15 +44,32 @@ namespace Hz
 		auto& resources = Resources2D::Get().Batch;
 
 		resources.CPUBuffer.clear();
+
+		resources.CurrentTextureIndex = 0;
+		resources.TextureIndices.clear(); // TODO: Maybe optimize
+
+		// Set the white texture to index 0
+		resources.TextureIndices[Resources2D::Get().Main.WhiteTexture.Raw()] = resources.CurrentTextureIndex++;
 	}
 
 	void BatchRenderer2D::End()
 	{
 		auto& resources = Resources2D::Get().Batch;
 
-		resources.DescriptorSetsObject->GetSets(0)[0]->Upload({
-			{ Resources2D::Get().Camera.Buffer, resources.DescriptorSetsObject->GetLayout(0).GetDescriptorByName("u_Camera") }
-		});
+		{
+			std::vector<Uploadable> uploadQueue;
+			uploadQueue.reserve(resources.TextureIndices.size() + 1); // + 1 for the Camera Buffer.
+
+			uploadQueue.push_back({ Resources2D::Get().Camera.Buffer, resources.DescriptorSetsObject->GetLayout(0).GetDescriptorByName("u_Camera") });
+
+			// Upload all images
+			const auto& descriptor = resources.DescriptorSetsObject->GetLayout(0).GetDescriptorByName("u_Textures");
+			for (const auto& [image, textureID] : resources.TextureIndices)
+				uploadQueue.push_back({ Ref(image), descriptor, textureID });
+
+			// Actual upload command
+			resources.DescriptorSetsObject->GetSets(0)[0]->Upload(uploadQueue);
+		}
 
 		// Only draw if there's something TO draw
 		if (resources.CPUBuffer.size() > 0)
@@ -102,12 +120,27 @@ namespace Hz
 			return;
 		}
 
-		resources.CPUBuffer.emplace_back(position, uv0, colour);
-		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y, position.z), uv1, colour);
-		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y + size.y, position.z), uv2, colour);
-		resources.CPUBuffer.emplace_back(glm::vec3(position.x, position.y + size.y, position.z), uv3, colour);
+		const uint32_t textureID = GetTextureID(texture);
 
-		// TODO: Upload texture
+		resources.CPUBuffer.emplace_back(position, uv0, colour, textureID);
+		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y, position.z), uv1, colour, textureID);
+		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y + size.y, position.z), uv2, colour, textureID);
+		resources.CPUBuffer.emplace_back(glm::vec3(position.x, position.y + size.y, position.z), uv3, colour, textureID);
+	}
+
+	uint32_t BatchRenderer2D::GetTextureID(Ref<Image> image)
+	{
+		auto& resources = Resources2D::Get().Batch;
+
+		// If nullptr return white texture
+		if (image == nullptr)
+			return resources.TextureIndices[Resources2D::Get().Main.WhiteTexture.Raw()];
+
+		// Check if texture is has not been cached
+		if (resources.TextureIndices.find(image.Raw()) == resources.TextureIndices.end())
+			resources.TextureIndices[image.Raw()] =  resources.CurrentTextureIndex++;
+
+		return resources.TextureIndices[image.Raw()];
 	}
 
 }

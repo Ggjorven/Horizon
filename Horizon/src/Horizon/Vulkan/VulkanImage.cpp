@@ -316,6 +316,8 @@ namespace Hz
 
     void VulkanImage::CreateImage(uint32_t width, uint32_t height)
 	{
+		ImageLayout finalLayout = m_Specification.Layout;
+
 		m_Specification.Width = width;
 		m_Specification.Height = height;
 		if (m_Specification.MipMaps)
@@ -326,7 +328,7 @@ namespace Hz
 		m_ImageView = VkUtils::Allocator::CreateImageView(m_Image, (VkFormat)m_Specification.Format, GetVulkanImageAspectFromImageUsage(m_Specification.Flags), m_Miplevels);
 		m_Sampler = VkUtils::Allocator::CreateSampler((VkFilter)m_SamplerSpecification.MagFilter, (VkFilter)m_SamplerSpecification.MinFilter, (VkSamplerAddressMode)m_SamplerSpecification.Address, (VkSamplerMipmapMode)m_SamplerSpecification.Mipmaps, m_Miplevels);
 
-		Transition(ImageLayout::Undefined, m_Specification.Layout);
+		Transition(m_Specification.Layout, finalLayout);
 	}
 
 	void VulkanImage::CreateImage(const std::filesystem::path& path)
@@ -355,6 +357,14 @@ namespace Hz
 
 	void VulkanImage::GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 	{
+		// Check if mipLevels == 1, aka no actual mipLevels
+		if (mipLevels == 1)
+		{
+			// We transition, since we expect the the ImageLayout to ShaderRead at the end of this call.
+			Transition(m_Specification.Layout, ImageLayout::ShaderRead);
+			return;
+		}
+
 		// Check if image format supports linear blitting
 		VkFormatProperties formatProperties;
 		vkGetPhysicalDeviceFormatProperties(VulkanContext::GetPhysicalDevice()->GetVkPhysicalDevice(), imageFormat, &formatProperties);

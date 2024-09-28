@@ -50,7 +50,7 @@ namespace Hz
         MutableValve = MutableEXT,
     };
 
-    enum class DescriptorBindingFlags : uint32_t
+    enum class DescriptorBindingFlags : uint8_t
     {
         None = 0,
         UpdateAfterBind = 1,
@@ -62,6 +62,9 @@ namespace Hz
         UpdateUnusedWhilePendingEXT = UpdateUnusedWhilePending,
         PartiallyBoundEXT = PartiallyBound,
         VariableDescriptorCountEXT = VariableDescriptorCount,
+
+        // Note: Most often used for sampler2D[]
+        Default = UpdateAfterBind | VariableDescriptorCount | PartiallyBound
     };
 
 	enum class ShaderStage : uint32_t
@@ -113,11 +116,12 @@ namespace Hz
 		std::string Name = "Empty";
 		uint32_t Binding = 0;
 		DescriptorType Type = DescriptorType::None;
-		uint32_t Count = 1;
 		ShaderStage Stage = ShaderStage::None;
+		uint32_t Count = 1;
+        DescriptorBindingFlags BindingFlags = DescriptorBindingFlags::None;
 
 		Descriptor() = default;
-		Descriptor(DescriptorType type, uint32_t binding, const std::string& name, ShaderStage stage, uint32_t count = 1);
+		Descriptor(DescriptorType type, uint32_t binding, const std::string& name, ShaderStage stage, uint32_t count = 1, DescriptorBindingFlags bindingFlags = DescriptorBindingFlags::None);
 		~Descriptor() = default;
 	};
 
@@ -127,13 +131,13 @@ namespace Hz
 		uint32_t SetID = 0;
 		std::unordered_map<std::string, Descriptor> Descriptors = { };
 
-        DescriptorBindingFlags BindingFlags = DescriptorBindingFlags::None;
-
 	public:
 		DescriptorSetLayout() = default;
-		DescriptorSetLayout(uint32_t setID, const std::vector<Descriptor>& descriptors, DescriptorBindingFlags bindingFlags = DescriptorBindingFlags::None);
-		DescriptorSetLayout(uint32_t setID, const std::initializer_list<Descriptor>& descriptors, DescriptorBindingFlags bindingFlags = DescriptorBindingFlags::None);
+		DescriptorSetLayout(uint32_t setID, const std::vector<Descriptor>& descriptors);
+		DescriptorSetLayout(uint32_t setID, const std::initializer_list<Descriptor>& descriptors);
 		~DescriptorSetLayout() = default;
+
+        const bool ContainsBindless() const;
 
 		Descriptor GetDescriptorByName(const std::string& name) const;
 		std::unordered_set<DescriptorType> UniqueTypes() const;
@@ -160,9 +164,10 @@ namespace Hz
     public:
         Type Value;
         Descriptor Element;
+        uint32_t ArrayIndex/* = 0*/;
 
     public:
-        Uploadable(Type value, Descriptor element);
+        Uploadable(Type value, Descriptor element, uint32_t arrayIndex = 0);
         ~Uploadable() = default;
     };
 
@@ -177,9 +182,13 @@ namespace Hz
 
 		virtual void Bind(Ref<Pipeline> pipeline, Ref<CommandBuffer> commandBuffer, PipelineBindPoint bindPoint = PipelineBindPoint::Graphics, const std::vector<uint32_t>& dynamicOffsets = { }) = 0;
 
-        virtual void Upload(const std::initializer_list<Uploadable>& elements) = 0; // Uploads to the current frame descriptorset.
-        virtual void UploadAll(const std::initializer_list<Uploadable>& elements) = 0; // Uploads to all frames in flight immediately.
-        virtual void QueueUpload(const std::initializer_list<Uploadable>& elements) = 0; // Queues the upload for all frames in flight.
+        virtual void Upload(const std::vector<Uploadable>& elements) = 0; // Uploads to the current frame descriptorset.
+        virtual void UploadAll(const std::vector<Uploadable>& elements) = 0; // Uploads to all frames in flight immediately.
+        virtual void QueueUpload(const std::vector<Uploadable>& elements) = 0; // Queues the upload for all frames in flight.
+
+        inline void Upload(const std::initializer_list<Uploadable>& elements) { Upload(std::vector(elements)); }
+        inline void UploadAll(const std::initializer_list<Uploadable>& elements) { UploadAll(std::vector(elements)); }
+        inline void QueueUpload(const std::initializer_list<Uploadable>& elements) { QueueUpload(std::vector(elements)); }
     };
 
 	class DescriptorSets : public RefCounted

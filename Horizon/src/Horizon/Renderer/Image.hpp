@@ -171,16 +171,9 @@ namespace Hz
 
         virtual void Transition(ImageLayout initial, ImageLayout final) = 0;
 
-		// Should only be used when using bindless, else you'll break logic.
-		inline void SetBindlessID(uint16_t id) { m_BindlessID = id; }
-		inline uint16_t GetBindlessID() const { return m_BindlessID; }
-
         virtual const ImageSpecification& GetSpecification() const = 0;
 
         static Ref<Image> Create(const ImageSpecification& specs, const SamplerSpecification& samplerSpecs = {});
-
-	protected:
-		uint16_t m_BindlessID = 0;
     };
 
 }

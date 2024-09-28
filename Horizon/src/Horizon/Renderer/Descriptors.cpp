@@ -15,22 +15,33 @@ namespace Hz
     ///////////////////////////////////////////////////////////
     // Specifications
     ///////////////////////////////////////////////////////////
-    Descriptor::Descriptor(DescriptorType type, uint32_t binding, const std::string& name, ShaderStage stage, uint32_t count)
-        : Type(type), Binding(binding), Name(name), Stage(stage), Count(count)
+    Descriptor::Descriptor(DescriptorType type, uint32_t binding, const std::string& name, ShaderStage stage, uint32_t count, DescriptorBindingFlags bindingFlags)
+        : Type(type), Binding(binding), Name(name), Stage(stage), Count(count), BindingFlags(bindingFlags)
     {
     }
 
-    DescriptorSetLayout::DescriptorSetLayout(uint32_t setID, const std::vector<Descriptor>& descriptors, DescriptorBindingFlags bindingFlags)
-        : SetID(setID), BindingFlags(bindingFlags)
-	{
+    DescriptorSetLayout::DescriptorSetLayout(uint32_t setID, const std::vector<Descriptor>& descriptors)
+        : SetID(setID)
+    {
 		for (auto& descriptor : descriptors)
 			Descriptors[descriptor.Name] = descriptor;
 	}
 
-    DescriptorSetLayout::DescriptorSetLayout(uint32_t setID, const std::initializer_list<Descriptor>& descriptors, DescriptorBindingFlags bindingFlags)
-        : DescriptorSetLayout(setID, std::vector(descriptors), bindingFlags)
+    DescriptorSetLayout::DescriptorSetLayout(uint32_t setID, const std::initializer_list<Descriptor>& descriptors)
+        : DescriptorSetLayout(setID, std::vector(descriptors))
 	{
 	}
+
+    const bool DescriptorSetLayout::ContainsBindless() const
+    {
+        for (const auto& [name, descriptor] : Descriptors)
+        {
+            if (descriptor.BindingFlags != DescriptorBindingFlags::None)
+                return true;
+        }
+
+        return false;
+    }
 
     Descriptor DescriptorSetLayout::GetDescriptorByName(const std::string& name) const
     {
@@ -72,8 +83,8 @@ namespace Hz
     {
     }
 
-    Uploadable::Uploadable(Type value, Descriptor element)
-        : Value(value), Element(element)
+    Uploadable::Uploadable(Type value, Descriptor element, uint32_t arrayIndex)
+        : Value(value), Element(element), ArrayIndex(arrayIndex)
     {
     }
 
@@ -83,7 +94,7 @@ namespace Hz
     Ref<DescriptorSets> DescriptorSets::Create(const std::initializer_list<DescriptorSetGroup>& specs)
     {
         if constexpr (RendererSpecification::API == RenderingAPI::Vulkan)
-            return Ref<VulkanDescriptorSets>::Create(std::move(specs));
+            return Ref<VulkanDescriptorSets>::Create(specs);
 
 		return nullptr;
     }

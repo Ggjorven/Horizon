@@ -18,6 +18,9 @@ namespace Hz
 		glm::vec2 UV = { 0.0f, 0.0f };
 		glm::vec4 Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
+		// Note: The underlying type is a uint16_t, it will never exceed this value.
+		uint32_t TextureID = 0; // 0 is the white texure
+
 	public:
 		static BufferLayout GetLayout();
 	};
@@ -40,6 +43,9 @@ namespace Hz
 
 		static void AddQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour);
 		static void AddQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour, Ref<Image> texture);
+
+	private:
+		static uint32_t GetTextureID(Ref<Image> image);
 	};
 
 }

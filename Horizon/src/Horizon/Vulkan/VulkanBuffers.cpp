@@ -24,13 +24,17 @@ namespace Hz
 		case DataType::Float2:  return VK_FORMAT_R32G32_SFLOAT;
 		case DataType::Float3:  return VK_FORMAT_R32G32B32_SFLOAT;
 		case DataType::Float4:  return VK_FORMAT_R32G32B32A32_SFLOAT;
-		case DataType::Mat3:    return VK_FORMAT_R32G32B32_SFLOAT;		// Assuming Mat3 is represented as 3 vec3s
-		case DataType::Mat4:    return VK_FORMAT_R32G32B32A32_SFLOAT;	// Assuming Mat4 is represented as 4 vec4s
 		case DataType::Int:     return VK_FORMAT_R32_SINT;
 		case DataType::Int2:    return VK_FORMAT_R32G32_SINT;
 		case DataType::Int3:    return VK_FORMAT_R32G32B32_SINT;
 		case DataType::Int4:    return VK_FORMAT_R32G32B32A32_SINT;
+        case DataType::UInt:    return VK_FORMAT_R32_UINT;
+        case DataType::UInt2:   return VK_FORMAT_R32G32_UINT;
+        case DataType::UInt3:   return VK_FORMAT_R32G32B32_UINT;
+        case DataType::UInt4:   return VK_FORMAT_R32G32B32A32_UINT;
 		case DataType::Bool:    return VK_FORMAT_R8_UINT;
+		case DataType::Mat3:    return VK_FORMAT_R32G32B32_SFLOAT;		// Assuming Mat3 is represented as 3 vec3s
+		case DataType::Mat4:    return VK_FORMAT_R32G32B32A32_SFLOAT;	// Assuming Mat4 is represented as 4 vec4s
 
         default:
             HZ_ASSERT(false, "Invalid DataType passed in.");
