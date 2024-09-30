@@ -9,6 +9,8 @@
 
 #include <Pulse/Utils/Random.hpp>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "../Extensions/ImGui/imgui/imgui.h"
 
 static uint32_t PCG_Hash(uint32_t seed)
@@ -30,8 +32,18 @@ void MainLayer::OnInit()
 {
 	Renderer2D::Init();
 
-	m_Texture0 = Image::Create({ Application::Get().GetWorkingDir() / "Sandbox/Resources/Images/texture0.tga" }, {});
-	m_Texture1 = Image::Create({ Application::Get().GetWorkingDir() / "Sandbox/Resources/Images/texture1.png" }, {});
+	m_Texture0 = Image::Create({ Application::Get().GetWorkingDir() / "Sandbox/Resources/Images/texture0.tga" }, {
+		.MagFilter = FilterMode::Nearest,
+		.MinFilter = FilterMode::Nearest,
+		.Address = AddressMode::Repeat,
+		.Mipmaps = MipmapMode::Linear,
+	});
+	m_Texture1 = Image::Create({ Application::Get().GetWorkingDir() / "Sandbox/Resources/Images/texture1.png" }, {
+		.MagFilter = FilterMode::Nearest,
+		.MinFilter = FilterMode::Nearest,
+		.Address = AddressMode::Repeat,
+		.Mipmaps = MipmapMode::Linear,
+	});
 
 	m_Camera = Ref<Camera>::Create();
 }

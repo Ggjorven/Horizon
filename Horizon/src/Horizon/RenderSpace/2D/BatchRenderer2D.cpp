@@ -133,11 +133,12 @@ namespace Hz
 		}
 
 		const uint32_t textureID = GetTextureID(texture);
+		const float zAxis = position.z * -1.0f;
 
-		resources.CPUBuffer.emplace_back(position, uv0, colour, textureID);
-		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y, position.z), uv1, colour, textureID);
-		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y + size.y, position.z), uv2, colour, textureID);
-		resources.CPUBuffer.emplace_back(glm::vec3(position.x, position.y + size.y, position.z), uv3, colour, textureID);
+		resources.CPUBuffer.emplace_back(glm::vec3(position.x, position.y, zAxis), uv0, colour, textureID);
+		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y, zAxis), uv1, colour, textureID);
+		resources.CPUBuffer.emplace_back(glm::vec3(position.x + size.x, position.y + size.y, zAxis), uv2, colour, textureID);
+		resources.CPUBuffer.emplace_back(glm::vec3(position.x, position.y + size.y, zAxis), uv3, colour, textureID);
 	}
 
 	uint32_t BatchRenderer2D::GetTextureID(Ref<Image> image)

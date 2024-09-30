@@ -3,7 +3,7 @@
 #include <Horizon/Core/Window.hpp>
 #include <Horizon/Core/Input/Input.hpp>
 
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+//#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>

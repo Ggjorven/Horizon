@@ -119,7 +119,7 @@ namespace Hz
 		~ImageSpecification() = default;
 	};
 
-    enum class FilterMode
+    enum class FilterMode : uint32_t
     {
         Nearest = 0,
         Linear,
@@ -127,7 +127,7 @@ namespace Hz
         CubicIMG = CubicEXT,
     };
 
-    enum class AddressMode
+    enum class AddressMode : uint8_t
     {
         Repeat = 0,
         MirroredRepeat,
@@ -137,7 +137,7 @@ namespace Hz
         MirrorClampToEdgeKHR = MirrorClampToEdge,
     };
 
-    enum class MipmapMode
+    enum class MipmapMode : uint8_t
     {
         Nearest = 0,
         Linear
@@ -150,10 +150,6 @@ namespace Hz
         FilterMode MinFilter = FilterMode::Linear;
         AddressMode Address = AddressMode::Repeat; // For U, V & W
         MipmapMode Mipmaps = MipmapMode::Linear;
-
-    public:
-        SamplerSpecification() = default;
-        ~SamplerSpecification() = default;
     };
 
 	///////////////////////////////////////////////////////////
